@@ -15,7 +15,6 @@
 import pygame
 
 def run():
-    pygame.init()
-    
+    pygame.init()    
     return 1
 
