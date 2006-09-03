@@ -20,7 +20,8 @@ try:
 except ImportError, e:
     print >> sys.stderr, "fatal: %s. " % e
     sys.exit(1)
+
+sys.path.append('thirdparty')
+
 from hci import game
-
 game.run()
-
