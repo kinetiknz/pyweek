@@ -22,6 +22,8 @@ import pygame
 from pgu import tilevid
 
 def initialize_modules():
+    '''Initialize PyGame modules.  If any modules fail, report all failures
+    and exit the program.'''
     modules = (pygame.display, pygame.mixer, pygame.font)
     errors = []
 
@@ -48,7 +50,7 @@ def player_new(g, t, value):
 
 def player_loop(g, s):
     if s.rect.right < g.view.left: g.quit = 1
-    s.rect.x += 1
+    s.rect.x += 0
 
     k = pygame.key.get_pressed()
     dx, dy = 0, 0
@@ -61,7 +63,16 @@ def player_loop(g, s):
 
     s.rect.x += dx * 5
     s.rect.y += dy * 5
-    s.rect.clamp_ip(g.view)
+
+    scroll_view = pygame.Rect(g.view)
+    scroll_view.inflate_ip(-200, -200)
+    pre_clamp = pygame.Rect(s.rect)
+    s.rect.clamp_ip(scroll_view)
+    if s.rect != pre_clamp:
+        mx = pre_clamp.x - s.rect.x
+        my = pre_clamp.y - s.rect.y
+        g.view.x += mx
+        g.view.y += my
 
 def player_shoot(g, s):
     shot_new(g, s, None)
@@ -150,8 +161,8 @@ cdata = {
     }
 
 tdata = {
-    0x01: ('player', tile_block,
-           {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+#    0x01: ('player', tile_block,
+#           {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x02: ('player', tile_block,
            {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x20: ('player', tile_coin, None),
@@ -163,16 +174,16 @@ def run():
 
     screen_w = 640
     screen_h = 480
-    tile_w = 16
-    tile_h = 16
+    tile_w = 32
+    tile_h = 32
 
     game = tilevid.Tilevid()
     game.screen = pygame.display.set_mode([screen_w, screen_h])
     game.view.w, game.view.h = screen_w, screen_h
     game.frame = 0
 
-    game.tga_load_tiles('data/test/tiles.png', [tile_h, tile_w], tdata)
-    game.tga_load_level('data/test/level.png')
+    game.tga_load_tiles('data/tilesets/testset.png', [tile_h, tile_w], tdata)
+    game.tga_load_level('data/maps/beachhead.tga')
     game.bounds = pygame.Rect(tile_w, tile_h,
                               (len(game.tlayer[0])-2)*tile_w,
                               (len(game.tlayer)-2)*tile_h)
@@ -181,9 +192,9 @@ def run():
     game.run_codes(cdata, (0, 0, 25, 17))
 
     splash_image = pygame.image.load('data/screens/splash.png')
-    # splashscreen.fade_in(game.screen, splash_image)
-    # pygame.time.wait(1000)
-    # splashscreen.fade_out(game.screen, splash_image)
+    #splashscreen.fade_in(game.screen, splash_image)
+    #pygame.time.wait(1000)
+    #splashscreen.fade_out(game.screen, splash_image)
 
     game.menu_font = pygame.font.Font('data/fonts/analgesics.ttf', 36)
     selection = menu.show([screen_w, screen_h], game.screen, splash_image, game.menu_font)
@@ -205,7 +216,7 @@ def run():
 
     text = pygame.font.Font(None, 36)
 
-    direction = 1
+    direction = 0
     while not game.quit:
         for e in pygame.event.get():
             if e.type is QUIT: game.quit = 1
