@@ -84,14 +84,17 @@ class Player(Sprite):
         if key[K_RIGHT]: dx += 1
         if key[K_SPACE] and game.frame % 8 == 0:
             self.fire(game, sprite)
+        if key[K_LSHIFT]: self.speed = 5
+        else: self.speed = 2
 
-        game.view.x += dx * 5
-        game.view.y += dy * 5
+        self.sprite.rect.x += dx * self.speed
+        self.sprite.rect.y += dy * self.speed
 
-        vx = game.view.x + (game.view.w/2) - 32
-        vy = game.view.y + (game.view.h/2) - 32
-        self.sprite.rect.x = vx
-        self.sprite.rect.y = vy
+        gx = self.sprite.rect.x - (game.view.w/2) + 32
+        gy = self.sprite.rect.y - (game.view.h/2) + 32
+
+        game.view.x = gx
+        game.view.y = gy
 
     def fire(self, game, sprite):
         Bullet('shot', game, sprite)
