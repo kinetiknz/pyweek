@@ -16,6 +16,7 @@ import sys
 import math
 import random
 import splashscreen
+import menu
 from pygame.locals import *
 import pygame
 from pgu import tilevid
@@ -180,9 +181,12 @@ def run():
     game.run_codes(cdata, (0, 0, 25, 17))
 
     splash_image = pygame.image.load('data/screens/splash.png')
-    splashscreen.fade_in(game.screen, splash_image)
-    pygame.time.wait(1000)
-    splashscreen.fade_out(game.screen, splash_image)
+    # splashscreen.fade_in(game.screen, splash_image)
+    # pygame.time.wait(1000)
+    # splashscreen.fade_out(game.screen, splash_image)
+
+    game.menu_font = pygame.font.Font('data/fonts/analgesics.ttf', 36)
+    selection = menu.show([screen_w, screen_h], game.screen, splash_image, game.menu_font)
 
     t = pygame.time.Clock()
 
@@ -190,6 +194,8 @@ def run():
     game.paint(game.screen)
 
     game.pause = 0
+
+    if (selection == -1): game.quit = 1
 
     stars = []
     for n in range(256):
