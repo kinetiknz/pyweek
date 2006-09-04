@@ -18,12 +18,21 @@ import pygame
 def fade_in(display, image):
     alpha = image.get_alpha()
     
-    for fade in xrange(255):
+    for fade in range(0, 255, 2):
         display.fill([0, 0, 0])
         image.set_alpha(fade)
         display.blit(image, [0,0])
         pygame.display.flip()
-        pygame.time.delay(5)
         
     image.set_alpha(alpha)
 
+def fade_out(display, image):
+    alpha = image.get_alpha()
+    
+    for fade in range(255, 0, -5):
+        display.fill([0, 0, 0])
+        image.set_alpha(fade)
+        display.blit(image, [0,0])
+        pygame.display.flip()
+        
+    image.set_alpha(alpha)

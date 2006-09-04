@@ -182,6 +182,7 @@ def run():
     splash_image = pygame.image.load('data/screens/splash.png')
     splashscreen.fade_in(game.screen, splash_image)
     pygame.time.wait(1000)
+    splashscreen.fade_out(game.screen, splash_image)
 
     t = pygame.time.Clock()
 
