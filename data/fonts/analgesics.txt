@@ -1,0 +1,27 @@
+Analgesics -- Copyright 2000, Ray Dittmeier
+A TrueType font available from Ace Fonts
+at http://www.acefonts.com
+Send e-mail to: fonts@acefonts.com.
+
+This font is free for both personal and commercial use. No fees or
+registration are required. All I ask is that if you use it, make 
+occasional return visits to the acefonts.com web site.  If you have
+a web site, setting up a link to Ace Fonts at the above URL would 
+also be nice.
+
+This font may be freely redistributed under the following conditions:
+
+1. Send an e-mail to tell me about it.
+
+2. This text file must stay with the .ttf file.
+
+3. If you make it available at a Web archive, include a link to
+   Ace Fonts at http://www.acefonts.com/.
+
+4. If you include it in a collection distributed on CD, floppy disk, 
+   or any other comparable medium, send me a copy of the CD or floppy 
+   disk or whatever.
+
+5. Keep in mind that nothing I write in this file means I'm giving up 
+   the copyright for this font.
+
