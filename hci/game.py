@@ -15,6 +15,7 @@
 import sys
 import math
 import random
+import splashscreen
 from pygame.locals import *
 import pygame
 from pgu import tilevid
@@ -177,6 +178,10 @@ def run():
 
     game.load_images(idata)
     game.run_codes(cdata, (0, 0, 25, 17))
+
+    splash_image = pygame.image.load('data/screens/splash.png')
+    splashscreen.fade_in(game.screen, splash_image)
+    pygame.time.wait(1000)
 
     t = pygame.time.Clock()
 
