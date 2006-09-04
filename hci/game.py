@@ -250,7 +250,7 @@ def run():
             txt = text.render(caption, 1, [255, 255, 255])
             game.screen.blit(txt, [1, 1])
 
-            caption = "view %r, player %r" % (game.view, game.player.rect)
+            caption = "view %r, player %r, world bounds %r" % (game.view, game.player.rect, game.bounds)
             txt = text_sm.render(caption, 1, [0, 0, 0])
             game.screen.blit(txt, [0, 240])
 
