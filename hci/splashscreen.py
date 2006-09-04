@@ -15,24 +15,30 @@
 
 import pygame
 
-def fade_in(display, image):
+def fade_in(display, image, speed = 2):
     alpha = image.get_alpha()
     
-    for fade in range(0, 255, 2):
+    for fade in range(0, 255, speed):
         display.fill([0, 0, 0])
         image.set_alpha(fade)
         display.blit(image, [0,0])
         pygame.display.flip()
         
+    display.fill([0, 0, 0])
+    image.set_alpha(255)
+    display.blit(image, [0,0])
+    pygame.display.flip()
     image.set_alpha(alpha)
 
-def fade_out(display, image):
+def fade_out(display, image, speed = 5):
     alpha = image.get_alpha()
     
-    for fade in range(255, 0, -5):
+    for fade in range(255, 0, -speed):
         display.fill([0, 0, 0])
         image.set_alpha(fade)
         display.blit(image, [0,0])
         pygame.display.flip()
         
+    display.fill([0, 0, 0])
+    pygame.display.flip()
     image.set_alpha(alpha)
