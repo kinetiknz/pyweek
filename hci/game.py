@@ -74,6 +74,8 @@ class Player(Sprite):
         self.sprite.rect.x = 320
         self.sprite.rect.y = 240
 
+        self.known_items = []
+
     def step(self, game, sprite):
         key = pygame.key.get_pressed()
 
@@ -84,11 +86,16 @@ class Player(Sprite):
         if key[K_RIGHT]: dx += 1
         if key[K_SPACE] and game.frame % 8 == 0:
             self.fire(game, sprite)
-        if key[K_LSHIFT]: self.speed = 5
-        else: self.speed = 2
+        if key[K_LSHIFT]: self.speed = 15
+        else: self.speed = 5
 
         self.sprite.rect.x += dx * self.speed
         self.sprite.rect.y += dy * self.speed
+
+        # cheezy bounds enforcement
+        bounds = pygame.Rect(game.bounds)
+        bounds.inflate_ip(-self.sprite.rect.w, -self.sprite.rect.h)
+        self.sprite.rect.clamp_ip(bounds)
 
         gx = self.sprite.rect.x - (game.view.w/2) + 32
         gy = self.sprite.rect.y - (game.view.h/2) + 32
@@ -98,6 +105,12 @@ class Player(Sprite):
 
     def fire(self, game, sprite):
         Bullet('shot', game, sprite)
+
+    def learn(self, target):
+        self.known_items.append(target)
+
+    def morph(self):
+        target = random.choice(self.known_items)
 
 class Bullet(Sprite):
     def __init__(self, name, game, tile, values=None):
@@ -156,7 +169,7 @@ def tile_fire(g, t, a):
     g.quit = 1
 
 idata = [
-    ('player', 'data/test/player.png', (4, 4, 24, 24)),
+    ('player', 'data/test/player.png', (4, 4, 48, 24)),
     ('enemy', 'data/test/enemy.png', (4, 4, 24, 24)),
     ('shot', 'data/test/shot.png', (1, 2, 6, 4))
     ]
