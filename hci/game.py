@@ -15,11 +15,13 @@
 import sys
 import math
 import random
-import splashscreen
-import menu
+
 from pygame.locals import *
 import pygame
 from pgu import tilevid
+
+import splashscreen
+import menu
 
 def initialize_modules():
     '''Initialize PyGame modules.  If any modules fail, report all failures
@@ -47,9 +49,11 @@ def player_new(g, t, value):
     s.score = 0
     s.shoot = player_shoot
     g.player = s
+    s.rect.x = 320
+    s.rect.y = 240
 
 def player_loop(g, s):
-    if s.rect.right < g.view.left: g.quit = 1
+    #if s.rect.right < g.view.left: g.quit = 1
     s.rect.x += 0
 
     k = pygame.key.get_pressed()
@@ -63,16 +67,8 @@ def player_loop(g, s):
 
     s.rect.x += dx * 5
     s.rect.y += dy * 5
-
-    scroll_view = pygame.Rect(g.view)
-    scroll_view.inflate_ip(-200, -200)
-    pre_clamp = pygame.Rect(s.rect)
-    s.rect.clamp_ip(scroll_view)
-    if s.rect != pre_clamp:
-        mx = pre_clamp.x - s.rect.x
-        my = pre_clamp.y - s.rect.y
-        g.view.x += mx
-        g.view.y += my
+    g.view.x += dx * 5
+    g.view.y += dy * 5
 
 def player_shoot(g, s):
     shot_new(g, s, None)
@@ -215,6 +211,7 @@ def run():
                       random.randrange(2, 8)])
 
     text = pygame.font.Font(None, 36)
+    text_sm = pygame.font.Font(None, 16)
 
     direction = 0
     while not game.quit:
@@ -260,6 +257,10 @@ def run():
             game.screen.blit(txt, [0, 0])
             txt = text.render(caption, 1, [255, 255, 255])
             game.screen.blit(txt, [1, 1])
+
+            caption = "view %r, player %r" % (game.view, game.player.rect)
+            txt = text_sm.render(caption, 1, [0, 0, 0])
+            game.screen.blit(txt, [0, 240])
 
             game.frame += 1
             pygame.display.flip()
