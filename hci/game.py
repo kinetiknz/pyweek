@@ -23,6 +23,10 @@ from pgu import tilevid
 import splashscreen
 import menu
 
+def logit(*args):
+    print args
+    sys.stdout.flush()
+
 def initialize_modules():
     '''Initialize PyGame modules.  If any modules fail, report all failures
     and exit the program.'''
@@ -40,86 +44,91 @@ def initialize_modules():
 
     if errors: sys.exit(1)
 
-def player_new(g, t, value):
-    g.clayer[t.ty][t.tx] = 0
-    s = tilevid.Sprite(g.images['player'], t.rect)
-    g.sprites.append(s)
-    s.loop = player_loop
-    s.groups = g.string2groups('player')
-    s.score = 0
-    s.shoot = player_shoot
-    g.player = s
-    s.rect.x = 320
-    s.rect.y = 240
+class AbstractClassException(Exception): pass
 
-def player_loop(g, s):
-    #if s.rect.right < g.view.left: g.quit = 1
-    s.rect.x += 0
+class Sprite(object):
+    def __init__(self, name, group, game, tile, values=None):
+        self.name = name
+        self.group = group
+        rect = tile
+        if hasattr(tile, 'rect'):
+            rect = tile.rect
+        self.sprite = tilevid.Sprite(game.images[self.name], rect)
+        self.sprite.loop = lambda game, sprite: self.step(game, sprite)
+        self.groups = game.string2groups(self.group)
 
-    k = pygame.key.get_pressed()
-    dx, dy = 0, 0
-    if k[K_UP]: dy -= 1
-    if k[K_DOWN]: dy += 1
-    if k[K_LEFT]: dx -= 1
-    if k[K_RIGHT]: dx += 1
-    if k[K_SPACE] and g.frame % 8 == 0:
-        shot_new(g, s, None)
+        if hasattr(tile, 'rect'):
+            game.clayer[tile.ty][tile.tx] = 0
+        game.sprites.append(self.sprite)
 
-    s.rect.x += dx * 5
-    s.rect.y += dy * 5
-    g.view.x += dx * 5
-    g.view.y += dy * 5
+    def step(self, game, sprite):
+        raise AbstractClassException
 
-def player_shoot(g, s):
-    shot_new(g, s, None)
+class Player(Sprite):
+    def __init__(self, game, tile, values=None):
+        super(Player, self).__init__('player', 'player', game, tile, values)
+        self.sprite.score = 0
+        self.sprite.shoot = lambda game, sprite: self.fire(game, sprite)
 
-def shot_new(g, t, value):
-    s = tilevid.Sprite(g.images['shot'], [t.rect.right, t.rect.centery - 2])
-    g.sprites.append(s)
-    s.agroups = g.string2groups('enemy')
-    s.hit = shot_hit
-    s.loop = shot_loop
+        game.player = self.sprite
+        self.sprite.rect.x = 320
+        self.sprite.rect.y = 240
 
-def shot_loop(g, s):
-    s.rect.x += 8
-    if s.rect.left > g.view.right:
-        g.sprites.remove(s)
+    def step(self, game, sprite):
+        key = pygame.key.get_pressed()
 
-def shot_hit(g, s, a):
-    if a in g.sprites: g.sprites.remove(a)
-    g.player.score += 500
+        dx, dy = 0, 0
+        if key[K_UP]: dy -= 1
+        if key[K_DOWN]: dy += 1
+        if key[K_LEFT]: dx -= 1
+        if key[K_RIGHT]: dx += 1
+        if key[K_SPACE] and game.frame % 8 == 0:
+            self.fire(game, sprite)
 
-def enemy_new(g, t, value):
-    g.clayer[t.ty][t.tx] = 0
-    s = tilevid.Sprite(g.images['enemy'], t.rect)
-    g.sprites.append(s)
-    s.loop = enemy_loop
-    s.move = value['move']
-    s.origin = pygame.Rect(s.rect)
-    s.frame = g.frame
-    s.groups = g.string2groups('enemy')
-    s.agroups = g.string2groups('player')
-    s.hit = enemy_hit
+        game.view.x += dx * 5
+        game.view.y += dy * 5
 
-def enemy_hit(g, s, a):
-    g.quit = 1
+        vx = game.view.x + (game.view.w/2) - 32
+        vy = game.view.y + (game.view.h/2) - 32
+        self.sprite.rect.x = vx
+        self.sprite.rect.y = vy
 
-def enemy_loop(g, s):
-    if s.rect.right < g.view.left:
-        g.sprites.remove(s)
-    s.move(g, s)
+    def fire(self, game, sprite):
+        Bullet('shot', game, sprite)
 
-def enemy_move_line(g, s):
-    s.rect.x -= 3
+class Bullet(Sprite):
+    def __init__(self, name, game, tile, values=None):
+        origin = [tile.rect.right, tile.rect.centery - 2]
+        super(Bullet, self).__init__(name, 'shot', game, origin, values)
+        self.sprite.agroups = game.string2groups('enemy')
+        self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
 
-def enemy_move_sine(g, s):
-    s.rect.x -= 2
-    s.rect.y = s.origin.y + 65 * math.sin((g.frame - s.frame) / 10.0)
+    def step(self, game, sprite):
+        self.sprite.rect.x += 8
+        if self.sprite.rect.left > game.view.right:
+            game.sprites.remove(self.sprite)
 
-def enemy_move_circle(g, s):
-    s.origin.x -= 1
-    s.rect.y = s.origin.y + 50 * math.sin((g.frame - s.frame) / 10.0)
-    s.rect.x = s.origin.x + 50 * math.sin((g.frame - s.frame) / 10.0)
+    def hit(self, game, sprite, other):
+        if other in game.sprites:
+            game.sprites.remove(other)
+        game.player.score += 500
+
+class Enemy(Sprite):
+    def __init__(self, game, tile, values=None):
+        super(Enemy, self).__init__('enemy', 'enemy', game, tile, values)
+        self.sprite.agroups = game.string2groups('player')
+        self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
+
+    def step(self, game, sprite):
+        if self.sprite.rect.right < game.view.left:
+            game.sprites.remove(self.sprite)
+        self.move()
+
+    def move(self):
+        s.rect.x -= 3
+
+    def hit(self, game, sprite, other):
+        logit(self, 'hit', other)
 
 def tile_block(g, t, a):
     c = t.config
@@ -150,10 +159,10 @@ idata = [
     ]
 
 cdata = {
-    1: (player_new, None),
-    2: (enemy_new, {'move': enemy_move_line}),
-    3: (enemy_new, {'move': enemy_move_sine}),
-    4: (enemy_new, {'move': enemy_move_circle}),
+    1: (lambda g, t, v: Player(g, t, v), None),
+    2: (lambda g, t, v: Enemy(g, t, v), None),
+    3: (lambda g, t, v: Enemy(g, t, v), None),
+    4: (lambda g, t, v: Enemy(g, t, v), None),
     }
 
 tdata = {
@@ -179,7 +188,7 @@ def run():
     game.frame = 0
 
     game.tga_load_tiles('data/tilesets/testset.png', [tile_h, tile_w], tdata)
-    game.tga_load_level('data/maps/beachhead.tga')
+    game.tga_load_level('data/maps/beachhead.tga', True)
     game.bounds = pygame.Rect(tile_w, tile_h,
                               (len(game.tlayer[0])-2)*tile_w,
                               (len(game.tlayer)-2)*tile_h)
@@ -202,13 +211,7 @@ def run():
 
     game.pause = 0
 
-    if (selection == -1): game.quit = 1
-
-    stars = []
-    for n in range(256):
-        stars.append([random.randrange(0, screen_w),
-                      random.randrange(0, screen_h),
-                      random.randrange(2, 8)])
+    if selection == -1: game.quit = 1
 
     text = pygame.font.Font(None, 36)
     text_sm = pygame.font.Font(None, 16)
@@ -232,17 +235,6 @@ def run():
 
             game.run_codes(cdata, (game.view.right/tile_w, 0, 1, 17))
             game.loop()
-
-            game.screen.fill([0, 0, 0])
-            for n in range(256):
-                x, y, s = stars[n]
-                if (game.frame * s) % 8 < s:
-                    x -= 1
-                if x < 0: x += screen_w
-                stars[n][0] = x
-                r = random.randint
-                ri = random.randint(100, 255)
-                game.screen.set_at([x, y], [ri, ri, ri])
 
             game.paint(game.screen)
 
