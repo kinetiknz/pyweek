@@ -71,8 +71,6 @@ class Player(Sprite):
         self.sprite.shoot = lambda game, sprite: self.fire(game, sprite)
 
         game.player = self.sprite
-        self.sprite.rect.x = 320
-        self.sprite.rect.y = 240
 
         self.known_items = []
 
@@ -137,14 +135,22 @@ class Enemy(Sprite):
 
     def step(self, game, sprite):
         if self.sprite.rect.right < game.view.left:
-            game.sprites.remove(self.sprite)
+            #game.sprites.remove(self.sprite)
+            logit(self, 'would\'ve been removed')
         self.move()
 
     def move(self):
-        s.rect.x -= 3
+        self.sprite.rect.x -= 3
 
     def hit(self, game, sprite, other):
         logit(self, 'hit', other)
+
+class Saucer(Sprite):
+    def __init__(self, game, tile, values=None):
+        super(Saucer, self).__init__('saucer', 'saucer', game, tile, values)
+
+    def step(self, game, sprite):
+        pass
 
 def tile_block(g, t, a):
     c = t.config
@@ -170,6 +176,7 @@ def tile_fire(g, t, a):
 
 idata = [
     ('player', 'data/test/player.png', (4, 4, 48, 24)),
+    ('saucer', 'data/test/Saucer0.png', (4, 4, 192, 114)),
     ('enemy', 'data/test/enemy.png', (4, 4, 24, 24)),
     ('shot', 'data/test/shot.png', (1, 2, 6, 4))
     ]
@@ -179,6 +186,7 @@ cdata = {
     2: (lambda g, t, v: Enemy(g, t, v), None),
     3: (lambda g, t, v: Enemy(g, t, v), None),
     4: (lambda g, t, v: Enemy(g, t, v), None),
+    5: (lambda g, t, v: Saucer(g, t, v), None),
     }
 
 tdata = {
@@ -210,7 +218,7 @@ def run():
                               (len(game.tlayer)-2)*tile_h)
 
     game.load_images(idata)
-    game.run_codes(cdata, (0, 0, 25, 17))
+    game.run_codes(cdata, (0, 0, len(game.tlayer[0]), len(game.tlayer)))
 
     splash_image = pygame.image.load('data/screens/splash.png')
     #splashscreen.fade_in(game.screen, splash_image)
@@ -265,10 +273,6 @@ def run():
             game.screen.blit(txt, [0, 0])
             txt = text.render(caption, 1, [255, 255, 255])
             game.screen.blit(txt, [1, 1])
-
-            caption = "view %r, player %r, world bounds %r" % (game.view, game.player.rect, game.bounds)
-            txt = text_sm.render(caption, 1, [0, 0, 0])
-            game.screen.blit(txt, [0, 240])
 
             game.frame += 1
             pygame.display.flip()
