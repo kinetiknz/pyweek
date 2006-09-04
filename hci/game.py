@@ -221,12 +221,14 @@ def run():
     game.run_codes(cdata, (0, 0, len(game.tlayer[0]), len(game.tlayer)))
 
     splash_image = pygame.image.load('data/screens/splash.png')
-    #splashscreen.fade_in(game.screen, splash_image)
-    #pygame.time.wait(1000)
-    #splashscreen.fade_out(game.screen, splash_image)
+    menu_image   = pygame.image.load('data/screens/menu.png')
+    
+    splashscreen.fade_in(game.screen, splash_image)
+    pygame.time.wait(500)
+    splashscreen.fade_out(game.screen, splash_image)
 
     game.menu_font = pygame.font.Font('data/fonts/analgesics.ttf', 36)
-    selection = menu.show([screen_w, screen_h], game.screen, splash_image, game.menu_font)
+    selection = menu.show([screen_w, screen_h], game.screen, menu_image, game.menu_font)
 
     t = pygame.time.Clock()
 

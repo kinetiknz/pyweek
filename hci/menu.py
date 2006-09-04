@@ -17,15 +17,17 @@ import pygame
 import splashscreen
 from pygame.locals import *
 
-menu_items   = [ 'One', 'Two','And another one']
+menu_items   = [ 'Press ENTER to continue']
+menu_sizes   = []
 selected     = 0
 font_y_space = 10
 
 def show(dispsize, display, bg_image, font):
-    # splashscreen.fade_in(display, bg_image, 5)
-    return 0
+    splashscreen.fade_in(display, bg_image, 10)
 
-    if (not draw_items(dispsize, display, font)): return -1
+    if (not calc_positions(dispsize, font)): return -1
+    draw_all(display, font)
+    pygame.display.flip()
 
     while 1:
         for e in pygame.event.get():
@@ -36,14 +38,13 @@ def show(dispsize, display, bg_image, font):
                 if e.key == K_RETURN:
                     return selected
     
-def draw_items(dispsize, display, font):
+def calc_positions(dispsize, font):
     totalh = 0
-    sizes = []
     
     for item in menu_items:
         the_size = font.size(item)
         the_rect = pygame.Rect(0,0,the_size[0],the_size[1])
-        sizes.append(the_rect)
+        menu_sizes.append(the_rect)
         totalh += the_rect.height
         totalh += font_y_space
         
@@ -52,19 +53,20 @@ def draw_items(dispsize, display, font):
     y_pos = (dispsize[1] - totalh)/2.0
     
     for i in xrange(len(menu_items)):
-        font_surface = font.render(menu_items[i], True, [255,255,255])
-        display.blit(font_surface, [dispsize[0]-sizes[i].width/2.0, y_pos])
-        y_pos += sizes[i].height
+        menu_sizes[i].x = (dispsize[0]-menu_sizes[i].width)/2.0
+        menu_sizes[i].y = y_pos
+        y_pos += menu_sizes[i].height
         y_pos += font_y_space
         
     return True
+
+def draw_item(i, display, font):
+    font_surface = font.render(menu_items[i], True, [0,0,100])
+    display.blit(font_surface, menu_sizes[i])
     
-    
-    
-    
-    
-    
-    
+def draw_all(display, font):
+    for i in xrange(len(menu_items)):
+        draw_item(i, display, font)
     
     
     
