@@ -25,4 +25,21 @@ except ImportError, e:
 sys.path.append('thirdparty')
 
 from hci import game
-game.run()
+
+
+if len(sys.argv) > 1:
+    if sys.argv[1] == 'profile':
+        import hotshot, hotshot.stats
+        prof = hotshot.Profile('game.prof')
+        prof.runcall(game.run)
+        prof.close()
+        stats = hotshot.stats.load('game.prof')
+        stats.strip_dirs()
+        stats.sort_stats('time', 'calls')
+        stats.print_stats(20)
+    elif sys.argv[1] == 'psyco':
+        import psyco
+        psyco.full()
+        game.run()
+else:
+    game.run()
