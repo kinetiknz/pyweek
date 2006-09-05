@@ -15,6 +15,7 @@
 import sys
 import math
 import random
+import sprite_eater
 
 from pygame.locals import *
 import pygame
@@ -223,11 +224,19 @@ class Saucer(Sprite):
         super(Saucer, self).__init__('saucer0', 'Background', game, tile, values)
         self.frames.append(game.images['saucer1'])
         self.frames.append(game.images['saucer2'])
+        
+        #self.test = sprite_eater.SpriteEater(self.sprite.image)       
+        #while self.test.advance_frame():
+        #    self.test.advance_frame()
+        #    self.test.advance_frame()
+        #    newimage = self.sprite.image.copy()
+        #    self.test.blit_to(newimage)
+        #    self.frames.append(newimage)
 
     def step(self, game, sprite):
         oldframe = int(self.frame)
         self.frame = (self.frame + 0.1) % len(self.frames)
-        if oldframe != int(self.frame):
+        if oldframe != int(self.frame):         
             self.sprite.setimage(self.frames[int(self.frame)])
 
 def tile_block(g, t, a):
