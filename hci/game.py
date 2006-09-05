@@ -15,12 +15,13 @@
 import sys
 import math
 import random
-import sprite_eater
+import time
 
 from pygame.locals import *
 import pygame
 from pgu import tilevid
 
+import sprite_eater
 import splashscreen
 import menu
 
@@ -252,19 +253,21 @@ class Saucer(Sprite):
         super(Saucer, self).__init__('saucer0', 'Background', game, tile, values)
         self.frames.append(game.images['saucer1'])
         self.frames.append(game.images['saucer2'])
-        
-        #self.test = sprite_eater.SpriteEater(self.sprite.image)       
+
+        #d = time.time()
+        #self.test = sprite_eater.SpriteEater(self.sprite.image)
         #while self.test.advance_frame():
         #    self.test.advance_frame()
         #    self.test.advance_frame()
         #    newimage = self.sprite.image.copy()
         #    self.test.blit_to(newimage)
         #    self.frames.append(newimage)
+        #logit('took', time.time() - d)
 
     def step(self, game, sprite):
         oldframe = int(self.frame)
         self.frame = (self.frame + 0.1) % len(self.frames)
-        if oldframe != int(self.frame):         
+        if oldframe != int(self.frame):
             self.sprite.setimage(self.frames[int(self.frame)])
 
 class Tree(Sprite):
@@ -367,12 +370,10 @@ def run():
     game.menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
     selection = menu.show([screen_w, screen_h], game.screen, menu_image, game.menu_font)
 
-    #Load in some music and play it
-    #pygame.mixer.init(48000,24,True,1024) -- didn't seem to make any difference..?
     music = pygame.mixer.music
     music.load('data/music/Track01.ogg')
     music.play(-1,0.0)
-    
+
     t = pygame.time.Clock()
 
     game.quit = 0
