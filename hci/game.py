@@ -23,6 +23,9 @@ from pgu import tilevid
 import splashscreen
 import menu
 
+screen_w, screen_h = 640, 480
+tile_w, tile_h = 32, 32
+
 def logit(*args):
     print args
     sys.stdout.flush()
@@ -127,14 +130,16 @@ class Player(Sprite):
             loc = pygame.mouse.get_pos()
 
             def s2t(x, y):
-                stx = x / 32
-                sty = y / 32
+                stx = x / tile_w
+                sty = y / tile_h
                 return stx, sty
 
-            stx, sty = s2t(*loc)
-            atx, aty = s2t(game.view.x, game.view.y)
-            logit(stx + atx, sty + aty)
-            game.set([stx + atx, sty + aty], 2)
+            tx, ty = s2t(game.view.x + loc[0], game.view.y + loc[1])
+            game.set([tx, ty], 2)
+
+            game.deferred_effects.append(lambda:
+                                         pygame.draw.line(game.screen, [0, 0, 255],
+                                                          [screen_h/2, screen_w/2], loc, 3))
 
         if (dx == 0 and dy == 0): return
 
@@ -163,8 +168,8 @@ class Player(Sprite):
         bounds.inflate_ip(-self.sprite.rect.w, -self.sprite.rect.h)
         self.sprite.rect.clamp_ip(bounds)
 
-        gx = self.sprite.rect.x - (game.view.w/2) + 32
-        gy = self.sprite.rect.y - (game.view.h/2) + 32
+        gx = self.sprite.rect.x - (game.view.w/2) + tile_w
+        gy = self.sprite.rect.y - (game.view.h/2) + tile_h
 
         game.view.x = gx
         game.view.y = gy
@@ -282,11 +287,6 @@ tdata = {
 def run():
     initialize_modules()
 
-    screen_w = 640
-    screen_h = 480
-    tile_w = 32
-    tile_h = 32
-
     try:
         version = open('_MTN/revision').read().strip()
     except IOError, e:
@@ -313,6 +313,8 @@ def run():
     #splashscreen.fade_in(game.screen, splash_image)
     #pygame.time.wait(500)
     #splashscreen.fade_out(game.screen, splash_image)
+
+    game.deferred_effects = []
 
     game.menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
     selection = menu.show([screen_w, screen_h], game.screen, menu_image, game.menu_font)
@@ -361,6 +363,10 @@ def run():
             game.loop()
 
             game.paint(game.screen)
+
+            for e in game.deferred_effects[:]:
+                e()
+                game.deferred_effects.remove(e)
 
             caption = "FPS %2.2f" % t.get_fps()
             txt = text.render(caption, 1, [0, 0, 0])
