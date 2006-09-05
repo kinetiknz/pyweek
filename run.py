@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
-# Copyright (c) 2006 Matthew Gregan <kinetik@flim.org>
+# Copyright (c) 2006 Matthew Gregan <kinetik@flim.org> 
+#                    Joseph Miller  <joff@goolehax.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
