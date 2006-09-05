@@ -335,6 +335,8 @@ cdata = {
 tdata = {
     0x02: ('player', tile_block,
            {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x02: ('enemy', tile_block,
+           {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),           
     0x20: ('player', tile_coin, None),
     0x30: ('player', tile_fire, None),
     }
