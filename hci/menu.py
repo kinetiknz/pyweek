@@ -23,6 +23,8 @@ selected     = 0
 font_y_space = 10
 
 def show(dispsize, display, bg_image, font):
+    return 0
+
     splashscreen.fade_in(display, bg_image, 10)
 
     if (not calc_positions(dispsize, font)): return -1

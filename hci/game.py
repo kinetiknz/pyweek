@@ -56,6 +56,9 @@ class Sprite(object):
         self.sprite = tilevid.Sprite(game.images[self.name], rect)
         self.sprite.loop = lambda game, sprite: self.step(game, sprite)
         self.groups = game.string2groups(self.group)
+        self.frame = 0.0
+        self.frames = []
+        self.frames.append(game.images[self.name])
 
         if hasattr(tile, 'rect'):
             game.clayer[tile.ty][tile.tx] = 0
@@ -147,11 +150,17 @@ class Enemy(Sprite):
 
 class Saucer(Sprite):
     def __init__(self, game, tile, values=None):
-        super(Saucer, self).__init__('saucer', 'saucer', game, tile, values)
+        super(Saucer, self).__init__('saucer0', 'saucer', game, tile, values)
+        self.frames.append(game.images['saucer1'])
+        self.frames.append(game.images['saucer2'])
 
     def step(self, game, sprite):
-        pass
+        oldframe = int(self.frame)
+        self.frame = (self.frame + 0.1) % len(self.frames)
+        if oldframe != int(self.frame):
+            self.sprite.setimage(self.frames[int(self.frame)])
 
+    
 def tile_block(g, t, a):
     c = t.config
     if c['top'] == 1 and a._rect.bottom <= t._rect.top \
@@ -176,7 +185,9 @@ def tile_fire(g, t, a):
 
 idata = [
     ('player', 'data/test/player.png', (4, 4, 48, 24)),
-    ('saucer', 'data/test/Saucer0.png', (4, 4, 192, 114)),
+    ('saucer0', 'data/test/Saucer0.png', (4, 4, 192, 114)),
+    ('saucer1', 'data/test/Saucer1.png', (4, 4, 192, 114)),
+    ('saucer2', 'data/test/Saucer2.png', (4, 4, 192, 114)),
     ('enemy', 'data/test/enemy.png', (4, 4, 24, 24)),
     ('shot', 'data/test/shot.png', (1, 2, 6, 4))
     ]
@@ -223,11 +234,11 @@ def run():
     splash_image = pygame.image.load('data/screens/splash.png')
     menu_image   = pygame.image.load('data/screens/menu.png')
     
-    splashscreen.fade_in(game.screen, splash_image)
-    pygame.time.wait(500)
-    splashscreen.fade_out(game.screen, splash_image)
+    # splashscreen.fade_in(game.screen, splash_image)
+    # pygame.time.wait(500)
+    # splashscreen.fade_out(game.screen, splash_image)
 
-    game.menu_font = pygame.font.Font('data/fonts/analgesics.ttf', 36)
+    game.menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
     selection = menu.show([screen_w, screen_h], game.screen, menu_image, game.menu_font)
 
     t = pygame.time.Clock()
