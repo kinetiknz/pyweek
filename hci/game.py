@@ -158,7 +158,7 @@ class Player(Sprite):
 
             game.deferred_effects.append(lambda:
                                          pygame.draw.line(game.screen, [0, 0, 255],
-                                                          [relx, rely], loc, 3))
+                                                          [relx, rely], loc, 2))
             game.deferred_effects.append(lambda:
                                          pygame.draw.line(game.screen, [0, 255, 255],
                                                           [relx2, rely2], loc, 3))
@@ -257,6 +257,20 @@ class Saucer(Sprite):
         if oldframe != int(self.frame):
             self.sprite.setimage(self.frames[int(self.frame)])
 
+class Tree(Sprite):
+    def __init__(self, game, tile, values=None):
+        super(Tree, self).__init__('tree', 'Background', game, tile, values)
+
+    def step(self, game, sprite):
+        pass
+
+class Bush(Sprite):
+    def __init__(self, game, tile, values=None):
+        super(Bush, self).__init__('bush', 'Background', game, tile, values)
+
+    def step(self, game, sprite):
+        pass
+
 def tile_block(g, t, a):
     c = t.config
     if c['top'] == 1 and a._rect.bottom <= t._rect.top \
@@ -288,14 +302,16 @@ idata = [
     ('saucer1', 'data/test/Saucer1.png', (4, 4, 192, 114)),
     ('saucer2', 'data/test/Saucer2.png', (4, 4, 192, 114)),
     ('enemy', 'data/test/enemy.png', (4, 4, 24, 24)),
-    ('shot', 'data/test/shot.png', (1, 2, 6, 4))
+    ('shot', 'data/test/shot.png', (1, 2, 6, 4)),
+    ('tree', 'data/test/treemediumsize.png', (4, 4, 48, 48)),
+    ('bush', 'data/test/treepinkflower.png', (4, 4, 48, 48)),
     ]
 
 cdata = {
     1: (lambda g, t, v: Player(g, t, v), None),
     2: (lambda g, t, v: Enemy(g, t, v), None),
-    3: (lambda g, t, v: Enemy(g, t, v), None),
-    4: (lambda g, t, v: Enemy(g, t, v), None),
+    3: (lambda g, t, v: Bush(g, t, v), None),
+    4: (lambda g, t, v: Tree(g, t, v), None),
     5: (lambda g, t, v: Saucer(g, t, v), None),
     }
 
