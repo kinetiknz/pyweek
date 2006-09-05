@@ -357,6 +357,12 @@ def run():
     game.menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
     selection = menu.show([screen_w, screen_h], game.screen, menu_image, game.menu_font)
 
+    #Load in some music and play it
+    #pygame.mixer.init(48000,24,True,1024) -- didn't seem to make any difference..?
+    music = pygame.mixer.music
+    music.load('data/music/Track01.ogg')
+    music.play(-1,0.0)
+    
     t = pygame.time.Clock()
 
     game.quit = 0
@@ -382,6 +388,7 @@ def run():
 
         if game.pause:
             caption = "GAME PAUSED"
+            music.pause()
             txt = text.render(caption, 1, [0, 0, 0])
             dx = screen_w/2 - txt.get_rect().w/2
             dy = screen_h/2 - txt.get_rect().h/2
@@ -390,6 +397,7 @@ def run():
             game.screen.blit(txt, [dx, dy])
             pygame.display.flip()
         else:
+            music.unpause()
             if game.view.x == game.bounds.w - screen_w + tile_w \
                    and direction == 1:
                 direction = -1
