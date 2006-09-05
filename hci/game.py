@@ -80,6 +80,9 @@ class Sprite(object):
         self.sprite = tilevid.Sprite(game.images[self.name], rect)
         self.sprite.loop = lambda game, sprite: self.step(game, sprite)
         self.sprite.groups = game.string2groups(self.group)
+        self.hitmask = pygame.surfarray.array_alpha(self.sprite.image)
+        self.rect = self.sprite.rect
+        self.sprite.backref = self
         self.frame = 0.0
         self.frames = []
         self.frames.append(game.images[self.name])
@@ -162,8 +165,9 @@ class Player(Sprite):
         target = random.choice(self.known_items)
    
     def hit(self, game, sprite, other):
-        self.sprite.rect.x, self.sprite.rect.y = self.oldpos
-        self.view_me(game)
+        if test_collision(self, other.backref):           
+            self.sprite.rect.x, self.sprite.rect.y = self.oldpos
+            self.view_me(game)
 
         
 class Bullet(Sprite):
@@ -250,9 +254,9 @@ idata = [
 
 cdata = {
     1: (lambda g, t, v: Player(g, t, v), None),
-    2: (lambda g, t, v: Enemy(g, t, v), None),
-    3: (lambda g, t, v: Enemy(g, t, v), None),
-    4: (lambda g, t, v: Enemy(g, t, v), None),
+    #2: (lambda g, t, v: Enemy(g, t, v), None),
+    #3: (lambda g, t, v: Enemy(g, t, v), None),
+    #4: (lambda g, t, v: Enemy(g, t, v), None),
     5: (lambda g, t, v: Saucer(g, t, v), None),
     }
 
