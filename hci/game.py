@@ -336,9 +336,8 @@ cdata = {
     5: (lambda g, t, v: Saucer(g, t, v), None),
     }
 
-tdata = {
-    0x02: ('player', tile_block,
-           {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+tdata = {        
+    0x02: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x20: ('player', tile_coin, None),
     0x30: ('player', tile_fire, None),
     }
