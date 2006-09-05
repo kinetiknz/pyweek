@@ -93,13 +93,12 @@ class Sprite(object):
 
     def step(self, game, sprite):
         raise AbstractClassException
- 
 
 class Player(Sprite):
     def __init__(self, game, tile, values=None):
         super(Player, self).__init__('player', 'player', game, tile, values)
         self.frames.append(game.images['player1'])
-        self.frames.append(game.images['player2'])       
+        self.frames.append(game.images['player2'])
         self.frames.append(game.images['player3'])
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit  = lambda game, sprite, other: self.hit(game, sprite, other)
@@ -123,19 +122,25 @@ class Player(Sprite):
         if key[K_LSHIFT]: self.speed = 15
         else: self.speed = 5
 
+        buttons = pygame.mouse.get_pressed()
+        if buttons[0]:
+            loc = pygame.mouse.get_pos()
+            logit(loc[0])
+
         if (dx == 0 and dy == 0): return
-        
+
         # get smart and give the player finer control over their movement
-        # move them in x first and do a collide test. then do Y... 
-        
+        # move them in x first and do a collide test.  then do Y.
+
         self.oldpos = (self.sprite.rect.x, self.sprite.rect.y)
         self.sprite.rect.x += dx * self.speed
-        
+
+        # XXX: bit of a hack?  any other way to do this?
         game.loop_spritehits()
-    
+
         self.oldpos = (self.sprite.rect.x, self.sprite.rect.y)
         self.sprite.rect.y += dy * self.speed
-        
+
         oldframe = int(self.frame)
         self.frame = (self.frame + 0.2) % len(self.frames)
         if oldframe != int(self.frame):
@@ -163,13 +168,12 @@ class Player(Sprite):
 
     def morph(self):
         target = random.choice(self.known_items)
-   
+
     def hit(self, game, sprite, other):
         if test_collision(self, other.backref):           
             self.sprite.rect.x, self.sprite.rect.y = self.oldpos
             self.view_me(game)
 
-        
 class Bullet(Sprite):
     def __init__(self, name, game, tile, values=None):
         origin = [tile.rect.right, tile.rect.centery - 2]
@@ -194,13 +198,13 @@ class Enemy(Sprite):
         self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
 
     def step(self, game, sprite):
-        if self.sprite.rect.right < game.view.left:
-            #game.sprites.remove(self.sprite)
-            logit(self, 'would\'ve been removed')
+        if self.sprite.rect.right < game.bounds.left:
+            game.sprites.remove(self.sprite)
+            return
         self.move()
 
     def move(self):
-        self.sprite.rect.x -= 3
+        self.sprite.rect.x -= 1
 
     def hit(self, game, sprite, other):
         logit(self, 'hit', other)
@@ -217,7 +221,6 @@ class Saucer(Sprite):
         if oldframe != int(self.frame):
             self.sprite.setimage(self.frames[int(self.frame)])
 
-    
 def tile_block(g, t, a):
     c = t.config
     if c['top'] == 1 and a._rect.bottom <= t._rect.top \
@@ -242,9 +245,9 @@ def tile_fire(g, t, a):
 
 idata = [
     ('player', 'data/test/alien/alien-top.png', (4, 4, 48, 24)),
-    ('player1', 'data/test/alien/alien-top2.png', (4, 4, 48, 24)),   
-    ('player2', 'data/test/alien/alien-top3.png', (4, 4, 48, 24)),  
-    ('player3', 'data/test/alien/alien-top4.png', (4, 4, 48, 24)),           
+    ('player1', 'data/test/alien/alien-top2.png', (4, 4, 48, 24)),
+    ('player2', 'data/test/alien/alien-top3.png', (4, 4, 48, 24)),
+    ('player3', 'data/test/alien/alien-top4.png', (4, 4, 48, 24)),
     ('saucer0', 'data/test/Saucer0.png', (4, 4, 192, 114)),
     ('saucer1', 'data/test/Saucer1.png', (4, 4, 192, 114)),
     ('saucer2', 'data/test/Saucer2.png', (4, 4, 192, 114)),
@@ -277,8 +280,14 @@ def run():
     tile_w = 32
     tile_h = 32
 
+    try:
+        version = open('_MTN/revision').read().strip()
+    except IOError, e:
+        version = '?'
+
     game = tilevid.Tilevid()
     game.screen = pygame.display.set_mode([screen_w, screen_h])
+    pygame.display.set_caption("PyWeek 3: The Disappearing Act [rev %.6s...]" % version)
     game.view.w, game.view.h = screen_w, screen_h
     game.frame = 0
 
@@ -293,10 +302,10 @@ def run():
 
     splash_image = pygame.image.load('data/screens/splash.png')
     menu_image   = pygame.image.load('data/screens/menu.png')
-    
-    # splashscreen.fade_in(game.screen, splash_image)
-    # pygame.time.wait(500)
-    # splashscreen.fade_out(game.screen, splash_image)
+
+    #splashscreen.fade_in(game.screen, splash_image)
+    #pygame.time.wait(500)
+    #splashscreen.fade_out(game.screen, splash_image)
 
     game.menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
     selection = menu.show([screen_w, screen_h], game.screen, menu_image, game.menu_font)
