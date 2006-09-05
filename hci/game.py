@@ -303,7 +303,7 @@ idata = [
     ('saucer2', 'data/test/Saucer2.png', (4, 4, 192, 114)),
     ('enemy', 'data/test/enemy.png', (4, 4, 24, 24)),
     ('shot', 'data/test/shot.png', (1, 2, 6, 4)),
-    ('tree', 'data/test/treemediumsize.png', (4, 4, 48, 48)),
+    ('tree', 'data/test/treebiggersize.png', (4, 4, 48, 48)),
     ('bush', 'data/test/treepinkflower.png', (4, 4, 48, 48)),
     ]
 
