@@ -237,7 +237,7 @@ class Bullet(Sprite):
 class Human(Sprite):
     def __init__(self, game, tile, values=None):
         super(Human, self).__init__('enemy', 'enemy', game, tile, values)
-        self.sprite.agroups = game.string2groups('player')
+        self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
 
     def step(self, game, sprite):
@@ -252,7 +252,7 @@ class Human(Sprite):
         self.sprite.rect.y = myloc[1]
 
     def hit(self, game, sprite, other):
-        pass
+        push(sprite, other)
 
 class Saucer(Sprite):
     def __init__(self, game, tile, values=None):
@@ -335,8 +335,6 @@ cdata = {
 tdata = {
     0x02: ('player', tile_block,
            {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
-    0x02: ('enemy', tile_block,
-           {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),           
     0x20: ('player', tile_coin, None),
     0x30: ('player', tile_fire, None),
     }
