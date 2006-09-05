@@ -116,10 +116,10 @@ class Player(Sprite):
         key = pygame.key.get_pressed()
 
         dx, dy = 0, 0
-        if key[K_UP]: dy -= 1
-        if key[K_DOWN]: dy += 1
-        if key[K_LEFT]: dx -= 1
-        if key[K_RIGHT]: dx += 1
+        if key[K_w]: dy -= 1
+        if key[K_s]: dy += 1
+        if key[K_a]: dx -= 1
+        if key[K_d]: dx += 1
         if key[K_SPACE] and game.frame % 8 == 0:
             self.fire(game, sprite)
         if key[K_LSHIFT]: self.speed = 15
@@ -128,18 +128,40 @@ class Player(Sprite):
         buttons = pygame.mouse.get_pressed()
         if buttons[0]:
             loc = pygame.mouse.get_pos()
+            loc = list(loc)
 
             def s2t(x, y):
                 stx = x / tile_w
                 sty = y / tile_h
                 return stx, sty
 
+            # find selected tile
             tx, ty = s2t(game.view.x + loc[0], game.view.y + loc[1])
-            game.set([tx, ty], 2)
+            #game.set([tx, ty], 2)
+
+            # ugly ray gun effect
+            relx = self.sprite.rect.x - game.view.x + 44
+            rely = self.sprite.rect.y - game.view.y + 5
+
+            relx2 = relx
+            rely2 = rely
+
+            jitter = random.randint(0, 3)
+            if jitter % 2 == 0:
+                relx += jitter
+                rely2 += jitter
+                loc[1] += jitter * 3
+            else:
+                rely += jitter
+                loc[0] += jitter * 3
+                relx2 += jitter
 
             game.deferred_effects.append(lambda:
                                          pygame.draw.line(game.screen, [0, 0, 255],
-                                                          [screen_w/2, screen_h/2], loc, 3))
+                                                          [relx, rely], loc, 3))
+            game.deferred_effects.append(lambda:
+                                         pygame.draw.line(game.screen, [0, 255, 255],
+                                                          [relx2, rely2], loc, 3))
 
         if (dx == 0 and dy == 0): return
 
@@ -150,9 +172,9 @@ class Player(Sprite):
         self.sprite.rect.x += dx * self.speed
 
         # XXX: bit of a hack?  any other way to do this?
-        game.loop_spritehits()
+        #game.loop_spritehits()
 
-        self.oldpos = (self.sprite.rect.x, self.sprite.rect.y)
+        #self.oldpos = (self.sprite.rect.x, self.sprite.rect.y)
         self.sprite.rect.y += dy * self.speed
 
         oldframe = int(self.frame)
@@ -184,9 +206,9 @@ class Player(Sprite):
         target = random.choice(self.known_items)
 
     def hit(self, game, sprite, other):
-        if test_collision(self, other.backref):
-            self.sprite.rect.x, self.sprite.rect.y = self.oldpos
-            self.view_me(game)
+        #if test_collision(self, other.backref):
+        self.sprite.rect.x, self.sprite.rect.y = self.oldpos
+        self.view_me(game)
 
 class Bullet(Sprite):
     def __init__(self, name, game, tile, values=None):
