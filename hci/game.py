@@ -108,6 +108,7 @@ class Player(Sprite):
         self.sprite.hit  = lambda game, sprite, other: self.hit(game, sprite, other)
         self.sprite.shoot = lambda game, sprite: self.fire(game, sprite)
         self.sprite.score = 0
+        self.oldpos = (self.sprite.rect.x, self.sprite.rect.y)
 
         game.player = self
 
