@@ -46,6 +46,30 @@ def initialize_modules():
 
 class AbstractClassException(Exception): pass
 
+def test_collision(obj1, obj2):
+    r1, h1 = obj1.rect, obj1.hitmask
+    r2, h2 = obj2.rect, obj2.hitmask
+
+    r = r1.clip(r2)
+    x1, y1 = r.x - r1.x, r.y - r1.y
+    x2, y2 = r.x - r2.x, r.y - r2.y
+
+    x = 0
+    y = 0
+    while 1:
+        if h1[x + x1][y + y1]:
+            if h2[x + x2][y + y2]:
+                return True
+        if h1[x1 - x][y1 - y]:
+            if h2[x2 - x][y2 - y]:
+                return True
+        x += 1
+        if x >= r.width:
+            x = 0
+            y += 1
+            if y >= r.height/2:
+                return False
+
 class Sprite(object):
     def __init__(self, name, group, game, tile, values=None):
         self.name = name
@@ -55,7 +79,7 @@ class Sprite(object):
             rect = tile.rect
         self.sprite = tilevid.Sprite(game.images[self.name], rect)
         self.sprite.loop = lambda game, sprite: self.step(game, sprite)
-        self.groups = game.string2groups(self.group)
+        self.sprite.groups = game.string2groups(self.group)
         self.frame = 0.0
         self.frames = []
         self.frames.append(game.images[self.name])
@@ -66,16 +90,18 @@ class Sprite(object):
 
     def step(self, game, sprite):
         raise AbstractClassException
-    
+ 
 
 class Player(Sprite):
     def __init__(self, game, tile, values=None):
         super(Player, self).__init__('player', 'player', game, tile, values)
         self.frames.append(game.images['player1'])
         self.frames.append(game.images['player2'])       
-        self.frames.append(game.images['player3']) 
-        self.sprite.score = 0
+        self.frames.append(game.images['player3'])
+        self.sprite.agroups = game.string2groups('Background')
+        self.sprite.hit  = lambda game, sprite, other: self.hit(game, sprite, other)
         self.sprite.shoot = lambda game, sprite: self.fire(game, sprite)
+        self.sprite.score = 0
 
         game.player = self
 
@@ -96,14 +122,22 @@ class Player(Sprite):
 
         if (dx == 0 and dy == 0): return
         
+        # get smart and give the player finer control over their movement
+        # move them in x first and do a collide test. then do Y... 
+        
+        self.oldpos = (self.sprite.rect.x, self.sprite.rect.y)
+        self.sprite.rect.x += dx * self.speed
+        
+        game.loop_spritehits()
+    
+        self.oldpos = (self.sprite.rect.x, self.sprite.rect.y)
+        self.sprite.rect.y += dy * self.speed
+        
         oldframe = int(self.frame)
         self.frame = (self.frame + 0.2) % len(self.frames)
         if oldframe != int(self.frame):
             self.sprite.setimage(self.frames[int(self.frame)])
 
-        self.sprite.rect.x += dx * self.speed
-        self.sprite.rect.y += dy * self.speed
-        
         self.view_me(game)
 
     def view_me(self, game):
@@ -126,7 +160,12 @@ class Player(Sprite):
 
     def morph(self):
         target = random.choice(self.known_items)
+   
+    def hit(self, game, sprite, other):
+        self.sprite.rect.x, self.sprite.rect.y = self.oldpos
+        self.view_me(game)
 
+        
 class Bullet(Sprite):
     def __init__(self, name, game, tile, values=None):
         origin = [tile.rect.right, tile.rect.centery - 2]
@@ -164,7 +203,7 @@ class Enemy(Sprite):
 
 class Saucer(Sprite):
     def __init__(self, game, tile, values=None):
-        super(Saucer, self).__init__('saucer0', 'saucer', game, tile, values)
+        super(Saucer, self).__init__('saucer0', 'Background', game, tile, values)
         self.frames.append(game.images['saucer1'])
         self.frames.append(game.images['saucer2'])
 
