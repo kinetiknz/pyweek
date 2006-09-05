@@ -139,7 +139,7 @@ class Player(Sprite):
 
             game.deferred_effects.append(lambda:
                                          pygame.draw.line(game.screen, [0, 0, 255],
-                                                          [screen_h/2, screen_w/2], loc, 3))
+                                                          [screen_w/2, screen_h/2], loc, 3))
 
         if (dx == 0 and dy == 0): return
 
