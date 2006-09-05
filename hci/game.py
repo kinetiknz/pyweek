@@ -66,14 +66,18 @@ class Sprite(object):
 
     def step(self, game, sprite):
         raise AbstractClassException
+    
 
 class Player(Sprite):
     def __init__(self, game, tile, values=None):
         super(Player, self).__init__('player', 'player', game, tile, values)
+        self.frames.append(game.images['player1'])
+        self.frames.append(game.images['player2'])       
+        self.frames.append(game.images['player3']) 
         self.sprite.score = 0
         self.sprite.shoot = lambda game, sprite: self.fire(game, sprite)
 
-        game.player = self.sprite
+        game.player = self
 
         self.known_items = []
 
@@ -90,9 +94,19 @@ class Player(Sprite):
         if key[K_LSHIFT]: self.speed = 15
         else: self.speed = 5
 
+        if (dx == 0 and dy == 0): return
+        
+        oldframe = int(self.frame)
+        self.frame = (self.frame + 0.2) % len(self.frames)
+        if oldframe != int(self.frame):
+            self.sprite.setimage(self.frames[int(self.frame)])
+
         self.sprite.rect.x += dx * self.speed
         self.sprite.rect.y += dy * self.speed
+        
+        self.view_me(game)
 
+    def view_me(self, game):
         # cheezy bounds enforcement
         bounds = pygame.Rect(game.bounds)
         bounds.inflate_ip(-self.sprite.rect.w, -self.sprite.rect.h)
@@ -128,7 +142,7 @@ class Bullet(Sprite):
     def hit(self, game, sprite, other):
         if other in game.sprites:
             game.sprites.remove(other)
-        game.player.score += 500
+        game.player.sprite.score += 500
 
 class Enemy(Sprite):
     def __init__(self, game, tile, values=None):
@@ -184,7 +198,10 @@ def tile_fire(g, t, a):
     g.quit = 1
 
 idata = [
-    ('player', 'data/test/player.png', (4, 4, 48, 24)),
+    ('player', 'data/test/alien/alien-top.png', (4, 4, 48, 24)),
+    ('player1', 'data/test/alien/alien-top2.png', (4, 4, 48, 24)),   
+    ('player2', 'data/test/alien/alien-top3.png', (4, 4, 48, 24)),  
+    ('player3', 'data/test/alien/alien-top4.png', (4, 4, 48, 24)),           
     ('saucer0', 'data/test/Saucer0.png', (4, 4, 192, 114)),
     ('saucer1', 'data/test/Saucer1.png', (4, 4, 192, 114)),
     ('saucer2', 'data/test/Saucer2.png', (4, 4, 192, 114)),
@@ -253,6 +270,8 @@ def run():
     text = pygame.font.Font(None, 36)
     text_sm = pygame.font.Font(None, 16)
 
+    game.player.view_me(game)
+
     direction = 0
     while not game.quit:
         for e in pygame.event.get():
@@ -281,7 +300,7 @@ def run():
             txt = text.render(caption, 1, [255, 255, 255])
             game.screen.blit(txt, [0, screen_h - txt.get_height()])
 
-            caption = "SCORE %05d" % game.player.score
+            caption = "SCORE %05d" % game.player.sprite.score
             txt = text.render(caption, 1, [0, 0, 0])
             game.screen.blit(txt, [0, 0])
             txt = text.render(caption, 1, [255, 255, 255])
