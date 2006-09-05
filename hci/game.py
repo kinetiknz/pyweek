@@ -125,7 +125,16 @@ class Player(Sprite):
         buttons = pygame.mouse.get_pressed()
         if buttons[0]:
             loc = pygame.mouse.get_pos()
-            logit(loc[0])
+
+            def s2t(x, y):
+                stx = x / 32
+                sty = y / 32
+                return stx, sty
+
+            stx, sty = s2t(*loc)
+            atx, aty = s2t(game.view.x, game.view.y)
+            logit(stx + atx, sty + aty)
+            game.set([stx + atx, sty + aty], 2)
 
         if (dx == 0 and dy == 0): return
 
@@ -170,7 +179,7 @@ class Player(Sprite):
         target = random.choice(self.known_items)
 
     def hit(self, game, sprite, other):
-        if test_collision(self, other.backref):           
+        if test_collision(self, other.backref):
             self.sprite.rect.x, self.sprite.rect.y = self.oldpos
             self.view_me(game)
 
@@ -257,15 +266,13 @@ idata = [
 
 cdata = {
     1: (lambda g, t, v: Player(g, t, v), None),
-    #2: (lambda g, t, v: Enemy(g, t, v), None),
-    #3: (lambda g, t, v: Enemy(g, t, v), None),
-    #4: (lambda g, t, v: Enemy(g, t, v), None),
+    2: (lambda g, t, v: Enemy(g, t, v), None),
+    3: (lambda g, t, v: Enemy(g, t, v), None),
+    4: (lambda g, t, v: Enemy(g, t, v), None),
     5: (lambda g, t, v: Saucer(g, t, v), None),
     }
 
 tdata = {
-#    0x01: ('player', tile_block,
-#           {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x02: ('player', tile_block,
            {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x20: ('player', tile_coin, None),
@@ -333,7 +340,16 @@ def run():
                 if e.key == K_F10: pygame.display.toggle_fullscreen()
                 if e.key == K_RETURN: game.pause = not game.pause
 
-        if not game.pause:
+        if game.pause:
+            caption = "GAME PAUSED"
+            txt = text.render(caption, 1, [0, 0, 0])
+            dx = screen_w/2 - txt.get_rect().w/2
+            dy = screen_h/2 - txt.get_rect().h/2
+            game.screen.blit(txt, [dx + 1, dy + 1])
+            txt = text.render(caption, 1, [255, 255, 255])
+            game.screen.blit(txt, [dx, dy])
+            pygame.display.flip()
+        else:
             if game.view.x == game.bounds.w - screen_w + tile_w \
                    and direction == 1:
                 direction = -1
