@@ -23,6 +23,8 @@ from pgu import tilevid
 
 import splashscreen
 import menu
+import movement
+import euclid
 
 screen_w, screen_h = 640, 480
 tile_w, tile_h = 32, 32
@@ -73,6 +75,19 @@ def test_collision(obj1, obj2):
             y += 1
             if y >= r.height/2:
                 return False
+
+def push(mover, away_from):
+    if mover._rect.bottom <= away_from._rect.top and mover.rect.bottom > away_from.rect.top:
+        mover.rect.bottom = away_from.rect.top
+    if mover._rect.right <= away_from._rect.left \
+           and mover.rect.right > away_from.rect.left:
+        mover.rect.right = away_from.rect.left
+    if mover._rect.left >= away_from._rect.right \
+           and mover.rect.left < away_from.rect.right:
+        mover.rect.left = away_from.rect.right
+    if mover._rect.top >= away_from._rect.bottom \
+           and mover.rect.top < away_from.rect.bottom:
+        mover.rect.top = away_from.rect.bottom
 
 class Sprite(object):
     def __init__(self, name, group, game, tile, values=None):
@@ -166,16 +181,8 @@ class Player(Sprite):
 
         if (dx == 0 and dy == 0): return
 
-        # get smart and give the player finer control over their movement
-        # move them in x first and do a collide test.  then do Y.
-
         self.oldpos = (self.sprite.rect.x, self.sprite.rect.y)
         self.sprite.rect.x += dx * self.speed
-
-        # XXX: bit of a hack?  any other way to do this?
-        #game.loop_spritehits()
-
-        #self.oldpos = (self.sprite.rect.x, self.sprite.rect.y)
         self.sprite.rect.y += dy * self.speed
 
         oldframe = int(self.frame)
@@ -207,8 +214,7 @@ class Player(Sprite):
         target = random.choice(self.known_items)
 
     def hit(self, game, sprite, other):
-        #if test_collision(self, other.backref):
-        self.sprite.rect.x, self.sprite.rect.y = self.oldpos
+        push(sprite, other)
         self.view_me(game)
 
 class Bullet(Sprite):
@@ -228,23 +234,25 @@ class Bullet(Sprite):
             game.sprites.remove(other)
         game.player.sprite.score += 500
 
-class Enemy(Sprite):
+class Human(Sprite):
     def __init__(self, game, tile, values=None):
-        super(Enemy, self).__init__('enemy', 'enemy', game, tile, values)
+        super(Human, self).__init__('enemy', 'enemy', game, tile, values)
         self.sprite.agroups = game.string2groups('player')
         self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
 
     def step(self, game, sprite):
-        if self.sprite.rect.right < game.bounds.left:
-            game.sprites.remove(self.sprite)
-            return
-        self.move()
+        self.move(game)
 
-    def move(self):
-        self.sprite.rect.x -= 1
+    def move(self, game):
+        myloc = euclid.Vector2(self.sprite.rect.x, self.sprite.rect.y)
+        target = euclid.Vector2(game.player.sprite.rect.x, game.player.sprite.rect.y)
+        myloc = movement.move(myloc, target, 4)
+        
+        self.sprite.rect.x = myloc[0]
+        self.sprite.rect.y = myloc[1]
 
     def hit(self, game, sprite, other):
-        logit(self, 'hit', other)
+        pass
 
 class Saucer(Sprite):
     def __init__(self, game, tile, values=None):
@@ -318,7 +326,7 @@ idata = [
 
 cdata = {
     1: (lambda g, t, v: Player(g, t, v), None),
-    2: (lambda g, t, v: Enemy(g, t, v), None),
+    2: (lambda g, t, v: Human(g, t, v), None),
     3: (lambda g, t, v: Bush(g, t, v), None),
     4: (lambda g, t, v: Tree(g, t, v), None),
     5: (lambda g, t, v: Saucer(g, t, v), None),
