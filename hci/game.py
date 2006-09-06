@@ -69,19 +69,6 @@ def test_collision(obj1, obj2):
             if y >= r.height/2:
                 return False
 
-def push(mover, away_from):
-    if mover._rect.bottom <= away_from._rect.top and mover.rect.bottom > away_from.rect.top:
-        mover.rect.bottom = away_from.rect.top
-    if mover._rect.right <= away_from._rect.left \
-           and mover.rect.right > away_from.rect.left:
-        mover.rect.right = away_from.rect.left
-    if mover._rect.left >= away_from._rect.right \
-           and mover.rect.left < away_from.rect.right:
-        mover.rect.left = away_from.rect.right
-    if mover._rect.top >= away_from._rect.bottom \
-           and mover.rect.top < away_from.rect.bottom:
-        mover.rect.top = away_from.rect.bottom
-
 def tile_block(g, t, a):
     c = t.config
     if c['top'] == 1 and a._rect.bottom <= t._rect.top \
