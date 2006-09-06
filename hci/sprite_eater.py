@@ -16,17 +16,14 @@
 import pygame
 import random
 
-magic_colour_r = 0
-magic_colour_g = 255
-magic_colour_b = 0
-
-magic_colour = [0,255,0]
-transparent  = 0
-
 class SpriteEater(object):
+    MAGIC_COLOUR_R = 0
+    MAGIC_COLOUR_G = 255
+    MAGIC_COLOUR_B = 0
+    TRANSPARENT  = 0
+
     def __init__(self, surface):
         self.surface = surface.copy()
-        print self.surface.get_flags()
         self.surfarray = pygame.surfarray.array3d(surface)
         self.alphas    = pygame.surfarray.array_alpha(surface)
         self.width = surface.get_width()
@@ -48,8 +45,10 @@ class SpriteEater(object):
 
         dst_alpha = pygame.surfarray.pixels_alpha(surface)
         for x in xrange(self.width):
+            sx = self.alphas[x]
+            dx = dst_alpha[x]
             for y in xrange(self.height):
-                dst_alpha[x][y] = self.alphas[x][y]
+                dx[y] = sx[y]
 
     def advance_frame(self):
         #surfarray = pygame.surfarray.pixels3d(self.surface)
@@ -66,7 +65,7 @@ class SpriteEater(object):
                 newlist.append(new_point)
                 newlist.append(point)
             else:
-                self.alphas[point[0]][point[1]] = transparent
+                self.alphas[point[0]][point[1]] = SpriteEater.TRANSPARENT
 
         self.points = newlist
         # pygame.surfarray.blit_array(self.surface, surfarray)
@@ -113,7 +112,7 @@ class SpriteEater(object):
             y = point[1]
 
             if die:
-                self.alphas[x][y] = transparent
+                self.alphas[x][y] = SpriteEater.TRANSPARENT
             else:
                 newlist.append(point)
 
@@ -124,30 +123,32 @@ class SpriteEater(object):
         return len(self.points) > 0
 
     def zap(self, surfarray, pos):
-        surfarray[pos[0]][pos[1]][0] = magic_colour_r
-        surfarray[pos[0]][pos[1]][1] = magic_colour_g
-        surfarray[pos[0]][pos[1]][2] = magic_colour_b
+        px = surfarray[pos[0]][pos[1]]
+        px[0] = SpriteEater.MAGIC_COLOUR_R
+        px[1] = SpriteEater.MAGIC_COLOUR_G
+        px[2] = SpriteEater.MAGIC_COLOUR_B
 
     def safe(self, surfarray, alphas, x, y):
         if x < 0 or y < 0 or x >= self.width or y >= self.height: return False
-        if alphas[x][y]    == transparent: return False
-        if surfarray[x][y][0] != magic_colour_r: return True
-        if surfarray[x][y][1] != magic_colour_g: return True
-        if surfarray[x][y][2] != magic_colour_b: return True
+        if alphas[x][y] == SpriteEater.TRANSPARENT: return False
+        px = surfarray[x][y]
+        if px[0] != SpriteEater.MAGIC_COLOUR_R: return True
+        if px[1] != SpriteEater.MAGIC_COLOUR_G: return True
+        if px[2] != SpriteEater.MAGIC_COLOUR_B: return True
         return False
 
     def walk(self, surfarray, alphas, pos):
-        dir = random.randint(0,3)
-        sdir = dir
+        rdir = random.randint(0,3)
+        sdir = rdir
 
         while 1:
-            if dir == 0:
+            if rdir == 0:
                 y = pos[1]-1
                 x = pos[0]
-            elif dir == 1:
+            elif rdir == 1:
                 y = pos[1]+1
                 x = pos[0]
-            elif dir == 2:
+            elif rdir == 2:
                 x = pos[0]+1
                 y = pos[1]
             else:
@@ -159,6 +160,6 @@ class SpriteEater(object):
                 pos[1] = y
                 return True
             else:
-                dir = (dir + 1) % 4
+                rdir = (rdir + 1) % 4
 
-            if dir == sdir: return False
+            if rdir == sdir: return False
