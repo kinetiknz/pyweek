@@ -29,17 +29,25 @@ import math
 #
 # returns True if my pos is within visible range
 
-def can_be_seen(mypos, otherpos, other_look_at, view_angle = (math.pi/2.0), view_distance2 = 10000.0):
+def can_be_seen(mypos, otherpos, other_look_at, view_angle = (math.pi/2.0), view_distance2 = 80000.0):
     assert isinstance(mypos, euclid.Vector2)
     assert isinstance(otherpos, euclid.Vector2)
     assert isinstance(other_look_at, euclid.Vector2)
     
     them2me = mypos - otherpos
-    if (them2me.magnitude_squared() > view_distance2):
+    dist    = them2me.magnitude_squared()
+    
+    if (dist > view_distance2):
         return False
     
     them_look = other_look_at - otherpos
-    angle_between = math.fabs(math.acos(them2me.normalize().dot(them_look.normalize())))
+    them_look.normalize()
+    them2me.normalize()
+    
+    if them_look == them2me: return True
+    
+    angle_between = math.acos(them2me.dot(them_look))
+    
     
     if (angle_between > view_angle/2.0):
         return False

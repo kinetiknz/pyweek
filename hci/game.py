@@ -25,6 +25,7 @@ import sprite_eater
 import splashscreen
 import menu
 import movement
+import visibility
 import euclid
 
 screen_w, screen_h = 640, 480
@@ -124,6 +125,7 @@ class Player(Sprite):
         self.sprite.hit  = lambda game, sprite, other: self.hit(game, sprite, other)
         self.sprite.shoot = lambda game, sprite: self.fire(game, sprite)
         self.sprite.score = 0
+        self.seen = False
         self.mouse_move = False
  
         game.player = self
@@ -132,6 +134,12 @@ class Player(Sprite):
 
     def step(self, game, sprite):
         key = pygame.key.get_pressed()
+
+        if self.seen:
+            relx = self.sprite.rect.x - game.view.x + 44
+            rely = self.sprite.rect.y - game.view.y + 5
+            game.deferred_effects.append(lambda:game.screen.blit(game.images['warn'][0], (relx, rely, 0, 0) ) )
+            self.seen = False           
 
         dx, dy = 0, 0
         if key[K_w]: dy -= 1
@@ -144,8 +152,9 @@ class Player(Sprite):
         else: self.speed = 5
 
         buttons = pygame.mouse.get_pressed()
-        if buttons[2]:
-            loc = pygame.mouse.get_pos()
+        loc = pygame.mouse.get_pos()
+        
+        if buttons[2]:    
             self.move_to = euclid.Vector2(game.view.x + loc[0], game.view.y + loc[1])
             self.mouse_move = True
         
@@ -185,7 +194,8 @@ class Player(Sprite):
                                          pygame.draw.line(game.screen, [0, 255, 255],
                                                           [relx2, rely2], loc, 3))
 
-        if ( dx == 0 and dy == 0 and not self.mouse_move ): return
+        if ( dx == 0 and dy == 0 and not self.mouse_move ):
+            return
 
         if (self.mouse_move):
             mypos = euclid.Vector2(self.sprite.rect.x, self.sprite.rect.y)
@@ -217,7 +227,7 @@ class Player(Sprite):
 
         game.view.x = gx
         game.view.y = gy
-
+        
     def fire(self, game, sprite):
         Bullet('shot', game, sprite)
 
@@ -253,17 +263,31 @@ class Human(Sprite):
         super(Human, self).__init__('enemy', 'enemy', game, tile, values)
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
+        self.waypoint = 0
+        self.waypoints = []
+        
+        for pts in xrange(10):
+            self.waypoints.append(euclid.Vector2(random.randint(10, game.bounds.width-10),random.randint(10, game.bounds.height-10)  ))
 
     def step(self, game, sprite):
         self.move(game)
 
     def move(self, game):
         myloc = euclid.Vector2(self.sprite.rect.x, self.sprite.rect.y)
-        target = euclid.Vector2(game.player.sprite.rect.x, game.player.sprite.rect.y)
-        movement.move(myloc, target, 4)
-        
+        # target = euclid.Vector2(game.player.sprite.rect.x, game.player.sprite.rect.y)
+        target = self.waypoints[self.waypoint]
+    
+        player_pos = euclid.Vector2(game.player.sprite.rect.x, game.player.sprite.rect.y)
+
+        if visibility.can_be_seen(player_pos, myloc, target):
+            game.player.seen = True
+
+        if movement.move(myloc, target, 4):
+            self.waypoint = (self.waypoint + 1) % len(self.waypoints)
+            
         self.sprite.rect.x = myloc[0]
         self.sprite.rect.y = myloc[1]
+
 
     def hit(self, game, sprite, other):
         push(sprite, other)
@@ -335,6 +359,8 @@ idata = [
     ('saucer1', 'data/test/Saucer1.png', (4, 4, 192, 114)),
     ('saucer2', 'data/test/Saucer2.png', (4, 4, 192, 114)),
     ('enemy', 'data/test/enemy.png', (4, 4, 24, 24)),
+    ('cow',   'data/test/clareta.png', (1, 1, 30, 30)),
+    ('warn',   'data/test/warning.png', (0, 0, 16, 16)), 
     ('shot', 'data/test/shot.png', (1, 2, 6, 4)),
     ('tree', 'data/test/treebiggersize.png', (20, 20, 95, 95)),
     ('bush', 'data/test/treepinkflower.png', (4, 4, 48, 48)),
