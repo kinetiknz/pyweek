@@ -110,7 +110,7 @@ idata = [
     ('warn',   'data/test/Warning.png', (0, 0, 16, 16)),
     ('shot', 'data/test/shot.png', (1, 2, 6, 4)),
     ('tree', 'data/test/treebiggersize.png', (10, 15, 95, 95)),
-    ('bush', 'data/test/treepinkflower.png', (4, 4, 48, 48)),
+    ('bush', 'data/test/treepinkflower.png', (4, 4, 32, 48)),
     ]
 
 cdata = {
