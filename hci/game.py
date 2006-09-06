@@ -150,6 +150,7 @@ class Player(Sprite):
             self.mouse_move = True
         
         if buttons[0]:
+            loc = pygame.mouse.get_pos()
             loc = list(loc)
 
             def s2t(x, y):
@@ -261,7 +262,7 @@ class Human(Sprite):
         myloc = euclid.Vector2(self.sprite.rect.x, self.sprite.rect.y)
         target = euclid.Vector2(game.player.sprite.rect.x, game.player.sprite.rect.y)
         movement.move(myloc, target, 4)
-        
+
         self.sprite.rect.x = myloc[0]
         self.sprite.rect.y = myloc[1]
 
@@ -348,7 +349,7 @@ cdata = {
     5: (lambda g, t, v: Saucer(g, t, v), None),
     }
 
-tdata = {        
+tdata = {
     0x02: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x20: ('player', tile_coin, None),
     0x30: ('player', tile_fire, None),
