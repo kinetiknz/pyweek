@@ -81,13 +81,18 @@ class Sprite(object):
         if (self.scale_factor == 1.0 and self.rotation == 0.0):
             self.sprite.setimage((self.orig_image, self.orig_shape))
             return
+        
+        if self.scale_factor != 1.0:
+            newrect = self.orig_shape.inflate(self.orig_shape.w * (self.scale_factor-1.0) , \
+                                              self.orig_shape.h * (self.scale_factor-1.0) )
 
         newsurf = pygame.transform.rotozoom(self.sprite.image, self.rotation, self.scale_factor)
         self.sprite.setimage(newsurf)
 
     def set_image(self, new_image):
-        self.sprite.orig_image = new_image
         self.sprite.setimage(new_image)
+        self.orig_image = self.sprite.image
+        self.orig_shape = self.sprite.shape
         self.reimage()
 
     def get_sprite_pos(self):
