@@ -179,6 +179,10 @@ class Player(Sprite):
 
         self.known_items = []
 
+        self.beam_sound = pygame.mixer.Sound('data/sfx/Beam.ogg')
+        self.beam_sound_isplaying = False
+
+
     def step(self, game, sprite):
         key = pygame.key.get_pressed()
 
@@ -207,11 +211,19 @@ class Player(Sprite):
 
         if (dx != 0 or dy != 0): self.mouse_move = False
 
+        if buttons[0] == 0 and self.beam_sound_isplaying == True:
+            self.beam_sound.stop()
+            self.beam_sound_isplaying = False
+
         if buttons[2]:
             self.target = euclid.Vector2(game.view.x + loc[0], game.view.y + loc[1])
             self.mouse_move = True
 
         if buttons[0]:
+            if not self.beam_sound_isplaying:
+                self.beam_sound.play()
+                self.beam_sound_isplaying = True
+                
             loc = pygame.mouse.get_pos()
             loc = list(loc)
 
@@ -247,6 +259,7 @@ class Player(Sprite):
             game.deferred_effects.append(lambda:
                                          pygame.draw.line(game.screen, [0, 255, 255],
                                                           [relx2, rely2], loc, 3))
+            #self.beam_sound.stop()
 
         if self.mouse_move:
             if self.move_toward(self.target, self.speed, 10.0):
