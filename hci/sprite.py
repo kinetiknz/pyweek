@@ -179,6 +179,9 @@ class Player(Sprite):
 
         self.known_items = []
 
+        self.walking_snd_channel = pygame.mixer.find_channel()
+
+        self.walking_sound = pygame.mixer.Sound('data/sfx/Walking.ogg')
         self.raygun_sound = pygame.mixer.Sound('data/sfx/Raygun.ogg')
         self.beam_sound = pygame.mixer.Sound('data/sfx/Beam.ogg')
         self.beam_sound_isplaying = False
@@ -194,10 +197,18 @@ class Player(Sprite):
             self.seen = False
 
         dx, dy = 0, 0
-        if key[K_w]: dy -= 1
-        if key[K_s]: dy += 1
-        if key[K_a]: dx -= 1
-        if key[K_d]: dx += 1
+        if key[K_w]: 
+            dy -= 1
+            self.walking_snd_channel.queue(self.walking_sound)
+        if key[K_s]: 
+            dy += 1
+            self.walking_snd_channel.queue(self.walking_sound)
+        if key[K_a]: 
+            dx -= 1
+            self.walking_snd_channel.queue(self.walking_sound)
+        if key[K_d]: 
+            dx += 1
+            self.walking_snd_channel.queue(self.walking_sound)
         if key[K_SPACE] and game.frame % 8 == 0:
             self.fire(game, sprite)
         if key[K_LSHIFT]:
