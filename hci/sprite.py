@@ -14,6 +14,7 @@
 
 import random
 import time
+import math
 
 from pygame.locals import *
 import pygame
@@ -37,14 +38,95 @@ class Sprite(object):
         self.hitmask = pygame.surfarray.array_alpha(self.sprite.image)
         self.rect = self.sprite.rect
         self.sprite.backref = self
+        self.bounds = pygame.Rect(game.bounds)
+        self.bounds.inflate_ip(-self.sprite.rect.w * 2, -self.sprite.rect.h * 2)
+        
+        # animation
         self.frame = 0.0
         self.frames = []
         self.frames.append(game.images[self.name])
-
+        
+        # movment
+        self.last_pos  = euclid.Vector2(0,0)
+        self.position  = euclid.Vector2(0,0)
+        self.get_sprite_pos()
+        self.stop()
+        self.accel     = 0.0
+        self.drag      = 0.85
+        self.top_speed = 0.0
+        self.target    = None
+        
+        # something to do with PGU?
         if hasattr(tile, 'rect'):
             game.clayer[tile.ty][tile.tx] = 0
         game.sprites.append(self.sprite)
+        
+    def get_sprite_pos(self):
+        self.position[0] = self.sprite.rect.x
+        self.position[1] = self.sprite.rect.y
+ 
+    def set_sprite_pos(self):
+        self.sprite.rect.x = self.position[0]
+        self.sprite.rect.y = self.position[1]
+ 
+    def stop(self):
+        self.last_pos[0] = self.position[0]
+        self.last_pos[1] = self.position[1]
+        
+    def accelerate(self, vector):
+        move_vec = self.velocity() + vector
+        
+        if move_vec.magnitude() > self.top_speed:
+            move_vec.normalize()
+            move_vec *= self.top_speed
+            
+        self.position = self.last_pos + move_vec
+        
+    def move_toward(self, target, speed, min_distance):
+            to_target = target - self.position
+            length = to_target.magnitude()
+            
+            if (length <= min_distance):
+                return True
+            
+            to_target /= length
+            to_target *= speed
+            self.accelerate(to_target)
+            
+            return False 
+    
+    
+    def velocity(self):
+        return self.position - self.last_pos
+        
+    def verlet_move(self):
+        # use verlet integration to move our sprite                    
+        move_vec = self.velocity()
+        
+        if move_vec.magnitude_squared() < 0.1:
+            return False
+        
+        move_vec *= self.drag
+        
+        if self.position[0] < self.bounds.left:    self.position[0] = self.bounds.left        
+        if self.position[0] > self.bounds.right:   self.position[0] = self.bounds.right
+        if self.position[1] < self.bounds.top:     self.position[1] = self.bounds.top
+        if self.position[1] > self.bounds.bottom:  self.position[1] = self.bounds.bottom
+        
+        self.last_pos = self.position
+        self.position = self.last_pos + move_vec
+        self.sprite.rect.x = self.position[0]
+        self.sprite.rect.y = self.position[1]
+        
+        return True
 
+    def view_me(self, game):      
+        gx = self.sprite.rect.x - (game.view.w/2) + game.tile_w
+        gy = self.sprite.rect.y - (game.view.h/2) + game.tile_h
+
+        game.view.x = gx
+        game.view.y = gy
+        
     def step(self, game, sprite):
         raise AbstractClassException
 
@@ -60,6 +142,8 @@ class Player(Sprite):
         self.sprite.score = 0
         self.seen = False
         self.mouse_move = False
+        self.speed = 1.0
+        self.top_speed = 5.0
 
         game.player = self
 
@@ -81,14 +165,20 @@ class Player(Sprite):
         if key[K_d]: dx += 1
         if key[K_SPACE] and game.frame % 8 == 0:
             self.fire(game, sprite)
-        if key[K_LSHIFT]: self.speed = 15
-        else: self.speed = 5
+        if key[K_LSHIFT]: 
+            self.top_speed = 15.0
+            self.speed     = 3.0
+        else: 
+            self.top_speed = 5.0
+            self.speed     = 1.0
 
         buttons = pygame.mouse.get_pressed()
         loc = pygame.mouse.get_pos()
 
+        if (dx != 0 or dy != 0): self.mouse_move = False
+
         if buttons[2]:
-            self.move_to = euclid.Vector2(game.view.x + loc[0], game.view.y + loc[1])
+            self.target = euclid.Vector2(game.view.x + loc[0], game.view.y + loc[1])
             self.mouse_move = True
 
         if buttons[0]:
@@ -128,39 +218,23 @@ class Player(Sprite):
                                          pygame.draw.line(game.screen, [0, 255, 255],
                                                           [relx2, rely2], loc, 3))
 
-        if ( dx == 0 and dy == 0 and not self.mouse_move ):
-            return
 
-        if (self.mouse_move):
-            mypos = euclid.Vector2(self.sprite.rect.x, self.sprite.rect.y)
-
-            if movement.move(mypos, self.move_to, self.speed):
+        if self.mouse_move:
+            if self.move_toward(self.target, self.speed, 10.0):
                 self.mouse_move = False
-
-            self.sprite.rect.x = mypos[0]
-            self.sprite.rect.y = mypos[1]
         else:
-            self.sprite.rect.x += dx * self.speed
-            self.sprite.rect.y += dy * self.speed
+            self.accelerate(euclid.Vector2(dx*self.speed,dy*self.speed))
 
+        if not self.verlet_move():
+            self.mouse_move = False
+            return
+                        
         oldframe = int(self.frame)
         self.frame = (self.frame + 0.2) % len(self.frames)
         if oldframe != int(self.frame):
             self.sprite.setimage(self.frames[int(self.frame)])
 
         self.view_me(game)
-
-    def view_me(self, game):
-        # cheezy bounds enforcement
-        bounds = pygame.Rect(game.bounds)
-        bounds.inflate_ip(-self.sprite.rect.w, -self.sprite.rect.h)
-        self.sprite.rect.clamp_ip(bounds)
-
-        gx = self.sprite.rect.x - (game.view.w/2) + game.tile_w
-        gy = self.sprite.rect.y - (game.view.h/2) + game.tile_h
-
-        game.view.x = gx
-        game.view.y = gy
 
     def fire(self, game, sprite):
         Bullet('shot', game, sprite)
@@ -173,6 +247,7 @@ class Player(Sprite):
 
     def hit(self, game, sprite, other):
         push(sprite, other)
+        self.get_sprite_pos()
         self.view_me(game)
 
 class Bullet(Sprite):
@@ -199,31 +274,34 @@ class Human(Sprite):
         self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
         self.waypoint = 0
         self.waypoints = []
-
+        self.speed = 1.0
+        self.top_speed = 4.0
+        
         for pts in xrange(10):
             self.waypoints.append(euclid.Vector2(random.randint(10, game.bounds.width-10),random.randint(10, game.bounds.height-10)))
 
     def step(self, game, sprite):
+        
         self.move(game)
 
     def move(self, game):
-        myloc = euclid.Vector2(self.sprite.rect.x, self.sprite.rect.y)
-        #target = euclid.Vector2(game.player.sprite.rect.x, game.player.sprite.rect.y)
         target = self.waypoints[self.waypoint]
 
-        player_pos = euclid.Vector2(game.player.sprite.rect.x, game.player.sprite.rect.y)
-
-        if visibility.can_be_seen(player_pos, myloc, target):
+        if visibility.can_be_seen(game.player.position, self.position, target):
             game.player.seen = True
-
-        if movement.move(myloc, target, 4):
+       
+        if self.move_toward(target, self.speed, 10.0):
+           self.waypoint = (self.waypoint + 1) % len(self.waypoints)
+        
+        if not self.verlet_move():
             self.waypoint = (self.waypoint + 1) % len(self.waypoints)
 
-        self.sprite.rect.x = myloc[0]
-        self.sprite.rect.y = myloc[1]
+        self.set_sprite_pos()
+
 
     def hit(self, game, sprite, other):
         push(sprite, other)
+        self.get_sprite_pos()
 
 class Saucer(Sprite):
     def __init__(self, game, tile, values=None):
