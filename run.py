@@ -26,7 +26,6 @@ sys.path.append('thirdparty')
 
 from hci import game
 
-
 if len(sys.argv) > 1:
     if sys.argv[1] == 'profile':
         import hotshot, hotshot.stats
