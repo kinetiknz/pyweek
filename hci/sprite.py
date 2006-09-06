@@ -81,7 +81,7 @@ class Sprite(object):
         if (self.scale_factor == 1.0 and self.rotation == 0.0):
             self.sprite.setimage((self.orig_image, self.orig_shape))
             return
-        
+
         if self.scale_factor != 1.0:
             newrect = self.orig_shape.inflate(self.orig_shape.w * (self.scale_factor-1.0) , \
                                               self.orig_shape.h * (self.scale_factor-1.0) )
@@ -203,7 +203,7 @@ class Player(Sprite):
         if key[K_s]: dy += 1
         if key[K_a]: dx -= 1
         if key[K_d]: dx += 1
-        if key[K_SPACE] and game.frame % 8 == 0:
+        if key[K_SPACE] and game.frame % 5 == 0:
             self.fire(game, sprite)
         if key[K_LSHIFT]:
             self.top_speed = 15.0
@@ -229,8 +229,7 @@ class Player(Sprite):
             if not self.beam_sound_isplaying:
                 self.beam_sound.play()
                 self.beam_sound_isplaying = True
-                
-            loc = pygame.mouse.get_pos()
+
             loc = list(loc)
 
             def s2t(x, y):
@@ -318,14 +317,14 @@ class Bullet(Sprite):
 
 class Human(Sprite):
     def __init__(self, game, tile, values=None):
-        super(Human, self).__init__('enemy', 'enemy', game, tile, values)
+        super(Human, self).__init__('cow', 'enemy', game, tile, values)
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
         self.waypoint = 0
         self.waypoints = []
         self.speed = 1.0
         self.top_speed = 4.0
-        self.close_already = False
+        self.stuck_sensor = 0
 
         for pts in xrange(10):
             self.waypoints.append(euclid.Vector2(random.randint(10, game.bounds.width-10),random.randint(10, game.bounds.height-10)))
@@ -356,19 +355,16 @@ class Human(Sprite):
                 return True
             return False
 
-        if close(self.last_pos.x, self.position.x, 1.0) \
-           and close(self.last_pos.y, self.position.y, 1.0):
-            if self.close_already:
-                import sys
-                print "close"
-                sys.stdout.flush()
+        if close(self.last_pos.x, self.position.x, 3.0) \
+           and close(self.last_pos.y, self.position.y, 3.0):
+            if self.stuck_sensor == 5:
                 self.waypoints = []
                 for pts in xrange(10):
                     self.waypoints.append(euclid.Vector2(random.randint(10, game.bounds.width-10),random.randint(10, game.bounds.height-10)))
                 self.waypoint = (self.waypoint + 1) % len(self.waypoints)
-                self.close_already = False
+                self.stuck_sensor = 0
             else:
-                self.close_already = True
+                self.stuck_sensor += 1
 
     def hit(self, game, sprite, other):
         push(sprite, other)
