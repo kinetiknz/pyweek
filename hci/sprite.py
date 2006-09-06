@@ -81,7 +81,7 @@ class Sprite(object):
         if (self.scale_factor == 1.0 and self.rotation == 0.0):
             self.sprite.setimage((self.orig_image, self.orig_shape))
             return
-        
+
         if self.scale_factor != 1.0:
             newrect = self.orig_shape.inflate(self.orig_shape.w * (self.scale_factor-1.0) , \
                                               self.orig_shape.h * (self.scale_factor-1.0) )
@@ -179,6 +179,7 @@ class Player(Sprite):
         self.mouse_move = False
         self.speed = 1.0
         self.top_speed = 5.0
+        self.player_target = None
 
         game.player = self
 
@@ -256,6 +257,11 @@ class Player(Sprite):
             # ugly ray gun effect
             relx = self.sprite.rect.x - game.view.x + 44
             rely = self.sprite.rect.y - game.view.y + 5
+
+            SelectionTest(game, (game.view.x + loc[0], game.view.y + loc[1]), None)
+            if self.player_target and game.frame % 5 == 0:
+                self.player_target.scale(0.9)
+                self.player_target = None
 
             relx2 = relx
             rely2 = rely
@@ -417,6 +423,22 @@ class Bush(Sprite):
 
     def step(self, game, sprite):
         pass
+
+class SelectionTest(Sprite):
+    def __init__(self, game, tile, values=None):
+        super(SelectionTest, self).__init__('cow', 'shot', game, tile, values)
+        self.sprite.agroups = game.string2groups('enemy,Background')
+        self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
+        self.lived_once = False
+
+    def step(self, game, sprite):
+        if self.lived_once == False:
+            self.lived_once = True
+            return
+        game.sprites.remove(sprite)
+
+    def hit(self, game, sprite, other):
+        game.player.player_target = other.backref
 
 def push(mover, away_from):
     if mover._rect.bottom <= away_from._rect.top and mover.rect.bottom > away_from.rect.top:
