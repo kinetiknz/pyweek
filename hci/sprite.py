@@ -179,6 +179,7 @@ class Player(Sprite):
 
         self.known_items = []
 
+        self.raygun_sound = pygame.mixer.Sound('data/sfx/Raygun.ogg')
         self.beam_sound = pygame.mixer.Sound('data/sfx/Beam.ogg')
         self.beam_sound_isplaying = False
 
@@ -280,6 +281,7 @@ class Player(Sprite):
 
     def fire(self, game, sprite):
         Bullet('shot', game, sprite)
+        self.raygun_sound.play()
 
     def learn(self, target):
         self.known_items.append(target)
