@@ -48,7 +48,7 @@ class Sprite(object):
         self.orig_shape   = self.sprite.shape
         self.scale_factor = 1.0
         self.rotation     = 0.0
-        
+
         # animation
         self.frame = 0.0
         self.frames = []
@@ -72,24 +72,24 @@ class Sprite(object):
     def scale(self, new_scale_factor):
         self.scale_factor = new_scale_factor
         self.reimage()
- 
+
     def rotate(self, new_rotation):
         self.rotation = new_rotation
         self.reimage()
-               
+
     def reimage(self):
         if (self.scale_factor == 1.0 and self.rotation == 0.0):
             self.sprite.setimage((self.orig_image, self.orig_shape))
             return
-        
+
         newsurf = pygame.transform.rotozoom(self.sprite.image, self.rotation, self.scale_factor)
         self.sprite.setimage(newsurf)
-        
+
     def set_image(self, new_image):
         self.sprite.orig_image = new_image
         self.sprite.setimage(new_image)
         self.reimage()
-                
+
     def get_sprite_pos(self):
         self.position[0] = self.sprite.rect.x
         self.position[1] = self.sprite.rect.y
@@ -318,12 +318,12 @@ class Human(Sprite):
         self.waypoints = []
         self.speed = 1.0
         self.top_speed = 4.0
+        self.close_already = False
 
         for pts in xrange(10):
             self.waypoints.append(euclid.Vector2(random.randint(10, game.bounds.width-10),random.randint(10, game.bounds.height-10)))
 
     def step(self, game, sprite):
-
         self.move(game)
 
     def move(self, game):
@@ -333,13 +333,35 @@ class Human(Sprite):
             game.player.seen = True
 
         if self.move_toward(target, self.speed, 10.0):
-           self.waypoint = (self.waypoint + 1) % len(self.waypoints)
+            self.waypoint = (self.waypoint + 1) % len(self.waypoints)
 
         if not self.verlet_move():
             self.waypoint = (self.waypoint + 1) % len(self.waypoints)
 
         self.set_sprite_pos()
 
+        def close(a, b, epsilon):
+            if a == b:
+                return True
+            if a - epsilon < b and a > b:
+                return True
+            if a + epsilon > b and a < b:
+                return True
+            return False
+
+        if close(self.last_pos.x, self.position.x, 1.0) \
+           and close(self.last_pos.y, self.position.y, 1.0):
+            if self.close_already:
+                import sys
+                print "close"
+                sys.stdout.flush()
+                self.waypoints = []
+                for pts in xrange(10):
+                    self.waypoints.append(euclid.Vector2(random.randint(10, game.bounds.width-10),random.randint(10, game.bounds.height-10)))
+                self.waypoint = (self.waypoint + 1) % len(self.waypoints)
+                self.close_already = False
+            else:
+                self.close_already = True
 
     def hit(self, game, sprite, other):
         push(sprite, other)
