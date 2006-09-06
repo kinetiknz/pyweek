@@ -203,16 +203,16 @@ class Player(Sprite):
             self.seen = False
 
         dx, dy = 0, 0
-        if key[K_w]: 
+        if key[K_w]:
             dy -= 1
             self.walking_snd_channel.queue(self.walking_sound)
-        if key[K_s]: 
+        if key[K_s]:
             dy += 1
             self.walking_snd_channel.queue(self.walking_sound)
-        if key[K_a]: 
+        if key[K_a]:
             dx -= 1
             self.walking_snd_channel.queue(self.walking_sound)
-        if key[K_d]: 
+        if key[K_d]:
             dx += 1
             self.walking_snd_channel.queue(self.walking_sound)
         if key[K_SPACE] and game.frame % 8 == 0:
@@ -241,7 +241,7 @@ class Player(Sprite):
             if not self.beam_sound_isplaying:
                 self.beam_sound.play()
                 self.beam_sound_isplaying = True
-                
+
             loc = pygame.mouse.get_pos()
             loc = list(loc)
 
