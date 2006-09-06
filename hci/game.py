@@ -96,6 +96,8 @@ idata = [
     ('player1', 'data/test/alien/alien-top2.png', (4, 4, 48, 24)),
     ('player2', 'data/test/alien/alien-top3.png', (4, 4, 48, 24)),
     ('player3', 'data/test/alien/alien-top4.png', (4, 4, 48, 24)),
+    ('player4', 'data/test/alien/alien-top5.png', (4, 4, 48, 24)),
+    ('player5', 'data/test/alien/alien-top6.png', (4, 4, 48, 24)),
     ('saucer0', 'data/test/Saucer0.png', (4, 4, 192, 114)),
     ('saucer1', 'data/test/Saucer1.png', (4, 4, 192, 114)),
     ('saucer2', 'data/test/Saucer2.png', (4, 4, 192, 114)),
