@@ -41,6 +41,12 @@ class Sprite(object):
         self.bounds = pygame.Rect(game.bounds)
         self.bounds.inflate_ip(-self.sprite.rect.w * 2, -self.sprite.rect.h * 2)
         
+        # size / rotation
+        self.orig_image   = self.sprite.image
+        self.orig_shape   = self.sprite.shape
+        self.scale_factor = 1.0
+        self.rotation     = 0.0
+        
         # animation
         self.frame = 0.0
         self.frames = []
@@ -60,7 +66,28 @@ class Sprite(object):
         if hasattr(tile, 'rect'):
             game.clayer[tile.ty][tile.tx] = 0
         game.sprites.append(self.sprite)
+
+    def scale(self, new_scale_factor):
+        self.scale_factor = new_scale_factor
+        self.reimage()
+ 
+    def rotate(self, new_rotation):
+        self.rotation = new_rotation
+        self.reimage()
+               
+    def reimage(self):
+        if (self.scale_factor == 1.0 and self.rotation == 0.0):
+            self.sprite.setimage((self.orig_image, self.orig_shape))
+            return
         
+        newsurf = pygame.transform.rotozoom(self.sprite.image, self.rotation, self.scale_factor)
+        self.sprite.setimage(newsurf)
+        
+    def set_image(self, new_image):
+        self.sprite.orig_image = new_image
+        self.sprite.setimage(new_image)
+        self.reimage()
+                
     def get_sprite_pos(self):
         self.position[0] = self.sprite.rect.x
         self.position[1] = self.sprite.rect.y
@@ -234,7 +261,7 @@ class Player(Sprite):
         oldframe = int(self.frame)
         self.frame = (self.frame + 0.2) % len(self.frames)
         if oldframe != int(self.frame):
-            self.sprite.setimage(self.frames[int(self.frame)])
+            self.set_image(self.frames[int(self.frame)])
 
         self.view_me(game)
 
@@ -325,7 +352,7 @@ class Saucer(Sprite):
         oldframe = int(self.frame)
         self.frame = (self.frame + 0.1) % len(self.frames)
         if oldframe != int(self.frame):
-            self.sprite.setimage(self.frames[int(self.frame)])
+            self.set_image(self.frames[int(self.frame)])
 
 class Tree(Sprite):
     def __init__(self, game, tile, values=None):
