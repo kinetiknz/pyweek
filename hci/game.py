@@ -21,7 +21,6 @@ from pgu import tilevid
 import splashscreen
 import menu
 import sprite
-import visibility
 
 def logit(*args):
     print args
@@ -70,32 +69,6 @@ def test_collision(obj1, obj2):
             if y >= r.height/2:
                 return False
 
-        self.seen = False
-        if self.seen:
-            relx = self.sprite.rect.x - game.view.x + 44
-            rely = self.sprite.rect.y - game.view.y + 5
-            game.deferred_effects.append(lambda:game.screen.blit(game.images['warn'][0], (relx, rely, 0, 0) ) )
-            self.seen = False           
-
-        
-        if buttons[2]:    
-            return
-        self.waypoint = 0
-        self.waypoints = []
-        
-        for pts in xrange(10):
-            self.waypoints.append(euclid.Vector2(random.randint(10, game.bounds.width-10),random.randint(10, game.bounds.height-10)  ))
-        # target = euclid.Vector2(game.player.sprite.rect.x, game.player.sprite.rect.y)
-        target = self.waypoints[self.waypoint]
-    
-        player_pos = euclid.Vector2(game.player.sprite.rect.x, game.player.sprite.rect.y)
-
-        if visibility.can_be_seen(player_pos, myloc, target):
-            game.player.seen = True
-
-        if movement.move(myloc, target, 4):
-            self.waypoint = (self.waypoint + 1) % len(self.waypoints)
-
 def tile_block(g, t, a):
     c = t.config
     if c['top'] == 1 and a._rect.bottom <= t._rect.top \
@@ -127,8 +100,8 @@ idata = [
     ('saucer1', 'data/test/Saucer1.png', (4, 4, 192, 114)),
     ('saucer2', 'data/test/Saucer2.png', (4, 4, 192, 114)),
     ('enemy', 'data/test/enemy.png', (4, 4, 24, 24)),
-    ('cow',   'data/test/clareta.png', (1, 1, 30, 30)),
-    ('warn',   'data/test/warning.png', (0, 0, 16, 16)), 
+    ('cow',   'data/test/Clareta.png', (1, 1, 30, 30)),
+    ('warn',   'data/test/Warning.png', (0, 0, 16, 16)),
     ('shot', 'data/test/shot.png', (1, 2, 6, 4)),
     ('tree', 'data/test/treebiggersize.png', (20, 20, 95, 95)),
     ('bush', 'data/test/treepinkflower.png', (4, 4, 48, 48)),
