@@ -20,7 +20,6 @@ from pgu import tilevid
 
 import splashscreen
 import menu
-import movement
 import sprite
 
 def logit(*args):

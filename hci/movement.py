@@ -22,29 +22,16 @@ import euclid
 def move(point, target_point, speed):
     move_vec = target_point - point
     length = move_vec.magnitude()
-    
+
     if length <= speed:
         point[0] = target_point[0]
         point[1] = target_point[1]
         return True
-    
+
     move_vec /= length
     move_vec *= speed
-    
+
     point[0] += move_vec[0]
     point[1] += move_vec[1]
 
     return False
-
-
-
-
-
-
-
-
-
-
-
-
-
