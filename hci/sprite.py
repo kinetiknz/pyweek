@@ -81,7 +81,7 @@ class Sprite(object):
         if (self.scale_factor == 1.0 and self.rotation == 0.0):
             self.sprite.setimage((self.orig_image, self.orig_shape))
             return
-
+        
         if self.scale_factor != 1.0:
             newrect = self.orig_shape.inflate(self.orig_shape.w * (self.scale_factor-1.0) , \
                                               self.orig_shape.h * (self.scale_factor-1.0) )
@@ -229,7 +229,7 @@ class Player(Sprite):
             if not self.beam_sound_isplaying:
                 self.beam_sound.play()
                 self.beam_sound_isplaying = True
-
+                
             loc = list(loc)
 
             def s2t(x, y):
