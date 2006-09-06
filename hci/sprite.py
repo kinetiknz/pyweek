@@ -81,20 +81,23 @@ class Sprite(object):
             self.sprite.setimage((self.orig_image, self.orig_shape))
             return
         
-        newrect = self.orig_shape.inflate(0,0)
+        newshape = self.orig_shape.inflate(0,0)
 
         if self.scale_factor != 1.0:     
-            newrect.width *= self.scale_factor
-            newrect.height *= self.scale_factor
-            newrect.centerx = self.orig_shape.centerx
-            newrect.centery = self.orig_shape.centery
-
-        newsurf = pygame.transform.rotozoom(self.sprite.image, self.rotation, self.scale_factor)
-        self.sprite.setimage((newsurf,newrect))
+            newshape.width *= self.scale_factor
+            newshape.height *= self.scale_factor
+            
+        oldc = self.sprite.rect.center
+        newsurf = pygame.transform.rotozoom(self.orig_image, self.rotation, self.scale_factor)
+        self.sprite.setimage((newsurf,newshape))
+        self.sprite.rect.center = oldc
 
 
     def set_image(self, new_image):
+        oldc = self.sprite.rect.center    
         self.sprite.setimage(new_image)
+        self.sprite.rect.center = oldc
+        
         self.orig_image = self.sprite.image
         self.orig_shape = self.sprite.shape
         self.reimage()
@@ -172,8 +175,8 @@ class Player(Sprite):
         self.frames.append(game.images['player1'])
         self.frames.append(game.images['player2'])
         self.frames.append(game.images['player3'])
-	self.frames.append(game.images['player4'])
-	self.frames.append(game.images['player5'])
+        self.frames.append(game.images['player4'])
+        self.frames.append(game.images['player5'])
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit  = lambda game, sprite, other: self.hit(game, sprite, other)
         self.sprite.shoot = lambda game, sprite: self.fire(game, sprite)
@@ -263,7 +266,7 @@ class Player(Sprite):
 
             SelectionTest(game, (game.view.x + loc[0], game.view.y + loc[1]), None)
             if self.player_target and game.frame % 5 == 0:
-                self.player_target.scale(0.9)
+                self.player_target.scale(0.5)
                 self.player_target = None
 
             relx2 = relx
