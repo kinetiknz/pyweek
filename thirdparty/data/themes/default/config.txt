@@ -286,3 +286,6 @@ progressbar background progressbar.tga
 progressbar bar progressbar.bar.tga
 progressbar width 16
 progressbar height 16
+
+dialog.title.label font Vera.ttf 16
+dialog.title.label color #000000
