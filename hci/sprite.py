@@ -38,7 +38,6 @@ class Sprite(object):
         self.sprite.loop = lambda game, sprite: self.step(game, sprite)
         self.sprite.groups = game.string2groups(self.group)
         self.hitmask = pygame.surfarray.array_alpha(self.sprite.image)
-        self.rect = self.sprite.rect
         self.sprite.backref = self
         self.bounds = pygame.Rect(game.bounds)
         self.bounds.inflate_ip(-self.sprite.rect.w * 2, -self.sprite.rect.h * 2)
@@ -81,13 +80,18 @@ class Sprite(object):
         if (self.scale_factor == 1.0 and self.rotation == 0.0):
             self.sprite.setimage((self.orig_image, self.orig_shape))
             return
+        
+        newrect = self.orig_shape.inflate(0,0)
 
-        if self.scale_factor != 1.0:
-            newrect = self.orig_shape.inflate(self.orig_shape.w * (self.scale_factor-1.0) , \
-                                              self.orig_shape.h * (self.scale_factor-1.0) )
+        if self.scale_factor != 1.0:     
+            newrect.width *= self.scale_factor
+            newrect.height *= self.scale_factor
+            newrect.centerx = self.orig_shape.centerx
+            newrect.centery = self.orig_shape.centery
 
         newsurf = pygame.transform.rotozoom(self.sprite.image, self.rotation, self.scale_factor)
-        self.sprite.setimage(newsurf)
+        self.sprite.setimage((newsurf,newrect))
+
 
     def set_image(self, new_image):
         self.sprite.setimage(new_image)
@@ -96,12 +100,12 @@ class Sprite(object):
         self.reimage()
 
     def get_sprite_pos(self):
-        self.position[0] = self.sprite.rect.x
-        self.position[1] = self.sprite.rect.y
+        self.position[0] = self.sprite.rect.centerx
+        self.position[1] = self.sprite.rect.centery
 
     def set_sprite_pos(self):
-        self.sprite.rect.x = self.position[0]
-        self.sprite.rect.y = self.position[1]
+        self.sprite.rect.centerx = self.position[0]
+        self.sprite.rect.centery = self.position[1]
 
     def stop(self):
         self.last_pos[0] = self.position[0]
@@ -148,14 +152,13 @@ class Sprite(object):
 
         self.last_pos = self.position
         self.position = self.last_pos + move_vec
-        self.sprite.rect.x = self.position[0]
-        self.sprite.rect.y = self.position[1]
+        self.set_sprite_pos()
 
         return True
 
     def view_me(self, game):
-        gx = self.sprite.rect.x - (game.view.w/2) + game.tile_w
-        gy = self.sprite.rect.y - (game.view.h/2) + game.tile_h
+        gx = self.position[0] - (game.view.w/2) + game.tile_w
+        gy = self.position[1] - (game.view.h/2) + game.tile_h
 
         game.view.x = gx
         game.view.y = gy
@@ -197,8 +200,8 @@ class Player(Sprite):
         key = pygame.key.get_pressed()
 
         if self.seen:
-            relx = self.sprite.rect.x - game.view.x + 44
-            rely = self.sprite.rect.y - game.view.y + 5
+            relx = self.position[0] - game.view.x - (game.images['warn'][0].get_width()/2)
+            rely = self.position[1] - game.view.y - (game.images['warn'][0].get_height()/2)
             game.deferred_effects.append(lambda:game.screen.blit(game.images['warn'][0], (relx, rely, 0, 0) ) )
             self.seen = False
 
@@ -255,8 +258,8 @@ class Player(Sprite):
             #game.set([tx, ty], 2)
 
             # ugly ray gun effect
-            relx = self.sprite.rect.x - game.view.x + 44
-            rely = self.sprite.rect.y - game.view.y + 5
+            relx = self.position[0] - game.view.x + 44
+            rely = self.position[1] - game.view.y + 5
 
             SelectionTest(game, (game.view.x + loc[0], game.view.y + loc[1]), None)
             if self.player_target and game.frame % 5 == 0:
