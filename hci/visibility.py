@@ -33,25 +33,25 @@ def can_be_seen(mypos, otherpos, other_look_at, view_angle = (math.pi/2.0), view
     assert isinstance(mypos, euclid.Vector2)
     assert isinstance(otherpos, euclid.Vector2)
     assert isinstance(other_look_at, euclid.Vector2)
-    
+
     them2me = mypos - otherpos
     dist    = them2me.magnitude_squared()
-    
+
     if (dist > view_distance2):
         return False
-    
+
     them_look = other_look_at - otherpos
     them_look.normalize()
     them2me.normalize()
-    
+
     if them_look == them2me: return True
-    
+
     angle_between = math.acos(them2me.dot(them_look))
-    
-    
+
+
     if (angle_between > view_angle/2.0):
         return False
-    
+
     return True
 
 def run_test():
@@ -62,9 +62,9 @@ def run_test():
         print('Test1 OK')
     else:
         print('Test1 Failed')
-        
+
     lookat = euclid.Vector2(140, 140)
- 
+
     if can_be_seen(me, them, lookat):
         print('Test2 Failed')
     else:
@@ -76,27 +76,26 @@ def run_test():
         print('Test3 Failed')
     else:
         print('Test3 OK')
-    
+
     if can_be_seen(euclid.Vector2(29,-30),euclid.Vector2(0,0), euclid.Vector2(0, -20)):
         print('Test4 OK')
     else:
         print('Test4 Failed')
-    
+
     if can_be_seen(euclid.Vector2(-29,-30),euclid.Vector2(0,0), euclid.Vector2(0, -20)):
         print('Test5 OK')
     else:
         print('Test5 Failed')
-    
+
     if can_be_seen(euclid.Vector2(31,-30),euclid.Vector2(0,0), euclid.Vector2(0, -20)):
         print('Test6 Failed')
     else:
         print('Test6 OK')
-    
+
     if can_be_seen(euclid.Vector2(-31,-30),euclid.Vector2(0,0), euclid.Vector2(0, -20)):
         print('Test7 Failed')
     else:
         print('Test7 OK')
-        
+
 if __name__ == '__main__':
   run_test()
-
