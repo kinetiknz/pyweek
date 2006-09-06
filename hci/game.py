@@ -124,8 +124,8 @@ class Player(Sprite):
         self.sprite.hit  = lambda game, sprite, other: self.hit(game, sprite, other)
         self.sprite.shoot = lambda game, sprite: self.fire(game, sprite)
         self.sprite.score = 0
-        self.oldpos = (self.sprite.rect.x, self.sprite.rect.y)
-
+        self.mouse_move = False
+ 
         game.player = self
 
         self.known_items = []
@@ -144,8 +144,12 @@ class Player(Sprite):
         else: self.speed = 5
 
         buttons = pygame.mouse.get_pressed()
-        if buttons[0]:
+        if buttons[2]:
             loc = pygame.mouse.get_pos()
+            self.move_to = euclid.Vector2(game.view.x + loc[0], game.view.y + loc[1])
+            self.mouse_move = True
+        
+        if buttons[0]:
             loc = list(loc)
 
             def s2t(x, y):
@@ -181,11 +185,19 @@ class Player(Sprite):
                                          pygame.draw.line(game.screen, [0, 255, 255],
                                                           [relx2, rely2], loc, 3))
 
-        if (dx == 0 and dy == 0): return
+        if ( dx == 0 and dy == 0 and not self.mouse_move ): return
 
-        self.oldpos = (self.sprite.rect.x, self.sprite.rect.y)
-        self.sprite.rect.x += dx * self.speed
-        self.sprite.rect.y += dy * self.speed
+        if (self.mouse_move):
+            mypos = euclid.Vector2(self.sprite.rect.x, self.sprite.rect.y)
+            
+            if movement.move(mypos, self.move_to, self.speed):
+                self.mouse_move = False
+                
+            self.sprite.rect.x = mypos[0]
+            self.sprite.rect.y = mypos[1]
+        else:
+            self.sprite.rect.x += dx * self.speed
+            self.sprite.rect.y += dy * self.speed
 
         oldframe = int(self.frame)
         self.frame = (self.frame + 0.2) % len(self.frames)
@@ -248,7 +260,7 @@ class Human(Sprite):
     def move(self, game):
         myloc = euclid.Vector2(self.sprite.rect.x, self.sprite.rect.y)
         target = euclid.Vector2(game.player.sprite.rect.x, game.player.sprite.rect.y)
-        myloc = movement.move(myloc, target, 4)
+        movement.move(myloc, target, 4)
         
         self.sprite.rect.x = myloc[0]
         self.sprite.rect.y = myloc[1]
