@@ -84,6 +84,10 @@ def tile_block(g, t, a):
            and a.rect.top < t.rect.bottom:
         a.rect.top = t.rect.bottom
 
+    # craziness
+    a.backref.get_sprite_pos()
+    a.backref.stop()
+
 def tile_coin(g, t, a):
     a.score += 100
     g.set([t.tx, t.ty], 0)
@@ -98,14 +102,14 @@ idata = [
     ('player3', 'data/test/alien/alien-top4.png', (4, 4, 48, 24)),
     ('player4', 'data/test/alien/alien-top5.png', (4, 4, 48, 24)),
     ('player5', 'data/test/alien/alien-top6.png', (4, 4, 48, 24)),
-    ('saucer0', 'data/test/Saucer0.png', (4, 4, 192, 114)),
-    ('saucer1', 'data/test/Saucer1.png', (4, 4, 192, 114)),
-    ('saucer2', 'data/test/Saucer2.png', (4, 4, 192, 114)),
+    ('saucer0', 'data/test/Saucer0.png', (14, 14, 172, 100)),
+    ('saucer1', 'data/test/Saucer1.png', (14, 14, 172, 100)),
+    ('saucer2', 'data/test/Saucer2.png', (14, 14, 172, 100)),
     ('enemy', 'data/test/enemy.png', (4, 4, 24, 24)),
     ('cow',   'data/test/Clareta.png', (1, 1, 30, 30)),
     ('warn',   'data/test/Warning.png', (0, 0, 16, 16)),
     ('shot', 'data/test/shot.png', (1, 2, 6, 4)),
-    ('tree', 'data/test/treebiggersize.png', (20, 20, 95, 95)),
+    ('tree', 'data/test/treebiggersize.png', (10, 15, 95, 95)),
     ('bush', 'data/test/treepinkflower.png', (4, 4, 48, 48)),
     ]
 
