@@ -43,6 +43,7 @@ class Sprite(object):
         self.sprite.backref = self
         self.bounds = pygame.Rect(game.bounds)
         self.bounds.inflate_ip(-self.sprite.rect.w * 2, -self.sprite.rect.h * 2)
+        self.trophy = False
 
         # size / rotation
         self.orig_image   = self.sprite.image
@@ -445,10 +446,19 @@ class Cow(Sprite):
         self.waypoints = []
         self.speed = 0.2
         self.top_speed = 0.4
+        self.trophy = True
         self.load_path('lvl1_cow')
 
     def step(self, game, sprite):
         self.move(game)
+        
+        if self.trophy:
+            relx = self.position[0] - game.view.x - (game.images['trophy'][0].get_width()/2)
+            rely = self.sprite.rect.y - game.view.y - (game.images['trophy'][0].get_height())
+            game.deferred_effects.append(lambda: game.screen.blit(game.images['trophy'][0], (relx, rely, 0, 0) ) )
+            self.seen = False
+           
+            
 
     def move(self, game):
         if len(self.waypoints) == 0: return
