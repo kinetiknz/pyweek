@@ -35,7 +35,7 @@ class Sprite(object):
         if hasattr(tile, 'rect'):
             rect = tile.rect
         self.sprite = tilevid.Sprite(game.images[self.name], rect)
-        self.sprite.loop = lambda game, sprite: self.step(game, sprite)
+        self.sprite.loop = self.step
         self.sprite.groups = game.string2groups(self.group)
         self.hitmask = pygame.surfarray.array_alpha(self.sprite.image)
         self.sprite.backref = self
@@ -229,8 +229,8 @@ class Player(Sprite):
         self.frames[' '].append(game.images['player4'])
         self.frames[' '].append(game.images['player5'])
         self.sprite.agroups = game.string2groups('Background')
-        self.sprite.hit  = lambda game, sprite, other: self.hit(game, sprite, other)
-        self.sprite.shoot = lambda game, sprite: self.fire(game, sprite)
+        self.sprite.hit  = self.hit
+        self.sprite.shoot = self.fire
         self.sprite.score = 0
         self.recording = False
         self.seen = False
@@ -441,7 +441,7 @@ class Bullet(Sprite):
         origin = [tile.rect.right, tile.rect.centery - 2]
         super(Bullet, self).__init__(name, 'shot', game, origin, values)
         self.sprite.agroups = game.string2groups('enemy')
-        self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
+        self.sprite.hit = self.hit
 
     def step(self, game, sprite):
         self.sprite.rect.x += 8
@@ -457,7 +457,7 @@ class Human(Sprite):
     def __init__(self, game, tile, values=None):
         super(Human, self).__init__('enemy', 'enemy', game, tile, values)
         self.sprite.agroups = game.string2groups('Background')
-        self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
+        self.sprite.hit = self.hit
         self.waypoints.append(euclid.Vector2(self.position[0], 0))
         self.speed = 0.0
         self.top_speed = 0.0
@@ -500,7 +500,7 @@ class Cow(Sprite):
         self.frames['d'].append(game.images['cow_d2'])
         self.frames['u'].append(game.images['cow_u1'])
         self.sprite.agroups = game.string2groups('Background')
-        self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
+        self.sprite.hit = self.hit
         self.speed = 0.2
         self.top_speed = 0.4
         self.trophy = True
@@ -591,7 +591,7 @@ class SelectionTest(Sprite):
     def __init__(self, game, tile, values=None):
         super(SelectionTest, self).__init__('laser', 'shot', game, tile, values)
         self.sprite.agroups = game.string2groups('enemy,Background')
-        self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
+        self.sprite.hit = self.hit
         self.lived_once = False
 
     def step(self, game, sprite):
