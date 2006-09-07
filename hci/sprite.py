@@ -285,6 +285,8 @@ class Player(Sprite):
 
             SelectionTest(game, (game.view.x + loc[0], game.view.y + loc[1]), None)
             if self.player_target and game.frame % 2 == 0:
+                movement.move(self.player_target.position, self.position, 1)
+                self.player_target.set_sprite_pos()
                 self.player_target.rotate(12.5)
                 self.player_target.scale(0.9)
                 self.player_target = None
@@ -302,6 +304,12 @@ class Player(Sprite):
                     return proc
 
                 game.deferred_effects.append(draw())
+
+            for l in xrange(10):
+                rsx = random.gauss(0, 7)
+                rsy = random.gauss(0, 7)
+                SelectionTest(game, (game.view.x + loc[0] + rsx,
+                                     game.view.y + loc[1] + rsy), None)
 
         if self.mouse_move:
             if self.move_toward(self.target, self.speed, 10.0):
