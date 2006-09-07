@@ -21,6 +21,8 @@ import pygame
 from pgu import tilevid, algo
 import euclid
 
+from PIL import Image, ImageFilter
+
 import movement
 import sprite_eater
 import visibility
@@ -277,18 +279,42 @@ class Player(Sprite):
                 self.player_target.scale(0.9)
                 self.player_target = None
 
+            ray = pygame.Surface([abs(loc[0] - relx), abs(loc[1] - rely)])
+            rect = ray.get_rect()
+
+            rect.x = relx
+            rect.y = rely
+            if loc[0] - relx < 0:
+                rect.x = loc[0]
+            if loc[1] - rely < 0:
+                rect.y = loc[1]
+
             ln = algo.getline([relx, rely], loc)
             for l in xrange(0, len(ln), 7):
-                def draw():
-                    c = [0, random.randint(0, 255), 255]
-                    r = [relx, rely]
-                    rx = random.randint(-5, 5)
-                    ry = random.randint(-5, 5)
-                    p = ln[l][0] + rx, ln[l][1] + ry
-                    def proc():
-                        pygame.draw.line(game.screen, c, r, p, 2)
-                    return proc
-                game.deferred_effects.append(draw())
+                c = [0, random.randint(0, 255), 255]
+                r = [0, 0]
+                p = [rect.w, rect.h]
+
+                if loc[0] - relx < 0:
+                    r[0] = rect.w
+                    p[0] = 0
+                if loc[1] - rely < 0:
+                    r[1] = rect.h
+                    p[1] = 0
+                rx = random.randint(-5, 5)
+                ry = random.randint(-5, 5)
+                p = p[0] + rx, p[1] + ry
+                pygame.draw.line(ray, c, r, p, 2)
+
+            buf = pygame.image.tostring(ray, "RGB")
+            ix, iy = rect.w, rect.h
+            img = Image.frombuffer("RGB", [ix, iy], buf)
+            img = img.filter(ImageFilter.BLUR)
+            buf = img.tostring()
+            ray = pygame.image.fromstring(buf, [ix, iy], "RGB", True)
+            ray.set_colorkey([0, 0, 0])
+
+            game.deferred_effects.append(lambda: game.screen.blit(ray, rect))
 
         if self.mouse_move:
             if self.move_toward(self.target, self.speed, 10.0):
