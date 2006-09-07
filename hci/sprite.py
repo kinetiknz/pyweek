@@ -68,14 +68,22 @@ class Sprite(object):
             game.clayer[tile.ty][tile.tx] = 0
         game.sprites.append(self.sprite)
 
-    def scale(self, new_scale_factor):
+    def set_scale(self, new_scale_factor):
         self.scale_factor = new_scale_factor
         self.reimage()
 
-    def rotate(self, new_rotation):
+    def set_rotation(self, new_rotation):
         self.rotation = new_rotation
         self.reimage()
 
+    def scale(self, scale_factor):
+        self.scale_factor *= scale_factor
+        self.reimage()
+
+    def rotate(self, rotation):
+        self.rotation += rotation
+        self.reimage()
+        
     def reimage(self):
         if (self.scale_factor == 1.0 and self.rotation == 0.0):
             self.sprite.setimage((self.orig_image, self.orig_shape))
@@ -266,7 +274,7 @@ class Player(Sprite):
 
             SelectionTest(game, (game.view.x + loc[0], game.view.y + loc[1]), None)
             if self.player_target and game.frame % 5 == 0:
-                self.player_target.scale(0.5)
+                self.player_target.scale(0.9)
                 self.player_target = None
 
             relx2 = relx
