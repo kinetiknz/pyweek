@@ -361,7 +361,7 @@ class Human(Sprite):
         self.speed = 1.0
         self.top_speed = 4.0
         self.stuck_sensor = 0
-        self.load_path('path1157602408.63')
+        self.load_path('lake_circuit')
 
     def step(self, game, sprite):
         self.move(game)
