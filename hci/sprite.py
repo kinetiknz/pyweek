@@ -456,7 +456,6 @@ class Human(Sprite):
             rely = self.sprite.rect.y - game.view.y - (game.images['warn'][0].get_height())
             game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx, rely, 0, 0)))
 
-
         if self.move_toward(target, self.speed, 10.0):
             self.waypoint = (self.waypoint + 1) % len(self.waypoints)
 
@@ -501,7 +500,6 @@ class Cow(Sprite):
 
         self.animate(0.025)
         self.set_sprite_pos()
-
 
     def hit(self, game, sprite, other):
         push(sprite, other)
