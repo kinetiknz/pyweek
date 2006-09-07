@@ -167,20 +167,20 @@ def run():
                               (len(game.tlayer)-2)*game.tile_h)
 
     game.load_images(idata)
-    game.run_codes(cdata, (0, 0, len(game.tlayer[0]), len(game.tlayer)))
 
     splash_image = pygame.image.load('data/screens/splash.png')
     menu_image   = pygame.image.load('data/screens/menu.png')
 
-    #splashscreen.fade_in(game.screen, splash_image)
-    #pygame.time.wait(500)
-    #splashscreen.fade_out(game.screen, splash_image)
+    # splashscreen.fade_in(game.screen, splash_image)
+    # pygame.time.wait(500)
+    # splashscreen.fade_out(game.screen, splash_image)
 
     game.deferred_effects = []
 
     game.menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
     selection = menu.show([game.view.w, game.view.h], game.screen, menu_image, game.menu_font)
 
+    game.run_codes(cdata, (0, 0, len(game.tlayer[0]), len(game.tlayer)))
     music = pygame.mixer.music
     pygame.mixer.music.queue('data/music/Track01.ogg')
 

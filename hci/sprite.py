@@ -388,8 +388,9 @@ class Human(Sprite):
         self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
         self.waypoint = 0
         self.waypoints = []
-        self.speed = 1.0
-        self.top_speed = 4.0
+        self.waypoints.append(euclid.Vector2(self.position[0], 0))
+        self.speed = 0.0
+        self.top_speed = 0.0
         #self.load_path('lake_circuit')
 
     def step(self, game, sprite):
@@ -406,7 +407,6 @@ class Human(Sprite):
             rely = self.sprite.rect.y - game.view.y - (game.images['warn'][0].get_height())
             game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx, rely, 0, 0)))
            
-
         if self.move_toward(target, self.speed, 10.0):
             self.waypoint = (self.waypoint + 1) % len(self.waypoints)
 
