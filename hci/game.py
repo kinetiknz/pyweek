@@ -179,8 +179,7 @@ def run():
     selection = menu.show([game.view.w, game.view.h], game.screen, menu_image, game.menu_font)
 
     music = pygame.mixer.music
-    music.load('data/music/Track01.ogg')
-    music.play(-1,0.0)
+    pygame.mixer.music.queue('data/music/Track01.ogg')
 
     t = pygame.time.Clock()
 
