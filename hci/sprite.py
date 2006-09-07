@@ -244,9 +244,9 @@ class Player(Sprite):
         key = pygame.key.get_pressed()
 
         if self.seen:
-            relx = self.position[0] - game.view.x - (game.images['warn'][0].get_width()/2)
-            rely = self.position[1] - game.view.y - (game.images['warn'][0].get_height()/2)
-            game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx, rely, 0, 0)))
+            # relx = self.position[0] - game.view.x - (game.images['warn'][0].get_width()/2)
+            # rely = self.position[1] - game.view.y - (game.images['warn'][0].get_height()/2)
+            # game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx, rely, 0, 0)))
             self.seen = False
 
         dx, dy = 0, 0
@@ -402,6 +402,10 @@ class Human(Sprite):
 
         if visibility.can_be_seen(game.player.position, self.position, target):
             game.player.seen = True
+            relx = self.position[0] - game.view.x - (game.images['warn'][0].get_width()/2)
+            rely = self.sprite.rect.y - game.view.y - (game.images['warn'][0].get_height())
+            game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx, rely, 0, 0)))
+           
 
         if self.move_toward(target, self.speed, 10.0):
             self.waypoint = (self.waypoint + 1) % len(self.waypoints)
@@ -435,7 +439,6 @@ class Cow(Sprite):
             relx = self.position[0] - game.view.x - (game.images['trophy'][0].get_width()/2)
             rely = self.sprite.rect.y - game.view.y - (game.images['trophy'][0].get_height())
             game.deferred_effects.append(lambda: game.screen.blit(game.images['trophy'][0], (relx, rely, 0, 0)))
-            self.seen = False
 
     def move(self, game):
         if len(self.waypoints) == 0: return
@@ -450,6 +453,7 @@ class Cow(Sprite):
 
         self.animate(0.05)
         self.set_sprite_pos()
+                
 
     def hit(self, game, sprite, other):
         push(sprite, other)
