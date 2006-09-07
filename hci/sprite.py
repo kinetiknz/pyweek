@@ -158,18 +158,17 @@ class Sprite(object):
 
     def velocity(self):
         return self.position - self.last_pos
-    
+
     def direction(self):
         vel = self.velocity()
         left_right = math.fabs(vel[0]) > math.fabs(vel[1])
 
         if left_right:
-            if vel[0] > 0: return 'r' 
+            if vel[0] > 0: return 'r'
             else: return 'l'
         else:
             if vel[1] > 0: return 'd'
             else: return 'u'
-
 
     def moving(self):
         return self.velocity.magnitude_squared() >= self.MIN_MOVEMENT_SQ
@@ -212,7 +211,7 @@ class Sprite(object):
         dir = self.direction()
         if (len(self.frames[dir]) == 0):
             dir = ' '
-        
+
         oldframe = int(self.frame)
         self.frame = (self.frame + step) % len(self.frames[dir])
         if oldframe != int(self.frame):
@@ -477,7 +476,7 @@ class Human(Sprite):
             relx = self.position[0] - game.view.x - (game.images['warn'][0].get_width()/2)
             rely = self.sprite.rect.y - game.view.y - (game.images['warn'][0].get_height())
             game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx, rely, 0, 0)))
-           
+
         if self.move_toward(target, self.speed, 10.0):
             self.waypoint = (self.waypoint + 1) % len(self.waypoints)
 
@@ -493,13 +492,13 @@ class Human(Sprite):
 class Cow(Sprite):
     def __init__(self, game, tile, values=None):
         super(Cow, self).__init__('cow_l1', 'enemy', game, tile, values)
-        self.frames['l'].append(game.images['cow_l1'])       
+        self.frames['l'].append(game.images['cow_l1'])
         self.frames['l'].append(game.images['cow_l2'])
-        self.frames['r'].append(game.images['cow_r1'])       
+        self.frames['r'].append(game.images['cow_r1'])
         self.frames['r'].append(game.images['cow_r2'])
-        self.frames['d'].append(game.images['cow_d1'])       
+        self.frames['d'].append(game.images['cow_d1'])
         self.frames['d'].append(game.images['cow_d2'])
-        self.frames['u'].append(game.images['cow_u1'])                           
+        self.frames['u'].append(game.images['cow_u1'])
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
         self.speed = 0.2
@@ -526,10 +525,8 @@ class Cow(Sprite):
         if not self.verlet_move():
             self.waypoint = (self.waypoint + 1) % len(self.waypoints)
 
-        self.animate(0.025)
-        print(self.direction())
+        self.animate(0.04)
         self.set_sprite_pos()
-                
 
     def hit(self, game, sprite, other):
         push(sprite, other)
