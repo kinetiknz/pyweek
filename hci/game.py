@@ -206,6 +206,7 @@ def run():
             if e.type is KEYDOWN:
                 if e.key == K_ESCAPE: game.quit = 1
                 if e.key == K_F10: pygame.display.toggle_fullscreen()
+                if e.key == K_r: game.player.morph()
                 if e.key == K_RETURN: game.pause = not game.pause
                 if e.key == K_BACKQUOTE:
                     if recording:

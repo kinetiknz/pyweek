@@ -260,8 +260,6 @@ class Player(Sprite):
         if key[K_s]: dy += 1
         if key[K_a]: dx -= 1
         if key[K_d]: dx += 1
-        if key[K_r] and game.frame % 8 == 0:
-            self.morph()
         if key[K_SPACE] and game.frame % 8 == 0:
             self.fire(game, sprite)
         if key[K_LSHIFT]:
