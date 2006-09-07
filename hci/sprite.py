@@ -152,7 +152,7 @@ class Sprite(object):
     def moving(self):
         return self.velocity.magnitude_squared() >= self.MIN_MOVEMENT_SQ
 
-    def verlet_move(self):
+    def verlet_move(self, check_bounds = True):
         # use verlet integration to move our sprite
         move_vec = self.velocity()
 
@@ -161,10 +161,11 @@ class Sprite(object):
 
         move_vec *= self.drag
 
-        if self.position[0] < self.bounds.left:    self.position[0] = self.bounds.left
-        if self.position[0] > self.bounds.right:   self.position[0] = self.bounds.right
-        if self.position[1] < self.bounds.top:     self.position[1] = self.bounds.top
-        if self.position[1] > self.bounds.bottom:  self.position[1] = self.bounds.bottom
+        if check_bounds:
+            if self.position[0] < self.bounds.left:    self.position[0] = self.bounds.left
+            if self.position[0] > self.bounds.right:   self.position[0] = self.bounds.right
+            if self.position[1] < self.bounds.top:     self.position[1] = self.bounds.top
+            if self.position[1] > self.bounds.bottom:  self.position[1] = self.bounds.bottom
 
         self.last_pos = self.position
         self.position = self.last_pos + move_vec
@@ -185,6 +186,12 @@ class Sprite(object):
         self.waypoints = []
         for x,y in path:
             self.waypoints.append(euclid.Vector2(x,y))
+
+    def animate(self, step):
+        oldframe = int(self.frame)
+        self.frame = (self.frame + step) % len(self.frames)
+        if oldframe != int(self.frame):
+            self.set_image(self.frames[int(self.frame)])
 
     def step(self, game, sprite):
         raise AbstractClassException, "abstract method called"
@@ -207,7 +214,11 @@ class Player(Sprite):
         self.speed = 1.0
         self.top_speed = 5.0
         self.player_target = None
-
+        
+        self.landing = True
+        self.set_image(game.images['none'])
+        Saucer(game, tile, values)
+        
         game.player = self
 
         self.known_items = []
@@ -220,8 +231,15 @@ class Player(Sprite):
         self.beam_sound_isplaying    = False
         self.walking_sound_isplaying = False
 
+    def landed(self, game):
+        self.landing = False
+        self.set_image(self.frames[int(self.frame)])
 
     def step(self, game, sprite):
+        if self.landing:
+            self.view_me(game)
+            return
+        
         key = pygame.key.get_pressed()
 
         if self.seen:
@@ -322,11 +340,7 @@ class Player(Sprite):
             self.walking_sound.stop()
             return
 
-        oldframe = int(self.frame)
-        self.frame = (self.frame + 0.2) % len(self.frames)
-        if oldframe != int(self.frame):
-            self.set_image(self.frames[int(self.frame)])
-
+        self.animate(0.2)
         self.view_me(game)
 
     def fire(self, game, sprite):
@@ -422,6 +436,14 @@ class Saucer(Sprite):
         super(Saucer, self).__init__('saucer0', 'Background', game, tile, values)
         self.frames.append(game.images['saucer1'])
         self.frames.append(game.images['saucer2'])
+        self.speed     = 0.5
+        self.top_speed = 1.0
+        self.set_scale(3.0)
+        self.land_pos      = self.position.copy()
+        self.position[1]   = game.view.y
+        self.land_distance = (self.land_pos - self.position).magnitude()
+        self.stop()
+
 
         #d = time.time()
         #self.test = sprite_eater.SpriteEater(self.sprite.image)
@@ -434,11 +456,28 @@ class Saucer(Sprite):
         #logit('took', time.time() - d)
 
     def step(self, game, sprite):
-        oldframe = int(self.frame)
-        self.frame = (self.frame + 0.1) % len(self.frames)
-        if oldframe != int(self.frame):
-            self.set_image(self.frames[int(self.frame)])
+        if game.player.landing:
+            percent = 1.0 - ((self.land_pos - self.position).magnitude() / self.land_distance)
+            self.move_toward(self.land_pos, self.speed / (1.0 - percent), 10.0)
+            
+            print (percent)
+            
+            if not self.verlet_move(False):
+                game.player.landed(game)
+                self.stop()
+                self.speed = 0.0
+                self.top_speed = 0.0
+                self.set_scale(1.0)
+                self.set_rotation(0.0)
+                self.set_sprite_pos()
+                return
 
+            self.set_sprite_pos()
+            self.animate(1.0 - (0.9 * percent))
+            self.set_scale(3.0 - (2.0 * (math.pow(percent,2.0))))
+        else:
+            self.animate(0.1)
+        
 class Tree(Sprite):
     def __init__(self, game, tile, values=None):
         super(Tree, self).__init__('tree', 'Background', game, tile, values)
