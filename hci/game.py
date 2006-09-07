@@ -120,9 +120,9 @@ idata = [
 
 cdata = {
     1: (lambda g, t, v: sprite.Player(g, t, v), None),
-    2: (lambda g, t, v: sprite.Human(g, t, v), None),
-    3: (lambda g, t, v: sprite.Bush(g, t, v), None),
-    4: (lambda g, t, v: sprite.Tree(g, t, v), None),
+    2: (lambda g, t, v: sprite.Cow(g, t, v),    None),
+    3: (lambda g, t, v: sprite.Bush(g, t, v),   None),
+    4: (lambda g, t, v: sprite.Tree(g, t, v),   None),
     }
 
 tdata = {
@@ -271,11 +271,11 @@ def run():
             txt = text.render(caption, 1, [255, 255, 255])
             game.screen.blit(txt, [0, game.view.h - txt.get_height()])
 
-            caption = "SCORE %05d" % game.player.sprite.score
-            txt = text.render(caption, 1, [0, 0, 0])
-            game.screen.blit(txt, [0, 0])
-            txt = text.render(caption, 1, [255, 255, 255])
-            game.screen.blit(txt, [1, 1])
+            #caption = "SCORE %05d" % game.player.sprite.score
+            #txt = text.render(caption, 1, [0, 0, 0])
+            #game.screen.blit(txt, [0, 0])
+            #txt = text.render(caption, 1, [255, 255, 255])
+            #game.screen.blit(txt, [1, 1])
 
             game.frame += 1
             pygame.display.flip()

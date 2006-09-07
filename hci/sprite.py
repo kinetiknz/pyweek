@@ -435,14 +435,46 @@ class Human(Sprite):
     def hit(self, game, sprite, other):
         push(sprite, other)
         self.get_sprite_pos()
+        
+class Cow(Sprite):
+    def __init__(self, game, tile, values=None):
+        super(Cow, self).__init__('cow', 'enemy', game, tile, values)
+        self.sprite.agroups = game.string2groups('Background')
+        self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
+        self.waypoint = 0
+        self.waypoints = []
+        self.speed = 0.2
+        self.top_speed = 0.4
+        self.load_path('lvl1_cow')
 
+    def step(self, game, sprite):
+        self.move(game)
+
+    def move(self, game):
+        if len(self.waypoints) == 0: return
+        
+        target = self.waypoints[self.waypoint]
+
+        if self.move_toward(target, self.speed, 10.0):
+            self.waypoint = (self.waypoint + 1) % len(self.waypoints)
+
+        if not self.verlet_move():
+            self.waypoint = (self.waypoint + 1) % len(self.waypoints)
+
+        self.set_sprite_pos()
+        return
+        
+    def hit(self, game, sprite, other):
+        push(sprite, other)
+        self.get_sprite_pos()
+        
 class Saucer(Sprite):
     def __init__(self, game, tile, values=None):
         super(Saucer, self).__init__('saucer0', 'Background', game, tile, values)
         self.frames.append(game.images['saucer1'])
         self.frames.append(game.images['saucer2'])
-        self.speed     = 0.5
-        self.top_speed = 1.0
+        self.speed     = 3.0
+        self.top_speed = 7.0
         self.set_scale(3.0)
         self.land_pos      = self.position.copy()
         self.position[1]   = game.view.y
@@ -464,8 +496,6 @@ class Saucer(Sprite):
         if game.player.landing:
             percent = 1.0 - ((self.land_pos - self.position).magnitude() / self.land_distance)
             self.move_toward(self.land_pos, self.speed * (1.0 - percent), 10.0)
-            
-            print (percent)
             
             if not self.verlet_move(False):
                 game.player.landed(game)
