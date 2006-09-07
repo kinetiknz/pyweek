@@ -21,8 +21,6 @@ import pygame
 from pgu import tilevid, algo
 import euclid
 
-from PIL import Image, ImageFilter
-
 import movement
 import sprite_eater
 import visibility
@@ -207,9 +205,9 @@ class Player(Sprite):
 
         self.known_items = []
 
-        self.walking_sound = pygame.mixer.Sound('data/sfx/Walking.ogg')  
+        self.walking_sound = pygame.mixer.Sound('data/sfx/Walking.ogg')
         self.walking_sound.set_volume(0.3)
-		  
+
         self.raygun_sound  = pygame.mixer.Sound('data/sfx/Raygun.ogg')
         self.beam_sound    = pygame.mixer.Sound('data/sfx/Beam.ogg')
         self.beam_sound_isplaying    = False
@@ -222,7 +220,7 @@ class Player(Sprite):
         if self.seen:
             relx = self.position[0] - game.view.x - (game.images['warn'][0].get_width()/2)
             rely = self.position[1] - game.view.y - (game.images['warn'][0].get_height()/2)
-            game.deferred_effects.append(lambda:game.screen.blit(game.images['warn'][0], (relx, rely, 0, 0) ) )
+            game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx, rely, 0, 0) ) )
             self.seen = False
 
         dx, dy = 0, 0
@@ -275,50 +273,28 @@ class Player(Sprite):
             #game.set([tx, ty], 2)
 
             # ugly ray gun effect
-            relx = self.position[0] - game.view.x
-            rely = self.position[1] - game.view.y
+            relx = self.position[0] - game.view.x + 24
+            rely = self.position[1] - game.view.y - 12
 
             SelectionTest(game, (game.view.x + loc[0], game.view.y + loc[1]), None)
             if self.player_target and game.frame % 2 == 0:
+                self.player_target.rotate(12.5)
                 self.player_target.scale(0.9)
                 self.player_target = None
 
-            ray = pygame.Surface([abs(loc[0] - relx), abs(loc[1] - rely)])
-            rect = ray.get_rect()
-
-            rect.x = relx
-            rect.y = rely
-            if loc[0] - relx < 0:
-                rect.x = loc[0]
-            if loc[1] - rely < 0:
-                rect.y = loc[1]
-
             ln = algo.getline([relx, rely], loc)
             for l in xrange(0, len(ln), 7):
-                c = [0, random.randint(0, 255), 255]
-                r = [0, 0]
-                p = [rect.w, rect.h]
+                def draw():
+                    c = [0, random.randint(0, 255), 255]
+                    r = [relx, rely]
+                    rx = random.randint(-5, 5)
+                    ry = random.randint(-5, 5)
+                    p = ln[l][0] + rx, ln[l][1] + ry
+                    def proc():
+                        pygame.draw.line(game.screen, c, r, p, 2)
+                    return proc
 
-                if loc[0] - relx < 0:
-                    r[0] = rect.w
-                    p[0] = 0
-                if loc[1] - rely < 0:
-                    r[1] = rect.h
-                    p[1] = 0
-                rx = random.randint(-5, 5)
-                ry = random.randint(-5, 5)
-                p = p[0] + rx, p[1] + ry
-                pygame.draw.line(ray, c, r, p, 2)
-
-            buf = pygame.image.tostring(ray, "RGB")
-            ix, iy = rect.w, rect.h
-            img = Image.frombuffer("RGB", [ix, iy], buf)
-            img = img.filter(ImageFilter.BLUR)
-            buf = img.tostring()
-            ray = pygame.image.fromstring(buf, [ix, iy], "RGB", True)
-            ray.set_colorkey([0, 0, 0])
-
-            game.deferred_effects.append(lambda: game.screen.blit(ray, rect))
+                game.deferred_effects.append(draw())
 
         if self.mouse_move:
             if self.move_toward(self.target, self.speed, 10.0):
