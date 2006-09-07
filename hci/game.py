@@ -110,12 +110,14 @@ idata = [
     ('saucer2', 'data/test/Saucer2.png', (20, 20, 140, 70)),
     ('enemy', 'data/test/Dude1.png', (4, 4, 24, 24)),
     ('cow',   'data/test/Cow.png', (1, 1, 112, 48)),
+    ('cow1',   'data/test/cow000.png', (1, 1, 112, 48)),
+    ('cow2',   'data/test/cow001.png', (1, 1, 112, 48)),
     ('warn',   'data/test/Warning.png', (0, 0, 16, 16)),
     ('shot', 'data/test/shot.png', (1, 2, 6, 4)),
     ('tree', 'data/test/treebiggersize.png', (10, 15, 95, 95)),
     ('bush', 'data/test/treepinkflower.png', (4, 4, 32, 48)),
     ('laser', 'data/test/laser.png', (0, 0, 8, 8)),
-    ('trophy',  'data/test/CollectMe.png', (0, 0, 0, 0)),    
+    ('trophy',  'data/test/CollectMe.png', (0, 0, 0, 0)),
     ('none',  'data/test/EmptyImage.png', (0, 0, 0, 0)),
     ]
 
@@ -251,19 +253,19 @@ def run():
                 # draw recorded path
                 def sub_gv(pt):
                     return (pt[0]-game.view.x, pt[1]-game.view.y)
-                    
+
                 for pt in xrange(len(recorded_path)):
                     start = sub_gv(recorded_path[pt-1])
                     end   = sub_gv(recorded_path[pt])
                     pygame.draw.line(game.screen, [random.randint(0, 255),random.randint(0, 255),random.randint(0, 255)], start, end, 2)
-                
+
                 if (game.frame / 30) % 2 == 0:
                     caption = "RECORDING PATH"
                     txt = text.render(caption, 1, [0, 0, 0])
                     dx = game.view.w/2 - txt.get_rect().w/2
                     game.screen.blit(txt, [dx+1,2])
                     txt = text.render(caption, 1, [255, 0, 0])
-                    game.screen.blit(txt, [dx, 1])                
+                    game.screen.blit(txt, [dx, 1])
 
             caption = "FPS %2.2f" % t.get_fps()
             txt = text.render(caption, 1, [0, 0, 0])

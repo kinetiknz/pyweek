@@ -45,7 +45,7 @@ class Sprite(object):
         self.bounds.inflate_ip(-self.sprite.rect.w * 2, -self.sprite.rect.h * 2)
         self.trophy = False
 
-        # size / rotation
+        # size/rotation
         self.orig_image   = self.sprite.image
         self.orig_shape   = self.sprite.shape
         self.scale_factor = 1.0
@@ -215,11 +215,11 @@ class Player(Sprite):
         self.speed = 1.0
         self.top_speed = 5.0
         self.player_target = None
-        
+
         self.landing = True
         self.set_image(game.images['none'])
         Saucer(game, tile, values)
-        
+
         game.player = self
 
         self.known_items = []
@@ -240,13 +240,13 @@ class Player(Sprite):
         if self.landing:
             self.view_me(game)
             return
-        
+
         key = pygame.key.get_pressed()
 
         if self.seen:
             relx = self.position[0] - game.view.x - (game.images['warn'][0].get_width()/2)
             rely = self.position[1] - game.view.y - (game.images['warn'][0].get_height()/2)
-            game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx, rely, 0, 0) ) )
+            game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx, rely, 0, 0)))
             self.seen = False
 
         dx, dy = 0, 0
@@ -271,7 +271,7 @@ class Player(Sprite):
             if not self.walking_sound_isplaying:
                  self.walking_sound.play(-1)
                  self.walking_sound_isplaying = True
-             
+
         if (dx == 0 and dy == 0):
             if self.walking_sound_isplaying:
                 self.walking_sound.stop()
@@ -383,22 +383,21 @@ class Bullet(Sprite):
 
 class Human(Sprite):
     def __init__(self, game, tile, values=None):
-        super(Human, self).__init__('cow', 'enemy', game, tile, values)
+        super(Human, self).__init__('enemy', 'enemy', game, tile, values)
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
         self.waypoint = 0
         self.waypoints = []
         self.speed = 1.0
         self.top_speed = 4.0
-        self.stuck_sensor = 0
-        self.load_path('lake_circuit')
+        #self.load_path('lake_circuit')
 
     def step(self, game, sprite):
         self.move(game)
 
     def move(self, game):
         if len(self.waypoints) == 0: return
-        
+
         target = self.waypoints[self.waypoint]
 
         if visibility.can_be_seen(game.player.position, self.position, target):
@@ -411,35 +410,15 @@ class Human(Sprite):
             self.waypoint = (self.waypoint + 1) % len(self.waypoints)
 
         self.set_sprite_pos()
-        return
-
-        def close(a, b, epsilon):
-            if a == b:
-                return True
-            if a - epsilon < b and a > b:
-                return True
-            if a + epsilon > b and a < b:
-                return True
-            return False
-
-        if close(self.last_pos.x, self.position.x, 3.0) \
-           and close(self.last_pos.y, self.position.y, 3.0):
-            if self.stuck_sensor == 5:
-                self.waypoints = []
-                for pts in xrange(10):
-                    self.waypoints.append(euclid.Vector2(random.randint(10, game.bounds.width-10),random.randint(10, game.bounds.height-10)))
-                self.waypoint = (self.waypoint + 1) % len(self.waypoints)
-                self.stuck_sensor = 0
-            else:
-                self.stuck_sensor += 1
 
     def hit(self, game, sprite, other):
         push(sprite, other)
         self.get_sprite_pos()
-        
+
 class Cow(Sprite):
     def __init__(self, game, tile, values=None):
-        super(Cow, self).__init__('cow', 'enemy', game, tile, values)
+        super(Cow, self).__init__('cow1', 'enemy', game, tile, values)
+        self.frames.append(game.images['cow2'])
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
         self.waypoint = 0
@@ -451,18 +430,16 @@ class Cow(Sprite):
 
     def step(self, game, sprite):
         self.move(game)
-        
+
         if self.trophy:
             relx = self.position[0] - game.view.x - (game.images['trophy'][0].get_width()/2)
             rely = self.sprite.rect.y - game.view.y - (game.images['trophy'][0].get_height())
-            game.deferred_effects.append(lambda: game.screen.blit(game.images['trophy'][0], (relx, rely, 0, 0) ) )
+            game.deferred_effects.append(lambda: game.screen.blit(game.images['trophy'][0], (relx, rely, 0, 0)))
             self.seen = False
-           
-            
 
     def move(self, game):
         if len(self.waypoints) == 0: return
-        
+
         target = self.waypoints[self.waypoint]
 
         if self.move_toward(target, self.speed, 10.0):
@@ -471,13 +448,13 @@ class Cow(Sprite):
         if not self.verlet_move():
             self.waypoint = (self.waypoint + 1) % len(self.waypoints)
 
+        self.animate(0.05)
         self.set_sprite_pos()
-        return
-        
+
     def hit(self, game, sprite, other):
         push(sprite, other)
         self.get_sprite_pos()
-        
+
 class Saucer(Sprite):
     def __init__(self, game, tile, values=None):
         super(Saucer, self).__init__('saucer0', 'Background', game, tile, values)
@@ -507,7 +484,7 @@ class Saucer(Sprite):
         if game.player.landing:
             percent = 1.0 - ((self.land_pos - self.position).magnitude() / self.land_distance)
             self.move_toward(self.land_pos, self.speed * (1.0 - percent), 10.0)
-            
+
             if not self.verlet_move(False):
                 game.player.landed(game)
                 self.stop()
@@ -524,7 +501,7 @@ class Saucer(Sprite):
             self.set_rotation(math.sin(percent*math.pi*6.0)*1.0)
         else:
             self.animate(0.1)
-        
+
 class Tree(Sprite):
     def __init__(self, game, tile, values=None):
         super(Tree, self).__init__('tree', 'Background', game, tile, values)
