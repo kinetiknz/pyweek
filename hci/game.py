@@ -13,6 +13,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import sys
+import cPickle
 
 from pygame.locals import *
 import pygame
@@ -192,6 +193,14 @@ def run():
                 if e.key == K_ESCAPE: game.quit = 1
                 if e.key == K_F10: pygame.display.toggle_fullscreen()
                 if e.key == K_RETURN: game.pause = not game.pause
+                if e.key == K_BACKQUOTE:
+                    if game.player.recording:
+                        files = os.listdir('/data/paths');
+                        game.player.recording = False
+                        pass
+                    else:
+                        game.player.recording = True
+                        game.player.recorded_path = []
 
         if game.pause:
             caption = "GAME PAUSED"
@@ -220,6 +229,14 @@ def run():
             for e in game.deferred_effects[:]:
                 e()
                 game.deferred_effects.remove(e)
+
+            if game.player.recording:
+                caption = "RECORDING PATH"
+                txt = text.render(caption, 1, [0, 0, 0])
+                dx = game.view.w/2 - txt.get_rect().w/2
+                game.screen.blit(txt, [dx+1,2])
+                txt = text.render(caption, 1, [255, 0, 0])
+                game.screen.blit(txt, [dx, 1])                
 
             caption = "FPS %2.2f" % t.get_fps()
             txt = text.render(caption, 1, [0, 0, 0])

@@ -196,6 +196,7 @@ class Player(Sprite):
         self.sprite.hit  = lambda game, sprite, other: self.hit(game, sprite, other)
         self.sprite.shoot = lambda game, sprite: self.fire(game, sprite)
         self.sprite.score = 0
+        self.recording = False
         self.seen = False
         self.mouse_move = False
         self.speed = 1.0
@@ -254,6 +255,7 @@ class Player(Sprite):
         if buttons[2]:
             self.target = euclid.Vector2(game.view.x + loc[0], game.view.y + loc[1])
             self.mouse_move = True
+            if self.recording: self.recorded_path.append(self.target)
 
         if buttons[0]:
             if not self.beam_sound_isplaying:
