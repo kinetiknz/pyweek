@@ -383,15 +383,30 @@ class Player(Sprite):
             self.impersonating = None
 
     def draw_morph_targets(self, game):
-        scale_to = 32
+        scale_to = 32.0
         x, y = game.view.w - scale_to, 0
         for t in self.known_items.values():
             def draw():
                 dx = x
                 dy = y
-                img = pygame.transform.scale(t.get_image(), (scale_to, scale_to))
+                sx, sy = scale_to, scale_to
+                rect = t.get_image().get_rect()
+                sx = float(rect.w / scale_to)
+                sy = float(rect.h / scale_to)
+                if sx == sy:
+                    sx = 1.0
+                    sy = 1.0
+                elif sx > sy:
+                    sy /= sx
+                    sx = 1.0
+                elif sy > sx:
+                    sx /= sy
+                    sy = 1.0
+                sx = int(sx * scale_to)
+                sy = int(sy * scale_to)
+                img = pygame.transform.scale(t.get_image(), (sx, sy))
                 def proc():
-                    game.screen.blit(img, (dx, dy, 0, 0))
+                    game.screen.blit(img, (dx, dy, scale_to, scale_to))
                 return proc
             game.deferred_effects.append(draw())
             y += scale_to
