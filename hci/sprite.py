@@ -399,7 +399,7 @@ class Player(Sprite):
             self.impersonating = random.choice(self.known_items.values())
             del self.known_items[self.impersonating.__class__]
         else:
-            self.set_image(self.frames[0])
+            self.set_image(self.frames[' '][0])
             self.impersonating = None
 
     def draw_morph_targets(self, game):
