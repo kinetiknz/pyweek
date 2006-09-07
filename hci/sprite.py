@@ -15,6 +15,7 @@
 import random
 import time
 import math
+import cPickle
 
 from pygame.locals import *
 import pygame
@@ -179,6 +180,13 @@ class Sprite(object):
         game.view.x = gx
         game.view.y = gy
 
+    def load_path(self, pathname):
+        file = open('data/paths/' + pathname, 'r')
+        path = cPickle.load(file)
+        self.waypoints = []
+        for x,y in path:
+            self.waypoints.append(euclid.Vector2(x,y))
+
     def step(self, game, sprite):
         raise AbstractClassException, "abstract method called"
 
@@ -194,7 +202,6 @@ class Player(Sprite):
         self.sprite.hit  = lambda game, sprite, other: self.hit(game, sprite, other)
         self.sprite.shoot = lambda game, sprite: self.fire(game, sprite)
         self.sprite.score = 0
-        self.recording = False
         self.seen = False
         self.mouse_move = False
         self.speed = 1.0
@@ -253,7 +260,6 @@ class Player(Sprite):
         if buttons[2]:
             self.target = euclid.Vector2(game.view.x + loc[0], game.view.y + loc[1])
             self.mouse_move = True
-            if self.recording: self.recorded_path.append(self.target)
 
         if buttons[0]:
             if not self.beam_sound_isplaying:
@@ -355,14 +361,14 @@ class Human(Sprite):
         self.speed = 1.0
         self.top_speed = 4.0
         self.stuck_sensor = 0
-
-        for pts in xrange(10):
-            self.waypoints.append(euclid.Vector2(random.randint(10, game.bounds.width-10),random.randint(10, game.bounds.height-10)))
+        self.load_path('path1157602408.63')
 
     def step(self, game, sprite):
         self.move(game)
 
     def move(self, game):
+        if len(self.waypoints) == 0: return
+        
         target = self.waypoints[self.waypoint]
 
         if visibility.can_be_seen(game.player.position, self.position, target):
@@ -375,6 +381,7 @@ class Human(Sprite):
             self.waypoint = (self.waypoint + 1) % len(self.waypoints)
 
         self.set_sprite_pos()
+        return
 
         def close(a, b, epsilon):
             if a == b:

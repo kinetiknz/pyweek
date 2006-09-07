@@ -14,6 +14,7 @@
 
 import sys
 import cPickle
+import time
 
 from pygame.locals import *
 import pygame
@@ -145,6 +146,8 @@ def run():
     game.screen = pygame.display.set_mode([game.view.w, game.view.h])
     pygame.display.set_caption("PyWeek 3: The Disappearing Act [rev %.6s...]" % version)
     game.frame = 0
+    recording = False
+    recorded_path = []
 
     game.tga_load_tiles('data/tilesets/testset.png', [game.tile_w, game.tile_h], tdata)
     game.tga_load_level('data/maps/beachhead.tga', True)
@@ -194,13 +197,19 @@ def run():
                 if e.key == K_F10: pygame.display.toggle_fullscreen()
                 if e.key == K_RETURN: game.pause = not game.pause
                 if e.key == K_BACKQUOTE:
-                    if game.player.recording:
-                        files = os.listdir('/data/paths');
-                        game.player.recording = False
-                        pass
+                    if recording:
+                        file = open('data/paths/path' + str(time.time()), 'wb');
+                        cPickle.dump(recorded_path, file)
+                        file.close()
+                        recording = False
                     else:
-                        game.player.recording = True
-                        game.player.recorded_path = []
+                        recording = True
+                        recorded_path = []
+            if e.type is MOUSEBUTTONDOWN:
+                if e.button == 3:
+                    if recording:
+                        recorded_path.append((game.view.x + e.pos[0], game.view.y + e.pos[1]))
+
 
         if game.pause:
             caption = "GAME PAUSED"
@@ -230,13 +239,14 @@ def run():
                 e()
                 game.deferred_effects.remove(e)
 
-            if game.player.recording:
-                caption = "RECORDING PATH"
-                txt = text.render(caption, 1, [0, 0, 0])
-                dx = game.view.w/2 - txt.get_rect().w/2
-                game.screen.blit(txt, [dx+1,2])
-                txt = text.render(caption, 1, [255, 0, 0])
-                game.screen.blit(txt, [dx, 1])                
+            if recording:
+                if (game.frame / 30) % 2 == 0:
+                    caption = "RECORDING PATH"
+                    txt = text.render(caption, 1, [0, 0, 0])
+                    dx = game.view.w/2 - txt.get_rect().w/2
+                    game.screen.blit(txt, [dx+1,2])
+                    txt = text.render(caption, 1, [255, 0, 0])
+                    game.screen.blit(txt, [dx, 1])                
 
             caption = "FPS %2.2f" % t.get_fps()
             txt = text.render(caption, 1, [0, 0, 0])
