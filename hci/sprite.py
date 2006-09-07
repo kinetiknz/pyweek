@@ -157,8 +157,6 @@ class Sprite(object):
     
     def direction(self):
         vel = self.velocity()
-        vel.normalize()
-
         left_right = math.fabs(vel[0]) > math.fabs(vel[1])
 
         if left_right:
@@ -168,7 +166,6 @@ class Sprite(object):
             if vel[1] > 0: return 'd'
             else: return 'u'
 
-        
 
     def moving(self):
         return self.velocity.magnitude_squared() >= self.MIN_MOVEMENT_SQ
@@ -209,10 +206,14 @@ class Sprite(object):
             self.waypoints.append(euclid.Vector2(x,y))
 
     def animate(self, step):
+        dir = self.direction()
+        if (len(self.frames[dir]) == 0):
+            dir = ' '
+        
         oldframe = int(self.frame)
-        self.frame = (self.frame + step) % len(self.frames)
+        self.frame = (self.frame + step) % len(self.frames[dir])
         if oldframe != int(self.frame):
-            self.set_image(self.frames[' '][int(self.frame)])
+            self.set_image(self.frames[dir][int(self.frame)])
 
     def step(self, game, sprite):
         raise AbstractClassException, "abstract method called"
@@ -254,7 +255,7 @@ class Player(Sprite):
 
     def landed(self, game):
         self.landing = False
-        self.set_image(self.frames[int(self.frame)])
+        self.set_image(self.frames[' '][int(self.frame)])
 
     def step(self, game, sprite):
         if self.landing:
@@ -366,7 +367,6 @@ class Player(Sprite):
             self.walking_sound.stop()
             return
 
-        print(self.direction())
         self.animate(0.2)
         self.view_me(game)
 
@@ -445,6 +445,11 @@ class Cow(Sprite):
         super(Cow, self).__init__('cow_l1', 'enemy', game, tile, values)
         self.frames['l'].append(game.images['cow_l1'])       
         self.frames['l'].append(game.images['cow_l2'])
+        self.frames['r'].append(game.images['cow_r1'])       
+        self.frames['r'].append(game.images['cow_r2'])
+        self.frames['d'].append(game.images['cow_d1'])       
+        self.frames['d'].append(game.images['cow_d2'])
+        self.frames['u'].append(game.images['cow_u1'])                           
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
         self.waypoint = 0
@@ -474,6 +479,7 @@ class Cow(Sprite):
             self.waypoint = (self.waypoint + 1) % len(self.waypoints)
 
         self.animate(0.04)
+        print(self.direction())
         self.set_sprite_pos()
                 
 
