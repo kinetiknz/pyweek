@@ -21,7 +21,6 @@ from pygame.locals import *
 import pygame
 from pgu import tilevid, algo
 import euclid
-
 import movement
 import sprite_eater
 import visibility
@@ -202,6 +201,7 @@ class Player(Sprite):
         self.sprite.hit  = lambda game, sprite, other: self.hit(game, sprite, other)
         self.sprite.shoot = lambda game, sprite: self.fire(game, sprite)
         self.sprite.score = 0
+        self.recording = False
         self.seen = False
         self.mouse_move = False
         self.speed = 1.0
@@ -212,9 +212,9 @@ class Player(Sprite):
 
         self.known_items = []
 
-        self.walking_sound = pygame.mixer.Sound('data/sfx/Walking.ogg')  
+        self.walking_sound = pygame.mixer.Sound('data/sfx/Walking.ogg')
         self.walking_sound.set_volume(0.3)
-		  
+
         self.raygun_sound  = pygame.mixer.Sound('data/sfx/Raygun.ogg')
         self.beam_sound    = pygame.mixer.Sound('data/sfx/Beam.ogg')
         self.beam_sound_isplaying    = False
@@ -227,7 +227,7 @@ class Player(Sprite):
         if self.seen:
             relx = self.position[0] - game.view.x - (game.images['warn'][0].get_width()/2)
             rely = self.position[1] - game.view.y - (game.images['warn'][0].get_height()/2)
-            game.deferred_effects.append(lambda:game.screen.blit(game.images['warn'][0], (relx, rely, 0, 0) ) )
+            game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx, rely, 0, 0) ) )
             self.seen = False
 
         dx, dy = 0, 0
@@ -260,6 +260,7 @@ class Player(Sprite):
         if buttons[2]:
             self.target = euclid.Vector2(game.view.x + loc[0], game.view.y + loc[1])
             self.mouse_move = True
+            if self.recording: self.recorded_path.append(self.target)
 
         if buttons[0]:
             if not self.beam_sound_isplaying:
@@ -284,6 +285,7 @@ class Player(Sprite):
 
             SelectionTest(game, (game.view.x + loc[0], game.view.y + loc[1]), None)
             if self.player_target and game.frame % 2 == 0:
+                self.player_target.rotate(12.5)
                 self.player_target.scale(0.9)
                 self.player_target = None
 
