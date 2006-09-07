@@ -28,6 +28,8 @@ import visibility
 class AbstractClassException(Exception): pass
 
 class Sprite(object):
+    MIN_MOVEMENT_SQ = 0.1
+    
     def __init__(self, name, group, game, tile, values=None):
         self.name = name
         self.group = group
@@ -146,12 +148,15 @@ class Sprite(object):
 
     def velocity(self):
         return self.position - self.last_pos
+    
+    def moving(self):
+        return self.velocity.magnitude_squared() >= self.MIN_MOVEMENT_SQ
 
     def verlet_move(self):
         # use verlet integration to move our sprite
         move_vec = self.velocity()
 
-        if move_vec.magnitude_squared() < 0.1:
+        if move_vec.magnitude_squared() < self.MIN_MOVEMENT_SQ:
             return False
 
         move_vec *= self.drag
@@ -199,12 +204,11 @@ class Player(Sprite):
 
         self.known_items = []
 
-        self.walking_snd_channel = pygame.mixer.find_channel()
-
         self.walking_sound = pygame.mixer.Sound('data/sfx/Walking.ogg')
-        self.raygun_sound = pygame.mixer.Sound('data/sfx/Raygun.ogg')
-        self.beam_sound = pygame.mixer.Sound('data/sfx/Beam.ogg')
-        self.beam_sound_isplaying = False
+        self.raygun_sound  = pygame.mixer.Sound('data/sfx/Raygun.ogg')
+        self.beam_sound    = pygame.mixer.Sound('data/sfx/Beam.ogg')
+        self.beam_sound_isplaying    = False
+        self.walking_sound_isplaying = False
 
 
     def step(self, game, sprite):
@@ -217,18 +221,10 @@ class Player(Sprite):
             self.seen = False
 
         dx, dy = 0, 0
-        if key[K_w]:
-            dy -= 1
-            self.walking_snd_channel.queue(self.walking_sound)
-        if key[K_s]:
-            dy += 1
-            self.walking_snd_channel.queue(self.walking_sound)
-        if key[K_a]:
-            dx -= 1
-            self.walking_snd_channel.queue(self.walking_sound)
-        if key[K_d]:
-            dx += 1
-            self.walking_snd_channel.queue(self.walking_sound)
+        if key[K_w]: dy -= 1
+        if key[K_s]: dy += 1
+        if key[K_a]: dx -= 1
+        if key[K_d]: dx += 1
         if key[K_SPACE] and game.frame % 8 == 0:
             self.fire(game, sprite)
         if key[K_LSHIFT]:
@@ -241,7 +237,11 @@ class Player(Sprite):
         buttons = pygame.mouse.get_pressed()
         loc = pygame.mouse.get_pos()
 
-        if (dx != 0 or dy != 0): self.mouse_move = False
+        if (dx != 0 or dy != 0): 
+            self.mouse_move = False
+            if not self.walking_sound_isplaying:
+                 self.walking_sound.play(-1)
+                 self.walking_sound_isplaying = True
 
         if buttons[0] == 0 and self.beam_sound_isplaying == True:
             self.beam_sound.stop()
@@ -306,6 +306,7 @@ class Player(Sprite):
 
         if not self.verlet_move():
             self.mouse_move = False
+            self.walking_sound.stop()
             return
 
         oldframe = int(self.frame)
