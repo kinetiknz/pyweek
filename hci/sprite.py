@@ -480,7 +480,8 @@ class Saucer(Sprite):
         self.position[1]   = game.view.y
         self.land_distance = (self.land_pos - self.position).magnitude()
         self.stop()
-
+        pygame.mixer.music.load('data/sfx/SaucerLand.ogg')
+        pygame.mixer.music.play(0,0.0)
 
         #d = time.time()
         #self.test = sprite_eater.SpriteEater(self.sprite.image)
