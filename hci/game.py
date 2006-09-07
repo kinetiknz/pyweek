@@ -129,6 +129,13 @@ tdata = {
     0x02: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x20: ('player', tile_coin, None),
     0x30: ('player', tile_fire, None),
+    0x05: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x06: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x07: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x08: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x09: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x0A: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x0B: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     }
 
 def run():
@@ -151,7 +158,7 @@ def run():
     recorded_path = []
 
     game.tga_load_tiles('data/tilesets/testset.png', [game.tile_w, game.tile_h], tdata)
-    game.tga_load_level('data/maps/beachhead.tga', True)
+    game.tga_load_level('data/maps/level1.tga', True)
     game.bounds = pygame.Rect(game.tile_w, game.tile_h,
                               (len(game.tlayer[0])-2)*game.tile_w,
                               (len(game.tlayer)-2)*game.tile_h)
