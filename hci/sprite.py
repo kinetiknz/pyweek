@@ -18,7 +18,7 @@ import math
 
 from pygame.locals import *
 import pygame
-from pgu import tilevid
+from pgu import tilevid, algo
 import euclid
 
 import movement
@@ -29,7 +29,7 @@ class AbstractClassException(Exception): pass
 
 class Sprite(object):
     MIN_MOVEMENT_SQ = 0.1
-    
+
     def __init__(self, name, group, game, tile, values=None):
         self.name = name
         self.group = group
@@ -85,18 +85,18 @@ class Sprite(object):
     def rotate(self, rotation):
         self.rotation += rotation
         self.reimage()
-        
+
     def reimage(self):
         if (self.scale_factor == 1.0 and self.rotation == 0.0):
             self.sprite.setimage((self.orig_image, self.orig_shape))
             return
-        
+
         newshape = self.orig_shape.inflate(0,0)
 
-        if self.scale_factor != 1.0:     
+        if self.scale_factor != 1.0:
             newshape.width *= self.scale_factor
             newshape.height *= self.scale_factor
-            
+
         oldc = self.sprite.rect.center
         newsurf = pygame.transform.rotozoom(self.orig_image, self.rotation, self.scale_factor)
         self.sprite.setimage((newsurf,newshape))
@@ -104,10 +104,10 @@ class Sprite(object):
 
 
     def set_image(self, new_image):
-        oldc = self.sprite.rect.center    
+        oldc = self.sprite.rect.center
         self.sprite.setimage(new_image)
         self.sprite.rect.center = oldc
-        
+
         self.orig_image = self.sprite.image
         self.orig_shape = self.sprite.shape
         self.reimage()
@@ -148,7 +148,7 @@ class Sprite(object):
 
     def velocity(self):
         return self.position - self.last_pos
-    
+
     def moving(self):
         return self.velocity.magnitude_squared() >= self.MIN_MOVEMENT_SQ
 
@@ -237,7 +237,7 @@ class Player(Sprite):
         buttons = pygame.mouse.get_pressed()
         loc = pygame.mouse.get_pos()
 
-        if (dx != 0 or dy != 0): 
+        if (dx != 0 or dy != 0):
             self.mouse_move = False
             if not self.walking_sound_isplaying:
                  self.walking_sound.play(-1)
@@ -269,34 +269,26 @@ class Player(Sprite):
             #game.set([tx, ty], 2)
 
             # ugly ray gun effect
-            relx = self.position[0] - game.view.x + 44
-            rely = self.position[1] - game.view.y + 5
+            relx = self.position[0] - game.view.x
+            rely = self.position[1] - game.view.y
 
             SelectionTest(game, (game.view.x + loc[0], game.view.y + loc[1]), None)
-            if self.player_target and game.frame % 5 == 0:
+            if self.player_target and game.frame % 2 == 0:
                 self.player_target.scale(0.9)
                 self.player_target = None
 
-            relx2 = relx
-            rely2 = rely
-
-            jitter = random.randint(0, 3)
-            if jitter % 2 == 0:
-                relx += jitter
-                rely2 += jitter
-                loc[1] += jitter * 3
-            else:
-                rely += jitter
-                loc[0] += jitter * 3
-                relx2 += jitter
-
-            game.deferred_effects.append(lambda:
-                                         pygame.draw.line(game.screen, [0, 0, 255],
-                                                          [relx, rely], loc, 2))
-            game.deferred_effects.append(lambda:
-                                         pygame.draw.line(game.screen, [0, 255, 255],
-                                                          [relx2, rely2], loc, 3))
-            #self.beam_sound.stop()
+            ln = algo.getline([relx, rely], loc)
+            for l in xrange(0, len(ln), 7):
+                def draw():
+                    c = [0, random.randint(0, 255), 255]
+                    r = [relx, rely]
+                    rx = random.randint(-5, 5)
+                    ry = random.randint(-5, 5)
+                    p = ln[l][0] + rx, ln[l][1] + ry
+                    def proc():
+                        pygame.draw.line(game.screen, c, r, p, 2)
+                    return proc
+                game.deferred_effects.append(draw())
 
         if self.mouse_move:
             if self.move_toward(self.target, self.speed, 10.0):
@@ -441,7 +433,7 @@ class Bush(Sprite):
 
 class SelectionTest(Sprite):
     def __init__(self, game, tile, values=None):
-        super(SelectionTest, self).__init__('cow', 'shot', game, tile, values)
+        super(SelectionTest, self).__init__('laser', 'shot', game, tile, values)
         self.sprite.agroups = game.string2groups('enemy,Background')
         self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
         self.lived_once = False
