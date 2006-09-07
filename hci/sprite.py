@@ -463,7 +463,7 @@ class Saucer(Sprite):
     def step(self, game, sprite):
         if game.player.landing:
             percent = 1.0 - ((self.land_pos - self.position).magnitude() / self.land_distance)
-            self.move_toward(self.land_pos, self.speed / (1.0 - percent), 10.0)
+            self.move_toward(self.land_pos, self.speed * (1.0 - percent), 10.0)
             
             print (percent)
             
@@ -479,7 +479,8 @@ class Saucer(Sprite):
 
             self.set_sprite_pos()
             self.animate(1.0 - (0.9 * percent))
-            self.set_scale(3.0 - (2.0 * (math.pow(percent,2.0))))
+            self.set_scale(3.0 - (2.0 * (math.pow(percent,1.5))))
+            self.set_rotation(math.sin(percent*math.pi*6.0)*1.0)
         else:
             self.animate(0.1)
         
