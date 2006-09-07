@@ -182,7 +182,8 @@ def run():
     selection = menu.show([game.view.w, game.view.h], game.screen, menu_image, game.menu_font)
 
     music = pygame.mixer.music
-    pygame.mixer.music.queue('data/music/Track01.ogg')
+    music.queue('data/music/Track01.ogg')
+    music.set_endevent(USEREVENT)
 
     t = pygame.time.Clock()
 
@@ -219,7 +220,8 @@ def run():
                 if e.button == 1:
                     if recording:
                         recorded_path.append((game.view.x + e.pos[0], game.view.y + e.pos[1]))
-
+            if e.type is USEREVENT:
+                music.play()
 
         if game.pause:
             caption = "GAME PAUSED"
