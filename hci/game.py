@@ -119,7 +119,7 @@ idata = [
     ('warn',   'data/test/Warning.png', (0, 0, 16, 16)),
     ('shot', 'data/test/shot.png', (1, 2, 6, 4)),
     ('tree', 'data/test/treebiggersize.png', (10, 15, 95, 95)),
-    ('bush', 'data/test/treepinkflower.png', (4, 4, 32, 48)),
+    ('bush', 'data/test/treepinkflower.png', (0, 0, 30, 37)),
     ('laser', 'data/test/laser.png', (0, 0, 8, 8)),
     ('trophy',  'data/test/CollectMe.png', (0, 0, 0, 0)),
     ('none',  'data/test/EmptyImage.png', (0, 0, 0, 0)),
@@ -186,7 +186,8 @@ def run():
 
     game.run_codes(cdata, (0, 0, len(game.tlayer[0]), len(game.tlayer)))
     music = pygame.mixer.music
-    pygame.mixer.music.queue('data/music/Track01.ogg')
+    music.queue('data/music/Track01.ogg')
+    music.set_endevent(USEREVENT)
 
     t = pygame.time.Clock()
 
@@ -209,6 +210,7 @@ def run():
             if e.type is KEYDOWN:
                 if e.key == K_ESCAPE: game.quit = 1
                 if e.key == K_F10: pygame.display.toggle_fullscreen()
+                if e.key == K_r: game.player.morph()
                 if e.key == K_RETURN: game.pause = not game.pause
                 if e.key == K_BACKQUOTE:
                     if recording:
@@ -223,7 +225,8 @@ def run():
                 if e.button == 1:
                     if recording:
                         recorded_path.append((game.view.x + e.pos[0], game.view.y + e.pos[1]))
-
+            if e.type is USEREVENT:
+                music.play()
 
         if game.pause:
             caption = "GAME PAUSED"

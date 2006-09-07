@@ -25,8 +25,6 @@ import movement
 import sprite_eater
 import visibility
 
-class AbstractClassException(Exception): pass
-
 class Sprite(object):
     MIN_MOVEMENT_SQ = 0.1
 
@@ -62,14 +60,16 @@ class Sprite(object):
         self.frames[' '].append(game.images[self.name])
 
         # movement
-        self.last_pos  = euclid.Vector2(0,0)
-        self.position  = euclid.Vector2(0,0)
+        self.last_pos  = euclid.Vector2(0, 0)
+        self.position  = euclid.Vector2(0, 0)
         self.get_sprite_pos()
         self.stop()
         self.accel     = 0.0
         self.drag      = 0.85
         self.top_speed = 0.0
         self.target    = None
+        self.waypoint = 0
+        self.waypoints = []
 
         # something to do with PGU?
         if hasattr(tile, 'rect'):
@@ -97,7 +97,7 @@ class Sprite(object):
             self.sprite.setimage((self.orig_image, self.orig_shape))
             return
 
-        newshape = self.orig_shape.inflate(0,0)
+        newshape = self.orig_shape.inflate(0, 0)
 
         if self.scale_factor != 1.0:
             newshape.width *= self.scale_factor
@@ -105,9 +105,8 @@ class Sprite(object):
 
         oldc = self.sprite.rect.center
         newsurf = pygame.transform.rotozoom(self.orig_image, self.rotation, self.scale_factor)
-        self.sprite.setimage((newsurf,newshape))
+        self.sprite.setimage((newsurf, newshape))
         self.sprite.rect.center = oldc
-
 
     def set_image(self, new_image):
         oldc = self.sprite.rect.center
@@ -117,6 +116,9 @@ class Sprite(object):
         self.orig_image = self.sprite.image
         self.orig_shape = self.sprite.shape
         self.reimage()
+
+    def get_image(self):
+        return self.orig_image
 
     def get_sprite_pos(self):
         self.position[0] = self.sprite.rect.centerx
@@ -129,6 +131,8 @@ class Sprite(object):
     def stop(self):
         self.last_pos[0] = self.position[0]
         self.last_pos[1] = self.position[1]
+        self.waypoint = 0
+        self.waypoints = []
 
     def accelerate(self, vector):
         move_vec = self.velocity() + vector
@@ -140,17 +144,17 @@ class Sprite(object):
         self.position = self.last_pos + move_vec
 
     def move_toward(self, target, speed, min_distance):
-            to_target = target - self.position
-            length = to_target.magnitude()
+        to_target = target - self.position
+        length = to_target.magnitude()
 
-            if (length <= min_distance):
-                return True
+        if (length <= min_distance):
+            return True
 
-            to_target /= length
-            to_target *= speed
-            self.accelerate(to_target)
+        to_target /= length
+        to_target *= speed
+        self.accelerate(to_target)
 
-            return False
+        return False
 
     def velocity(self):
         return self.position - self.last_pos
@@ -201,9 +205,8 @@ class Sprite(object):
     def load_path(self, pathname):
         file = open('data/paths/' + pathname, 'r')
         path = cPickle.load(file)
-        self.waypoints = []
-        for x,y in path:
-            self.waypoints.append(euclid.Vector2(x,y))
+        for x, y in path:
+            self.waypoints.append(euclid.Vector2(x, y))
 
     def animate(self, step):
         dir = self.direction()
@@ -216,7 +219,7 @@ class Sprite(object):
             self.set_image(self.frames[dir][int(self.frame)])
 
     def step(self, game, sprite):
-        raise AbstractClassException, "abstract method called"
+        pass
 
 class Player(Sprite):
     def __init__(self, game, tile, values=None):
@@ -236,6 +239,7 @@ class Player(Sprite):
         self.speed = 1.0
         self.top_speed = 5.0
         self.player_target = None
+        self.impersonating = None
 
         self.landing = True
         self.set_image(game.images['none'])
@@ -243,7 +247,7 @@ class Player(Sprite):
 
         game.player = self
 
-        self.known_items = []
+        self.known_items = {}
 
         self.walking_sound = pygame.mixer.Sound('data/sfx/Walking.ogg')
         self.walking_sound.set_volume(0.5)
@@ -261,6 +265,8 @@ class Player(Sprite):
         if self.landing:
             self.view_me(game)
             return
+
+        game.deferred_effects.append(lambda: self.draw_morph_targets(game))
 
         key = pygame.key.get_pressed()
 
@@ -283,6 +289,10 @@ class Player(Sprite):
         else:
             self.top_speed = 5.0
             self.speed     = 1.0
+
+        if self.impersonating:
+            self.set_image(self.impersonating.get_image())
+            return
 
         buttons = pygame.mouse.get_pressed()
         loc = pygame.mouse.get_pos()
@@ -324,17 +334,23 @@ class Player(Sprite):
             tx, ty = s2t(game.view.x + loc[0], game.view.y + loc[1])
             #game.set([tx, ty], 2)
 
+            # ugly ray gun logic
+            SelectionTest(game, (game.view.x + loc[0], game.view.y + loc[1]), None)
+            if self.player_target and not self.player_target.__class__ in self.known_items:
+                self.player_target.stop()
+                self.player_target.waypoints.append(self.position)
+                movement.move(self.player_target.position, self.position, 1)
+                self.player_target.rotate(6.25)
+                self.player_target.scale(0.95)
+                self.player_target.set_sprite_pos()
+                if self.player_target.scale_factor < 0.25:
+                    self.learn(self.player_target)
+                    game.sprites.remove(self.player_target.sprite)
+                    self.player_target = None
+
             # ugly ray gun effect
             relx = self.position[0] - game.view.x + 24
             rely = self.position[1] - game.view.y - 12
-
-            SelectionTest(game, (game.view.x + loc[0], game.view.y + loc[1]), None)
-            if self.player_target and game.frame % 2 == 0:
-                movement.move(self.player_target.position, self.position, 1)
-                self.player_target.set_sprite_pos()
-                self.player_target.rotate(12.5)
-                self.player_target.scale(0.9)
-                self.player_target = None
 
             ln = algo.getline([relx, rely], loc)
             for l in xrange(0, len(ln), 7):
@@ -360,7 +376,7 @@ class Player(Sprite):
             if self.move_toward(self.target, self.speed, 10.0):
                 self.mouse_move = False
         else:
-            self.accelerate(euclid.Vector2(dx*self.speed,dy*self.speed))
+            self.accelerate(euclid.Vector2(dx*self.speed, dy*self.speed))
 
         if not self.verlet_move():
             self.mouse_move = False
@@ -375,10 +391,46 @@ class Player(Sprite):
         self.raygun_sound.play()
 
     def learn(self, target):
-        self.known_items.append(target)
+        self.known_items[target.__class__] = target
 
     def morph(self):
-        target = random.choice(self.known_items)
+        if not self.impersonating and len(self.known_items) == 0:
+            return
+        if not self.impersonating:
+            self.impersonating = random.choice(self.known_items.values())
+            del self.known_items[self.impersonating.__class__]
+        else:
+            self.set_image(self.frames[0])
+            self.impersonating = None
+
+    def draw_morph_targets(self, game):
+        scale_to = 32.0
+        x, y = game.view.w - scale_to, 0
+        for t in self.known_items.values():
+            def draw():
+                dx = x
+                dy = y
+                sx, sy = scale_to, scale_to
+                rect = t.get_image().get_rect()
+                sx = float(rect.w / scale_to)
+                sy = float(rect.h / scale_to)
+                if sx == sy:
+                    sx = 1.0
+                    sy = 1.0
+                elif sx > sy:
+                    sy /= sx
+                    sx = 1.0
+                elif sy > sx:
+                    sx /= sy
+                    sy = 1.0
+                sx = int(sx * scale_to)
+                sy = int(sy * scale_to)
+                img = pygame.transform.scale(t.get_image(), (sx, sy))
+                def proc():
+                    game.screen.blit(img, (dx, dy, scale_to, scale_to))
+                return proc
+            game.deferred_effects.append(draw())
+            y += scale_to
 
     def hit(self, game, sprite, other):
         push(sprite, other)
@@ -407,8 +459,6 @@ class Human(Sprite):
         super(Human, self).__init__('enemy', 'enemy', game, tile, values)
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
-        self.waypoint = 0
-        self.waypoints = []
         self.waypoints.append(euclid.Vector2(self.position[0], 0))
         self.speed = 0.0
         self.top_speed = 0.0
@@ -452,8 +502,6 @@ class Cow(Sprite):
         self.frames['u'].append(game.images['cow_u1'])                           
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
-        self.waypoint = 0
-        self.waypoints = []
         self.speed = 0.2
         self.top_speed = 0.4
         self.trophy = True
@@ -478,7 +526,7 @@ class Cow(Sprite):
         if not self.verlet_move():
             self.waypoint = (self.waypoint + 1) % len(self.waypoints)
 
-        self.animate(0.04)
+        self.animate(0.025)
         print(self.direction())
         self.set_sprite_pos()
                 
@@ -500,7 +548,7 @@ class Saucer(Sprite):
         self.land_distance = (self.land_pos - self.position).magnitude()
         self.stop()
         pygame.mixer.music.load('data/sfx/SaucerLand.ogg')
-        pygame.mixer.music.play(0,0.0)
+        pygame.mixer.music.play(0, 0.0)
 
         #d = time.time()
         #self.test = sprite_eater.SpriteEater(self.sprite.image)
@@ -529,7 +577,7 @@ class Saucer(Sprite):
 
             self.set_sprite_pos()
             self.animate(1.0 - (0.9 * percent))
-            self.set_scale(3.0 - (2.0 * (math.pow(percent,1.5))))
+            self.set_scale(3.0 - (2.0 * (math.pow(percent, 1.5))))
             self.set_rotation(math.sin(percent*math.pi*6.0)*1.0)
         else:
             self.animate(0.1)
@@ -538,15 +586,9 @@ class Tree(Sprite):
     def __init__(self, game, tile, values=None):
         super(Tree, self).__init__('tree', 'Background', game, tile, values)
 
-    def step(self, game, sprite):
-        pass
-
 class Bush(Sprite):
     def __init__(self, game, tile, values=None):
         super(Bush, self).__init__('bush', 'Background', game, tile, values)
-
-    def step(self, game, sprite):
-        pass
 
 class SelectionTest(Sprite):
     def __init__(self, game, tile, values=None):
@@ -559,6 +601,7 @@ class SelectionTest(Sprite):
         if self.lived_once == False:
             self.lived_once = True
             return
+        game.player.player_target = None
         game.sprites.remove(sprite)
 
     def hit(self, game, sprite, other):
