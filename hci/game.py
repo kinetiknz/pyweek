@@ -25,10 +25,6 @@ import splashscreen
 import menu
 import sprite
 
-def logit(*args):
-    print args
-    sys.stdout.flush()
-
 def initialize_modules():
     '''Initialize PyGame modules.  If any modules fail, report all failures
     and exit the program.'''
@@ -45,32 +41,6 @@ def initialize_modules():
         print >> sys.stderr, 'initialization failure: %s' %e
 
     if errors: sys.exit(1)
-
-class AbstractClassException(Exception): pass
-
-def test_collision(obj1, obj2):
-    r1, h1 = obj1.rect, obj1.hitmask
-    r2, h2 = obj2.rect, obj2.hitmask
-
-    r = r1.clip(r2)
-    x1, y1 = r.x - r1.x, r.y - r1.y
-    x2, y2 = r.x - r2.x, r.y - r2.y
-
-    x = 0
-    y = 0
-    while 1:
-        if h1[x + x1][y + y1]:
-            if h2[x + x2][y + y2]:
-                return True
-        if h1[x1 - x][y1 - y]:
-            if h2[x2 - x][y2 - y]:
-                return True
-        x += 1
-        if x >= r.width:
-            x = 0
-            y += 1
-            if y >= r.height/2:
-                return False
 
 def tile_block(g, t, a):
     c = t.config
@@ -90,13 +60,6 @@ def tile_block(g, t, a):
     # craziness
     a.backref.get_sprite_pos()
     a.backref.stop()
-
-def tile_coin(g, t, a):
-    a.score += 100
-    g.set([t.tx, t.ty], 0)
-
-def tile_fire(g, t, a):
-    g.quit = 1
 
 idata = [
     ('player', 'data/test/alien/alien-top.png', (4, 4, 48, 24)),
@@ -134,8 +97,6 @@ cdata = {
 
 tdata = {
     0x02: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
-    0x20: ('player', tile_coin, None),
-    0x30: ('player', tile_fire, None),
     0x05: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x06: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x07: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
