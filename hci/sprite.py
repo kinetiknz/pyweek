@@ -204,7 +204,9 @@ class Player(Sprite):
 
         self.known_items = []
 
-        self.walking_sound = pygame.mixer.Sound('data/sfx/Walking.ogg')
+        self.walking_sound = pygame.mixer.Sound('data/sfx/Walking.ogg')  
+        self.walking_sound.set_volume(0.3)
+		  
         self.raygun_sound  = pygame.mixer.Sound('data/sfx/Raygun.ogg')
         self.beam_sound    = pygame.mixer.Sound('data/sfx/Beam.ogg')
         self.beam_sound_isplaying    = False
