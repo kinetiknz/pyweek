@@ -105,9 +105,9 @@ idata = [
     ('player3', 'data/test/alien/alien-top4.png', (4, 4, 48, 24)),
     ('player4', 'data/test/alien/alien-top5.png', (4, 4, 48, 24)),
     ('player5', 'data/test/alien/alien-top6.png', (4, 4, 48, 24)),
-    ('saucer0', 'data/test/Saucer0.png', (14, 14, 172, 100)),
-    ('saucer1', 'data/test/Saucer1.png', (14, 14, 172, 100)),
-    ('saucer2', 'data/test/Saucer2.png', (14, 14, 172, 100)),
+    ('saucer0', 'data/test/Saucer0.png', (20, 20, 140, 70)),
+    ('saucer1', 'data/test/Saucer1.png', (20, 20, 140, 70)),
+    ('saucer2', 'data/test/Saucer2.png', (20, 20, 140, 70)),
     ('enemy', 'data/test/Dude1.png', (4, 4, 24, 24)),
     ('cow',   'data/test/Cow.png', (1, 1, 112, 48)),
     ('warn',   'data/test/Warning.png', (0, 0, 16, 16)),
@@ -115,6 +115,7 @@ idata = [
     ('tree', 'data/test/treebiggersize.png', (10, 15, 95, 95)),
     ('bush', 'data/test/treepinkflower.png', (4, 4, 32, 48)),
     ('laser', 'data/test/laser.png', (0, 0, 8, 8)),
+    ('none',  'data/test/EmptyImage.png', (0, 0, 0, 0)),
     ]
 
 cdata = {
@@ -122,7 +123,6 @@ cdata = {
     2: (lambda g, t, v: sprite.Human(g, t, v), None),
     3: (lambda g, t, v: sprite.Bush(g, t, v), None),
     4: (lambda g, t, v: sprite.Tree(g, t, v), None),
-    5: (lambda g, t, v: sprite.Saucer(g, t, v), None),
     }
 
 tdata = {
