@@ -15,6 +15,7 @@
 import sys
 import cPickle
 import time
+import random
 
 from pygame.locals import *
 import pygame
@@ -240,6 +241,15 @@ def run():
                 game.deferred_effects.remove(e)
 
             if recording:
+                # draw recorded path
+                def sub_gv(pt):
+                    return (pt[0]-game.view.x, pt[1]-game.view.y)
+                    
+                for pt in xrange(len(recorded_path)):
+                    start = sub_gv(recorded_path[pt-1])
+                    end   = sub_gv(recorded_path[pt])
+                    pygame.draw.line(game.screen, [random.randint(0, 255),random.randint(0, 255),random.randint(0, 255)], start, end, 2)
+                
                 if (game.frame / 30) % 2 == 0:
                     caption = "RECORDING PATH"
                     txt = text.render(caption, 1, [0, 0, 0])
