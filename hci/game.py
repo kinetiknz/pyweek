@@ -71,7 +71,7 @@ idata = [
     ('saucer0', 'data/test/Saucer0.png', (20, 20, 140, 70)),
     ('saucer1', 'data/test/Saucer1.png', (20, 20, 140, 70)),
     ('saucer2', 'data/test/Saucer2.png', (20, 20, 140, 70)),
-    ('enemy',   'data/test/Dude1.png', (4, 4, 24, 24)),
+    ('enemy',   'data/test/characters/farmer-front.png', (4, 4, 24, 24)),
     ('cow_l1',  'data/test/cow000.png', (10, 10, 90, 50)),
     ('cow_l2',  'data/test/cow001.png', (10, 10, 90, 50)),
     ('cow_u1',  'data/test/cow011.png', (10, 10, 50, 90)),
