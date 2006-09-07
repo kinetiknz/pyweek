@@ -207,7 +207,7 @@ def run():
                 if e.key == K_BACKQUOTE:
                     if recording:
                         file = open('data/paths/path' + str(time.time()), 'wb');
-                        cPickle.dump(recorded_path, file)
+                        cPickle.dump(recorded_path, file, protocol=2)
                         file.close()
                         recording = False
                     else:
