@@ -53,8 +53,13 @@ class Sprite(object):
 
         # animation
         self.frame = 0.0
-        self.frames = []
-        self.frames.append(game.images[self.name])
+        self.frames = { ' ': ([]),
+                        'u': ([]),
+                        'd': ([]),
+                        'l': ([]),
+                        'r': ([]) }
+
+        self.frames[' '].append(game.images[self.name])
 
         # movement
         self.last_pos  = euclid.Vector2(0,0)
@@ -149,6 +154,21 @@ class Sprite(object):
 
     def velocity(self):
         return self.position - self.last_pos
+    
+    def direction(self):
+        vel = self.velocity()
+        vel.normalize()
+
+        left_right = math.fabs(vel[0]) > math.fabs(vel[1])
+
+        if left_right:
+            if vel[0] > 0: return 'r' 
+            else: return 'l'
+        else:
+            if vel[1] > 0: return 'd'
+            else: return 'u'
+
+        
 
     def moving(self):
         return self.velocity.magnitude_squared() >= self.MIN_MOVEMENT_SQ
@@ -192,7 +212,7 @@ class Sprite(object):
         oldframe = int(self.frame)
         self.frame = (self.frame + step) % len(self.frames)
         if oldframe != int(self.frame):
-            self.set_image(self.frames[int(self.frame)])
+            self.set_image(self.frames[' '][int(self.frame)])
 
     def step(self, game, sprite):
         raise AbstractClassException, "abstract method called"
@@ -200,11 +220,11 @@ class Sprite(object):
 class Player(Sprite):
     def __init__(self, game, tile, values=None):
         super(Player, self).__init__('player', 'player', game, tile, values)
-        self.frames.append(game.images['player1'])
-        self.frames.append(game.images['player2'])
-        self.frames.append(game.images['player3'])
-        self.frames.append(game.images['player4'])
-        self.frames.append(game.images['player5'])
+        self.frames[' '].append(game.images['player1'])
+        self.frames[' '].append(game.images['player2'])
+        self.frames[' '].append(game.images['player3'])
+        self.frames[' '].append(game.images['player4'])
+        self.frames[' '].append(game.images['player5'])
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit  = lambda game, sprite, other: self.hit(game, sprite, other)
         self.sprite.shoot = lambda game, sprite: self.fire(game, sprite)
@@ -346,6 +366,7 @@ class Player(Sprite):
             self.walking_sound.stop()
             return
 
+        print(self.direction())
         self.animate(0.2)
         self.view_me(game)
 
@@ -421,8 +442,9 @@ class Human(Sprite):
 
 class Cow(Sprite):
     def __init__(self, game, tile, values=None):
-        super(Cow, self).__init__('cow1', 'enemy', game, tile, values)
-        self.frames.append(game.images['cow2'])
+        super(Cow, self).__init__('cow_l1', 'enemy', game, tile, values)
+        self.frames['l'].append(game.images['cow_l1'])       
+        self.frames['l'].append(game.images['cow_l2'])
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit = lambda game, sprite, other: self.hit(game, sprite, other)
         self.waypoint = 0
@@ -451,7 +473,7 @@ class Cow(Sprite):
         if not self.verlet_move():
             self.waypoint = (self.waypoint + 1) % len(self.waypoints)
 
-        self.animate(0.05)
+        self.animate(0.04)
         self.set_sprite_pos()
                 
 
@@ -462,8 +484,8 @@ class Cow(Sprite):
 class Saucer(Sprite):
     def __init__(self, game, tile, values=None):
         super(Saucer, self).__init__('saucer0', 'Background', game, tile, values)
-        self.frames.append(game.images['saucer1'])
-        self.frames.append(game.images['saucer2'])
+        self.frames[' '].append(game.images['saucer1'])
+        self.frames[' '].append(game.images['saucer2'])
         self.speed     = 3.0
         self.top_speed = 7.0
         self.set_scale(3.0)
