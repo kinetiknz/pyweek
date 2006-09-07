@@ -277,16 +277,16 @@ class Player(Sprite):
                 self.walking_sound.stop()
                 self.walking_sound_isplaying = False
 
-        if buttons[0] == 0 and self.beam_sound_isplaying == True:
+        if buttons[2] == 0 and self.beam_sound_isplaying == True:
             self.beam_sound.stop()
             self.beam_sound_isplaying = False
 
-        if buttons[2]:
+        if buttons[0]:
             self.target = euclid.Vector2(game.view.x + loc[0], game.view.y + loc[1])
             self.mouse_move = True
             if self.recording: self.recorded_path.append(self.target)
 
-        if buttons[0]:
+        if buttons[2]:
             if not self.beam_sound_isplaying:
                 self.beam_sound.play()
                 self.beam_sound_isplaying = True

@@ -215,7 +215,7 @@ def run():
                         recording = True
                         recorded_path = []
             if e.type is MOUSEBUTTONDOWN:
-                if e.button == 3:
+                if e.button == 1:
                     if recording:
                         recorded_path.append((game.view.x + e.pos[0], game.view.y + e.pos[1]))
 
