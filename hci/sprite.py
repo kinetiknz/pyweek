@@ -662,9 +662,9 @@ class Cow(Sprite):
         self.trophy = True
         self.load_path('lvl1_cow')
         self.sound_one_cow = pygame.mixer.Sound('data/sfx/One-Cow.ogg')
-        self.sound_one_cow.set_volume(0.5)
+        self.sound_one_cow.set_volume(0.3)
         self.sound_two_cows = pygame.mixer.Sound('data/sfx/Two-Cows-Loop.ogg')
-        self.sound_two_cows.set_volume(0.4)
+        self.sound_two_cows.set_volume(0.3)
         self.sound_two_cows.play(-1)
 
     def step(self, game, sprite):
