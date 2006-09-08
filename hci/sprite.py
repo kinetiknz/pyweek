@@ -618,7 +618,7 @@ class FBI(Human):
         self.frames[' '].append(game.images['man_d1'])
         self.speed = 1.0
         self.top_speed = 2.0
-        self.target = game.player.position
+        self.target = None
         
     def seeing_alien(self, game):
         super(FBI, self).seeing_alien(game)
