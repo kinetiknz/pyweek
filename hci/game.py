@@ -119,7 +119,7 @@ def run():
     game.view.h = 480
     game.tile_w = 32
     game.tile_h = 32
-    game.screen = pygame.display.set_mode([game.view.w, game.view.h])
+    game.screen = pygame.display.set_mode([game.view.w, game.view.h], pygame.DOUBLEBUF)
     pygame.display.set_caption("PyWeek 3: The Disappearing Act [rev %.6s...]" % version)
     game.frame = 0
     recording = False
