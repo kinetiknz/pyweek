@@ -470,6 +470,7 @@ class Player(Sprite):
         if not self.impersonating:
             self.impersonating = random.choice(self.known_items.values())
             self.state = 'cloaked'
+            self.stop()
             del self.known_items[self.impersonating.__class__]
         else:
             self.set_image(self.frames[' '][0])
