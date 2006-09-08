@@ -328,8 +328,8 @@ class Player(Sprite):
 
         gun_pos = euclid.Vector2(self.position[0], self.position[1]) + self.gun_pos[self.gun_dir()]
 
-        loc = [self.suck_target_pos[0] - game.view.x, \
-               self.suck_target_pos[1] - game.view.y ]
+        loc = [self.suck_target_pos[0], \
+               self.suck_target_pos[1] ]
 
         if self.suck_target:
             self.suck_target.set_rotation(720.0 * self.suck_progress)
@@ -341,14 +341,14 @@ class Player(Sprite):
             self.suck_target.position = gun_pos + vec
             self.suck_target.set_sprite_pos()
 
-            loc = [self.suck_target.position[0] - game.view.x, \
-                   self.suck_target.position[1] - game.view.y ]
+            loc = [self.suck_target.position[0], \
+                   self.suck_target.position[1] ]
 
         # ugly ray gun effect
         relx = gun_pos[0] - game.view.x
         rely = gun_pos[1] - game.view.y
 
-        ln = algo.getline([relx, rely], loc)
+        ln = algo.getline([relx, rely], [loc[0]-game.view.x,loc[1]-game.view.y])
         for l in xrange(0, len(ln), 7):
             def draw():
                 c = [0, random.randint(0, 255), 255]
@@ -363,12 +363,9 @@ class Player(Sprite):
             game.deferred_effects.append(draw())
 
         for l in xrange(10):
-            rsx = random.gauss(0, 7)
-            rsy = random.gauss(0, 7)
-
-            SelectionTest(game, (game.view.x + loc[0] + rsx,
-                                 game.view.y + loc[1] + rsy), None)
-
+            rsx = random.gauss(0, 7) + loc[0]
+            rsy = random.gauss(0, 7) + loc[1]
+            game.deferred_effects.append(lambda: game.screen.blit(game.images['laser'][0], ( rsx - game.view.x, rsy - game.view.y, 0, 0)))
         self.suck_progress += 0.02
 
     def step(self, game, sprite):
@@ -592,13 +589,20 @@ class Human(Sprite):
             game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx - game.view.x, rely - game.view.y, 0, 0)))
             self.seen_count -= 1
 
+    def reached_target(self):
+        pass
+
+    def move_blocked(self):
+        pass
+    
     def move(self, game):
-        if self.move_toward(target, self.speed, 10.0):
-            self.waypoint = (self.waypoint + 1) % len(self.waypoints)
-
+        if self.target:
+            if self.move_toward(self.target, self.speed, 10.0):
+                self.reached_target()
+            
         if not self.verlet_move():
-            self.waypoint = (self.waypoint + 1) % len(self.waypoints)
-
+            self.move_blocked()
+            
         self.set_sprite_pos()
 
     def hit(self, game, sprite, other):
@@ -646,6 +650,12 @@ class Farmer(Human):
         
     def step(self, game, sprite):
         super(Farmer, self).step(game, sprite)
+
+    def move_blocked(self):        
+        self.waypoint = (self.waypoint + 1) % len(self.waypoints)
+        
+    def reached_target(self):        
+        self.waypoint = (self.waypoint + 1) % len(self.waypoints)
 
     def hit(self, game, sprite, other):
         super(Farmer, self).hit(game, sprite, other)
@@ -789,7 +799,7 @@ class Chicken(Sprite):
 
 class SelectionTest(Sprite):
     def __init__(self, game, tile, values=None):
-        super(SelectionTest, self).__init__('laser', 'shot', game, tile, values)
+        super(SelectionTest, self).__init__('none', 'shot', game, tile, values)
         self.sprite.agroups = game.string2groups('enemy,Background')
         self.sprite.hit = self.hit
         self.lived_once = False
@@ -798,7 +808,6 @@ class SelectionTest(Sprite):
         if self.lived_once == False:
             self.lived_once = True
             return
-        game.player.suck_target = None
         game.sprites.remove(sprite)
 
     def hit(self, game, sprite, other):
