@@ -276,7 +276,7 @@ class Player(Sprite):
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit  = self.hit
         self.sprite.score = 0
-        self.gun_pos = euclid.Vector2(24.0, -12.0)
+        self.gun_pos = {' ': euclid.Vector2(-3.0, 35.0), 'l': euclid.Vector2(-12.0, 35.0)}
         self.recording = False
         self.seen = False
         self.mouse_move = False
@@ -304,6 +304,12 @@ class Player(Sprite):
         self.state = 'normal'
         self.set_image(self.frames[' '][int(self.frame)])
 
+    def gun_dir(self):
+        xn = self.direction4()
+        if xn not in self.gun_pos:
+            xn = ' '
+        return xn
+
     def suck(self, game):
         if self.suck_target:
             self.suck_target.stop()
@@ -320,7 +326,7 @@ class Player(Sprite):
             self.beam_sound.stop()
             return
 
-        gun_pos = euclid.Vector2(self.position[0], self.position[1]) + self.gun_pos
+        gun_pos = euclid.Vector2(self.position[0], self.position[1]) + self.gun_pos[self.gun_dir()]
 
         loc = [self.suck_target_pos[0] - game.view.x, \
                self.suck_target_pos[1] - game.view.y ]
@@ -426,7 +432,7 @@ class Player(Sprite):
         if buttons[2] and not self.state == 'sucking':
             loc       = pygame.mouse.get_pos()
             click_pos = euclid.Vector2(loc[0]+game.view.x, loc[1]+game.view.y)
-            gun_pos   = self.position + self.gun_pos
+            gun_pos   = self.position + self.gun_pos[self.gun_dir()]
 
             #def s2t(x, y):
             #    stx = x / game.tile_w
