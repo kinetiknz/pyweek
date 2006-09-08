@@ -252,14 +252,24 @@ class Sprite(object):
 
 class Player(Sprite):
     def __init__(self, game, tile, values=None):
-        super(Player, self).__init__('player', 'player', game, tile, values)
-        self.frames[' '].append(game.images['player1'])
-        self.frames[' '].append(game.images['player2'])
-        self.frames[' '].append(game.images['player3'])
-        self.frames[' '].append(game.images['player4'])
-        self.frames[' '].append(game.images['player5'])
-        self.frames['l'].append(game.images['player_l0'])
-        self.frames['r'].append(game.images['player_r0'])
+        super(Player, self).__init__('player_u1', 'player', game, tile, values)
+        self.frames['u'].append(game.images['player_u1'])
+        self.frames['u'].append(game.images['player_u2'])
+        self.frames['u'].append(game.images['player_u3'])
+        self.frames['u'].append(game.images['player_u4'])
+        self.frames['d'].append(game.images['player_d1'])
+        self.frames['d'].append(game.images['player_d2'])
+        self.frames['d'].append(game.images['player_d3'])
+        self.frames['d'].append(game.images['player_d4'])
+        self.frames['l'].append(game.images['player_l1'])
+        self.frames['l'].append(game.images['player_l2'])
+        self.frames['l'].append(game.images['player_l3'])
+        self.frames['l'].append(game.images['player_l4'])
+        self.frames['r'].append(game.images['player_r1'])
+        self.frames['r'].append(game.images['player_r2'])
+        self.frames['r'].append(game.images['player_r3'])
+        self.frames['r'].append(game.images['player_r4'])                        
+        
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit  = self.hit
         self.sprite.shoot = self.fire
