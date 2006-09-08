@@ -249,6 +249,9 @@ class Sprite(object):
 
     def step(self, game, sprite):
         pass
+    
+    def get_sucked(self):
+        return
 
 class Player(Sprite):
     def __init__(self, game, tile, values=None):
@@ -299,6 +302,7 @@ class Player(Sprite):
                 self.suck_target.stop()
                 self.suck_target.speed = 0.0
                 self.suck_target.top_speed = 0.0
+                self.suck_target.get_sucked()
             else:
                 self.suck_target = None
         
@@ -606,6 +610,11 @@ class Cow(Sprite):
         self.top_speed = 0.4
         self.trophy = True
         self.load_path('lvl1_cow')
+        self.sound_one_cow = pygame.mixer.Sound('data/sfx/One-Cow.ogg')
+        self.sound_one_cow.set_volume(0.3)
+        self.sound_two_cows = pygame.mixer.Sound('data/sfx/Two-Cows-Loop.ogg')
+        self.sound_two_cows.set_volume(0.4)
+        self.sound_two_cows.play(-1)
 
     def step(self, game, sprite):
         self.move(game)
@@ -632,6 +641,10 @@ class Cow(Sprite):
     def hit(self, game, sprite, other):
         push(sprite, other)
         self.get_sprite_pos()
+
+    def get_sucked(self):
+        self.sound_one_cow.play()
+        self.sound_two_cows.stop()
 
 class Saucer(Sprite):
     def __init__(self, game, tile, values=None):
