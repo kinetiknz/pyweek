@@ -556,6 +556,9 @@ class Human(Sprite):
         self.speed = 0.1
         self.top_speed = 0.1
         #self.load_path('lake_circuit')
+        self.sound_sucked_scream = pygame.mixer.Sound('data/sfx/Wilhelm-Long.ogg')
+        self.sound_spotted_scream = pygame.mixer.Sound('data/sfx/Wilhelm.ogg')
+        self.sound_spotted_scream.set_volume(0.25)
 
     def step(self, game, sprite):
         self.move(game)
@@ -571,6 +574,7 @@ class Human(Sprite):
             relx = self.position[0] - (game.images['warn'][0].get_width()/2)
             rely = self.sprite.rect.y  - (game.images['warn'][0].get_height())
             game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx - game.view.x, rely - game.view.y, 0, 0)))
+            self.sound_spotted_scream.play()
 
         if self.move_toward(target, self.speed, 10.0):
             self.waypoint = (self.waypoint + 1) % len(self.waypoints)
@@ -584,6 +588,9 @@ class Human(Sprite):
         push(sprite, other)
         self.get_sprite_pos()
 
+    def get_sucked(self):
+        self.sound_sucked_scream.play()
+        
 class FBI(Human):
     def __init__(self, game, tile, values=None):
         super(FBI, self).__init__('farmer_u0', 'enemy', game, tile, values)
@@ -652,7 +659,7 @@ class Cow(Sprite):
         self.trophy = True
         self.load_path('lvl1_cow')
         self.sound_one_cow = pygame.mixer.Sound('data/sfx/One-Cow.ogg')
-        self.sound_one_cow.set_volume(0.3)
+        self.sound_one_cow.set_volume(0.5)
         self.sound_two_cows = pygame.mixer.Sound('data/sfx/Two-Cows-Loop.ogg')
         self.sound_two_cows.set_volume(0.4)
         self.sound_two_cows.play(-1)
