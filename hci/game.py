@@ -77,7 +77,9 @@ idata = [
     ('player_r1',  'data/test/alien/alien-r1.png', (4, 4, 48, 24)),
     ('player_r2',  'data/test/alien/alien-r2.png', (4, 4, 48, 24)),
     ('player_r3',  'data/test/alien/alien-r3.png', (4, 4, 48, 24)),
-    ('player_r4',  'data/test/alien/alien-r4.png', (4, 4, 48, 24)),     
+    ('player_r4',  'data/test/alien/alien-r4.png', (4, 4, 48, 24)),
+    ('man_d0',     'data/test/man010.png', (4, 4, 48, 72)),
+    ('man_d1',     'data/test/man011.png', (4, 4, 48, 72)),
     ('saucer0', 'data/test/Saucer0.png', (20, 20, 140, 70)),
     ('saucer1', 'data/test/Saucer1.png', (20, 20, 140, 70)),
     ('saucer2', 'data/test/Saucer2.png', (20, 20, 140, 70)),
@@ -115,7 +117,7 @@ idata = [
 cdata = {
     1: (lambda g, t, v: sprite.Player(g, t, v), None),
     2: (lambda g, t, v: sprite.Cow(g, t, v),    None),
-    3: (lambda g, t, v: sprite.Human(g, t, v),   None),
+    3: (lambda g, t, v: sprite.FBI(g, t, v),   None),
     4: (lambda g, t, v: sprite.Tree(g, t, v),   None),
     }
 

@@ -273,7 +273,7 @@ class Player(Sprite):
         self.frames['r'].append(game.images['player_r3'])
         self.frames['r'].append(game.images['player_r4'])                        
         
-        self.sprite.agroups = game.string2groups('Background')
+        self.sprite.agroups = game.string2groups('Background,enemy')
         self.sprite.hit  = self.hit
         self.sprite.shoot = self.fire
         self.sprite.score = 0
@@ -484,7 +484,7 @@ class Player(Sprite):
         if not self.impersonating and len(self.known_items) == 0:
             return
         if not self.impersonating:
-            self.impersonating = random.choice(self.known_items.values())
+            self.impersonating = random.choice(self.known_items)
             self.state = 'cloaked'
             self.stop()
             self.known_items.remove(self.impersonating)
@@ -555,38 +555,46 @@ class Bullet(Sprite):
         game.player.sprite.score += 500
 
 class Human(Sprite):
-    def __init__(self, game, tile, values=None):
-        super(Human, self).__init__('farmer_u0', 'enemy', game, tile, values)
-        self.frames['l'].append(game.images['farmer_l0'])
-        self.frames['r'].append(game.images['farmer_r0'])
-        self.frames['d'].append(game.images['farmer_d0'])
-        self.frames['u'].append(game.images['farmer_u0'])
-        self.sprite.agroups = game.string2groups('Background')
+    def __init__(self, image, game, tile, values=None):
+        super(Human, self).__init__(image, 'enemy', game, tile, values)
+        self.sprite.agroups = game.string2groups('Background,enemy')
         self.sprite.hit = self.hit
         self.waypoints.append(euclid.Vector2(self.position[0], 0))
-        self.speed = 0.1
-        self.top_speed = 0.1
+        self.speed = 0.0
+        self.top_speed = 0.0
+        self.seen_count = 0
+        self.target = None
         #self.load_path('lake_circuit')
         self.sound_sucked_scream = pygame.mixer.Sound('data/sfx/Wilhelm-Long.ogg')
         self.sound_spotted_scream = pygame.mixer.Sound('data/sfx/Wilhelm.ogg')
         self.sound_spotted_scream.set_volume(0.25)
 
     def step(self, game, sprite):
+        if not game.player.cloaked() and self.target and \
+               visibility.can_be_seen(game.player.position, self.position, self.target):
+            if not game.player.seen:
+                game.player.seen = True
+                self.seen_alien()
+            self.seeing_alien(game)
+        else:
+            self.not_seeing_alien()
+
         self.move(game)
+        
+    def seen_alien(self):
+        self.seen_count = 60
+        
+    def not_seeing_alien(self):
+        pass
+    
+    def seeing_alien(self, game):
+        if self.seen_count > 0:
+            relx = self.position[0] - (game.images['warn'][0].get_width()/2)
+            rely = self.sprite.rect.y  - (game.images['warn'][0].get_height()) - 5
+            game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx - game.view.x, rely - game.view.y, 0, 0)))
+            self.seen_count -= 1
 
     def move(self, game):
-        if len(self.waypoints) == 0: return
-
-        target = self.waypoints[self.waypoint]
-
-        if not game.player.cloaked() and \
-               visibility.can_be_seen(game.player.position, self.position, target):
-            game.player.seen = True
-            relx = self.position[0] - (game.images['warn'][0].get_width()/2)
-            rely = self.sprite.rect.y  - (game.images['warn'][0].get_height())
-            game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx - game.view.x, rely - game.view.y, 0, 0)))
-            self.sound_spotted_scream.play()
-
         if self.move_toward(target, self.speed, 10.0):
             self.waypoint = (self.waypoint + 1) % len(self.waypoints)
 
@@ -604,45 +612,50 @@ class Human(Sprite):
         
 class FBI(Human):
     def __init__(self, game, tile, values=None):
-        super(FBI, self).__init__('farmer_u0', 'enemy', game, tile, values)
+        super(FBI, self).__init__('man_d0', game, tile, values)
+        self.frames[' '].append(game.images['man_d1'])
+        self.speed = 1.0
+        self.top_speed = 2.0
+        self.target = game.player.position
+        
+    def seeing_alien(self, game):
+        super(FBI, self).seeing_alien(game)
+        self.target = game.player.position 
+ 
+    def not_seeing_alien(self):
+        super(FBI, self).not_seeing_alien()
+        #self.target = None
+        
+    def move(self, game):
+        if self.target:
+            self.move_toward(self.target, self.speed, 40.0)
+
+        if self.verlet_move():
+            self.animate(0.1)
+
+        self.set_sprite_pos()        
+
+class Farmer(Human):
+    def __init__(self, game, tile, values=None):
+        super(Farmer, self).__init__('farmer_d0', game, tile, values)
         self.frames['l'].append(game.images['farmer_l0'])
         self.frames['r'].append(game.images['farmer_r0'])
         self.frames['d'].append(game.images['farmer_d0'])
         self.frames['u'].append(game.images['farmer_u0'])
-        self.sprite.agroups = game.string2groups('Background')
-        self.sprite.hit = self.hit
-        self.waypoints.append(euclid.Vector2(self.position[0], 0))
-        self.speed = 0.1
-        self.top_speed = 0.1
-        #self.load_path('lake_circuit')
-
+        self.speed = 1.0
+        self.top_speed = 2.0
+        self.target = None
+        
     def step(self, game, sprite):
-        self.move(game)
-
-    def move(self, game):
-        if len(self.waypoints) == 0: return
-
-        target = self.waypoints[self.waypoint]
-
-        if not game.player.cloaked() and \
-               visibility.can_be_seen(game.player.position, self.position, target):
-            game.player.seen = True
-            relx = self.position[0] - (game.images['warn'][0].get_width()/2)
-            rely = self.sprite.rect.y  - (game.images['warn'][0].get_height())
-            game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx - game.view.x, rely - game.view.y, 0, 0)))
-
-        if self.move_toward(target, self.speed, 10.0):
-            self.waypoint = (self.waypoint + 1) % len(self.waypoints)
-
-        if not self.verlet_move():
-            self.waypoint = (self.waypoint + 1) % len(self.waypoints)
-
-        self.set_sprite_pos()
+        super(Farmer, self).step(game, sprite)
 
     def hit(self, game, sprite, other):
-        push(sprite, other)
-        self.get_sprite_pos()
-        
+        super(Farmer, self).hit(game, sprite, other)
+
+    def seen_alien(self, game):
+        super(Farmer, self).seen_alien(game)
+        self.sound_spotted_scream.play()
+                        
 class Cow(Sprite):
     def __init__(self, game, tile, values=None):
         super(Cow, self).__init__('cow_l1', 'enemy', game, tile, values)
@@ -663,7 +676,7 @@ class Cow(Sprite):
         self.frames['dr'].append(game.images['cow_dr0'])
         self.frames['dr'].append(game.images['cow_dr1'])
         self.dir_func = self.direction8
-        self.sprite.agroups = game.string2groups('Background')
+        self.sprite.agroups = game.string2groups('Background,player')
         self.sprite.hit = self.hit
         self.speed = 0.2
         self.top_speed = 0.4
