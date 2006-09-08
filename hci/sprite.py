@@ -25,6 +25,17 @@ import movement
 import sprite_eater
 import visibility
 
+def VectorToDegrees(vec):
+    ang = 180.0 - math.atan2(vec[0], vec[1]) * 360.0 / (2.0 * math.pi)
+    if ang < 0.0: ang += 360.0
+    ang = math.fmod(ang, 360.0)
+    return ang
+
+def DegreesToVector(ang):
+    ang /= 180.0
+    ang *= math.pi
+    return euclid.Vector2(math.sin(ang), -math.cos(ang))
+
 class Sprite(object):
     MIN_MOVEMENT_SQ = 0.1
 
@@ -161,14 +172,14 @@ class Sprite(object):
 
     def direction(self):
         vel = self.velocity()
-        left_right = math.fabs(vel[0]) > math.fabs(vel[1])
+        ang = VectorToDegrees(vel)
+        
+        if ang >= 315.0 or  ang < 45.0:  return 'u'
+        if ang >=  45.0 and ang < 135.0: return 'r'
+        if ang >= 135.0 and ang < 225.0: return 'd'
+        if ang >= 225.0 and ang < 315.0: return 'l'
 
-        if left_right:
-            if vel[0] > 0: return 'r'
-            else: return 'l'
-        else:
-            if vel[1] > 0: return 'd'
-            else: return 'u'
+        assert(False)
 
     def moving(self):
         return self.velocity.magnitude_squared() >= self.MIN_MOVEMENT_SQ
