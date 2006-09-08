@@ -265,7 +265,6 @@ class Player(Sprite):
 
         self.raygun_sound  = pygame.mixer.Sound('data/sfx/Raygun.ogg')
         self.beam_sound    = pygame.mixer.Sound('data/sfx/Beam.ogg')
-        self.beam_sound_isplaying    = False
         self.walking_sound_isplaying = False
 
     def landed(self, game):
@@ -278,6 +277,7 @@ class Player(Sprite):
             game.sprites.remove(self.player_target.sprite)
             self.player_target = None
             self.state = 'normal'
+            self.beam_sound.stop()
             return
                      
         assert(self.player_target)
@@ -320,7 +320,7 @@ class Player(Sprite):
             SelectionTest(game, (game.view.x + loc[0] + rsx,
                                  game.view.y + loc[1] + rsy), None)   
         
-        self.suck_progress += 0.01   
+        self.suck_progress += 0.02   
 
     def step(self, game, sprite):
         if self.state == 'landing':
@@ -373,20 +373,12 @@ class Player(Sprite):
                 self.walking_sound.stop()
                 self.walking_sound_isplaying = False
 
-        if buttons[2] == 0 and self.beam_sound_isplaying == True:
-            self.beam_sound.stop()
-            self.beam_sound_isplaying = False
-
         if buttons[0]:
             self.target = euclid.Vector2(game.view.x + loc[0], game.view.y + loc[1])
             self.mouse_move = True
             if self.recording: self.recorded_path.append(self.target)
 
-        if buttons[2]:
-            if not self.beam_sound_isplaying:
-                self.beam_sound.play()
-                self.beam_sound_isplaying = True
-
+        if buttons[2] and not self.state == 'sucking':
             loc = pygame.mouse.get_pos()
             loc = list(loc)
 
@@ -407,6 +399,7 @@ class Player(Sprite):
                 self.player_target.top_speed = 0.0
                 self.state = 'sucking'
                 self.suck_progress = 0.0
+                self.beam_sound.play()
                 self.suck_distance = (self.player_target.position - (self.position + self.gun_pos)).magnitude()
 
         if self.mouse_move:
