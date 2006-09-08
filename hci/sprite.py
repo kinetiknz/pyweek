@@ -243,6 +243,7 @@ class Player(Sprite):
         self.sprite.hit  = self.hit
         self.sprite.shoot = self.fire
         self.sprite.score = 0
+        self.gun_pos = euclid.Vector2(24.0, -12.0)
         self.recording = False
         self.seen = False
         self.mouse_move = False
@@ -251,7 +252,7 @@ class Player(Sprite):
         self.player_target = None
         self.impersonating = None
 
-        self.landing = True
+        self.state = 'landing'
         self.set_image(game.images['none'])
         Saucer(game, tile, values)
 
@@ -268,13 +269,64 @@ class Player(Sprite):
         self.walking_sound_isplaying = False
 
     def landed(self, game):
-        self.landing = False
+        self.state = 'normal'
         self.set_image(self.frames[' '][int(self.frame)])
 
+    def suck(self, game):
+        if self.suck_progress >= 1.0:
+            self.learn(self.player_target)
+            game.sprites.remove(self.player_target.sprite)
+            self.player_target = None
+            self.state = 'normal'
+            return
+                     
+        assert(self.player_target)
+                     
+        self.player_target.set_rotation(720.0 * self.suck_progress)
+        self.player_target.set_scale(0.1 + (0.9*(1.0-self.suck_progress)))
+        
+        gun_pos = euclid.Vector2(self.position[0], self.position[1]) + self.gun_pos
+        
+        vec = self.player_target.position - gun_pos
+        vec.normalize()
+        vec *= ((1.0-self.suck_progress) * self.suck_distance)
+        self.player_target.position = gun_pos + vec
+        self.player_target.set_sprite_pos()
+
+        # ugly ray gun effect
+        relx = gun_pos[0] - game.view.x 
+        rely = gun_pos[1] - game.view.y
+
+        loc = [self.player_target.position[0] - game.view.x, \
+               self.player_target.position[1] - game.view.y ]
+
+        ln = algo.getline([relx, rely], loc)
+        for l in xrange(0, len(ln), 7):
+            def draw():
+                c = [0, random.randint(0, 255), 255]
+                r = [relx, rely]
+                rx = random.randint(-5, 5)
+                ry = random.randint(-5, 5)
+                p = ln[l][0] + rx, ln[l][1] + ry
+                def proc():
+                    pygame.draw.line(game.screen, c, r, p, 2)
+                return proc
+
+            game.deferred_effects.append(draw())
+
+        for l in xrange(10):
+            rsx = random.gauss(0, 7)
+            rsy = random.gauss(0, 7)
+            SelectionTest(game, (game.view.x + loc[0] + rsx,
+                                 game.view.y + loc[1] + rsy), None)   
+        
+        self.suck_progress += 0.01   
+
     def step(self, game, sprite):
-        if self.landing:
+        if self.state == 'landing':
             self.view_me(game)
             return
+        
 
         game.deferred_effects.append(lambda: self.draw_morph_targets(game))
 
@@ -286,6 +338,9 @@ class Player(Sprite):
             # game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx, rely, 0, 0)))
             self.seen = False
 
+        if self.state == 'sucking':
+            self.suck(game)
+        
         dx, dy = 0, 0
         if key[K_w]: dy -= 1
         if key[K_s]: dy += 1
@@ -348,39 +403,11 @@ class Player(Sprite):
             SelectionTest(game, (game.view.x + loc[0], game.view.y + loc[1]), None)
             if self.player_target and not self.player_target.__class__ in self.known_items:
                 self.player_target.stop()
-                self.player_target.waypoints.append(self.position)
-                movement.move(self.player_target.position, self.position, 1)
-                self.player_target.rotate(6.25)
-                self.player_target.scale(0.95)
-                self.player_target.set_sprite_pos()
-                if self.player_target.scale_factor < 0.25:
-                    self.learn(self.player_target)
-                    game.sprites.remove(self.player_target.sprite)
-                    self.player_target = None
-
-            # ugly ray gun effect
-            relx = self.position[0] - game.view.x + 24
-            rely = self.position[1] - game.view.y - 12
-
-            ln = algo.getline([relx, rely], loc)
-            for l in xrange(0, len(ln), 7):
-                def draw():
-                    c = [0, random.randint(0, 255), 255]
-                    r = [relx, rely]
-                    rx = random.randint(-5, 5)
-                    ry = random.randint(-5, 5)
-                    p = ln[l][0] + rx, ln[l][1] + ry
-                    def proc():
-                        pygame.draw.line(game.screen, c, r, p, 2)
-                    return proc
-
-                game.deferred_effects.append(draw())
-
-            for l in xrange(10):
-                rsx = random.gauss(0, 7)
-                rsy = random.gauss(0, 7)
-                SelectionTest(game, (game.view.x + loc[0] + rsx,
-                                     game.view.y + loc[1] + rsy), None)
+                self.player_target.speed = 0.0
+                self.player_target.top_speed = 0.0
+                self.state = 'sucking'
+                self.suck_progress = 0.0
+                self.suck_distance = (self.player_target.position - (self.position + self.gun_pos)).magnitude()
 
         if self.mouse_move:
             if self.move_toward(self.target, self.speed, 10.0):
@@ -466,12 +493,16 @@ class Bullet(Sprite):
 
 class Human(Sprite):
     def __init__(self, game, tile, values=None):
-        super(Human, self).__init__('enemy', 'enemy', game, tile, values)
+        super(Human, self).__init__('farmer_u0', 'enemy', game, tile, values)
+        self.frames['l'].append(game.images['farmer_l0'])
+        self.frames['r'].append(game.images['farmer_r0'])
+        self.frames['d'].append(game.images['farmer_d0'])
+        self.frames['u'].append(game.images['farmer_u0'])        
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit = self.hit
         self.waypoints.append(euclid.Vector2(self.position[0], 0))
-        self.speed = 0.0
-        self.top_speed = 0.0
+        self.speed = 0.1
+        self.top_speed = 0.1
         #self.load_path('lake_circuit')
 
     def step(self, game, sprite):
@@ -484,9 +515,9 @@ class Human(Sprite):
 
         if visibility.can_be_seen(game.player.position, self.position, target):
             game.player.seen = True
-            relx = self.position[0] - game.view.x - (game.images['warn'][0].get_width()/2)
-            rely = self.sprite.rect.y - game.view.y - (game.images['warn'][0].get_height())
-            game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx, rely, 0, 0)))
+            relx = self.position[0] - (game.images['warn'][0].get_width()/2)
+            rely = self.sprite.rect.y  - (game.images['warn'][0].get_height())
+            game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx - game.view.x, rely - game.view.y, 0, 0)))
 
         if self.move_toward(target, self.speed, 10.0):
             self.waypoint = (self.waypoint + 1) % len(self.waypoints)
@@ -569,7 +600,7 @@ class Saucer(Sprite):
         #logit('took', time.time() - d)
 
     def step(self, game, sprite):
-        if game.player.landing:
+        if game.player.state == 'landing':
             percent = 1.0 - ((self.land_pos - self.position).magnitude() / self.land_distance)
             self.move_toward(self.land_pos, self.speed * (1.0 - percent), 10.0)
 

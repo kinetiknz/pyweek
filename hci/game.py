@@ -71,7 +71,10 @@ idata = [
     ('saucer0', 'data/test/Saucer0.png', (20, 20, 140, 70)),
     ('saucer1', 'data/test/Saucer1.png', (20, 20, 140, 70)),
     ('saucer2', 'data/test/Saucer2.png', (20, 20, 140, 70)),
-    ('enemy',   'data/test/characters/farmer-front.png', (4, 4, 24, 24)),
+    ('farmer_u0', 'data/test/characters/farmer-up0.png', (4, 4, 24, 24)),
+    ('farmer_d0', 'data/test/characters/farmer-dw0.png', (4, 4, 24, 24)), 
+    ('farmer_r0', 'data/test/characters/farmer-rg0.png', (4, 4, 24, 24)),   
+    ('farmer_l0', 'data/test/characters/farmer-lf0.png', (4, 4, 24, 24)),          
     ('cow_l1',  'data/test/cow000.png', (10, 10, 90, 50)),
     ('cow_l2',  'data/test/cow001.png', (10, 10, 90, 50)),
     ('cow_u1',  'data/test/cow011.png', (10, 10, 50, 90)),
@@ -91,7 +94,7 @@ idata = [
 cdata = {
     1: (lambda g, t, v: sprite.Player(g, t, v), None),
     2: (lambda g, t, v: sprite.Cow(g, t, v),    None),
-    3: (lambda g, t, v: sprite.Bush(g, t, v),   None),
+    3: (lambda g, t, v: sprite.Human(g, t, v),   None),
     4: (lambda g, t, v: sprite.Tree(g, t, v),   None),
     }
 
