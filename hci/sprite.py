@@ -173,7 +173,7 @@ class Sprite(object):
     def direction(self):
         vel = self.velocity()
         ang = VectorToDegrees(vel)
-        
+
         if ang >= 315.0 or  ang < 45.0:  return 'u'
         if ang >=  45.0 and ang < 135.0: return 'r'
         if ang >= 135.0 and ang < 225.0: return 'd'
@@ -279,14 +279,14 @@ class Player(Sprite):
             self.state = 'normal'
             self.beam_sound.stop()
             return
-                     
+
         assert(self.player_target)
-                     
+
         self.player_target.set_rotation(720.0 * self.suck_progress)
         self.player_target.set_scale(0.1 + (0.9*(1.0-self.suck_progress)))
-        
+
         gun_pos = euclid.Vector2(self.position[0], self.position[1]) + self.gun_pos
-        
+
         vec = self.player_target.position - gun_pos
         vec.normalize()
         vec *= ((1.0-self.suck_progress) * self.suck_distance)
@@ -294,7 +294,7 @@ class Player(Sprite):
         self.player_target.set_sprite_pos()
 
         # ugly ray gun effect
-        relx = gun_pos[0] - game.view.x 
+        relx = gun_pos[0] - game.view.x
         rely = gun_pos[1] - game.view.y
 
         loc = [self.player_target.position[0] - game.view.x, \
@@ -318,15 +318,15 @@ class Player(Sprite):
             rsx = random.gauss(0, 7)
             rsy = random.gauss(0, 7)
             SelectionTest(game, (game.view.x + loc[0] + rsx,
-                                 game.view.y + loc[1] + rsy), None)   
-        
-        self.suck_progress += 0.02   
+                                 game.view.y + loc[1] + rsy), None)
+
+        self.suck_progress += 0.02
 
     def step(self, game, sprite):
         if self.state == 'landing':
             self.view_me(game)
             return
-        
+
 
         game.deferred_effects.append(lambda: self.draw_morph_targets(game))
 
@@ -340,7 +340,7 @@ class Player(Sprite):
 
         if self.state == 'sucking':
             self.suck(game)
-        
+
         dx, dy = 0, 0
         if key[K_w]: dy -= 1
         if key[K_s]: dy += 1
@@ -428,10 +428,18 @@ class Player(Sprite):
             return
         if not self.impersonating:
             self.impersonating = random.choice(self.known_items.values())
+            self.state = 'cloaked'
             del self.known_items[self.impersonating.__class__]
         else:
             self.set_image(self.frames[' '][0])
             self.impersonating = None
+
+    def cloaked(self):
+        if self.impersonating:
+            return True
+        if self.state == 'landing':
+            return True
+        return False
 
     def draw_morph_targets(self, game):
         scale_to = 32.0
@@ -490,7 +498,7 @@ class Human(Sprite):
         self.frames['l'].append(game.images['farmer_l0'])
         self.frames['r'].append(game.images['farmer_r0'])
         self.frames['d'].append(game.images['farmer_d0'])
-        self.frames['u'].append(game.images['farmer_u0'])        
+        self.frames['u'].append(game.images['farmer_u0'])
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit = self.hit
         self.waypoints.append(euclid.Vector2(self.position[0], 0))
@@ -506,7 +514,8 @@ class Human(Sprite):
 
         target = self.waypoints[self.waypoint]
 
-        if visibility.can_be_seen(game.player.position, self.position, target):
+        if not game.player.cloaked() and \
+               visibility.can_be_seen(game.player.position, self.position, target):
             game.player.seen = True
             relx = self.position[0] - (game.images['warn'][0].get_width()/2)
             rely = self.sprite.rect.y  - (game.images['warn'][0].get_height())

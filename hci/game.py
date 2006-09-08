@@ -72,9 +72,9 @@ idata = [
     ('saucer1', 'data/test/Saucer1.png', (20, 20, 140, 70)),
     ('saucer2', 'data/test/Saucer2.png', (20, 20, 140, 70)),
     ('farmer_u0', 'data/test/characters/farmer-up0.png', (4, 4, 24, 24)),
-    ('farmer_d0', 'data/test/characters/farmer-dw0.png', (4, 4, 24, 24)), 
-    ('farmer_r0', 'data/test/characters/farmer-rg0.png', (4, 4, 24, 24)),   
-    ('farmer_l0', 'data/test/characters/farmer-lf0.png', (4, 4, 24, 24)),          
+    ('farmer_d0', 'data/test/characters/farmer-dw0.png', (4, 4, 24, 24)),
+    ('farmer_r0', 'data/test/characters/farmer-rg0.png', (4, 4, 24, 24)),
+    ('farmer_l0', 'data/test/characters/farmer-lf0.png', (4, 4, 24, 24)),
     ('cow_l1',  'data/test/cow000.png', (10, 10, 90, 50)),
     ('cow_l2',  'data/test/cow001.png', (10, 10, 90, 50)),
     ('cow_u1',  'data/test/cow011.png', (10, 10, 50, 90)),
@@ -253,4 +253,3 @@ def run():
 
             game.frame += 1
             pygame.display.flip()
-
