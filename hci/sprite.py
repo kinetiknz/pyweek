@@ -275,7 +275,6 @@ class Player(Sprite):
 
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit  = self.hit
-        self.sprite.shoot = self.fire
         self.sprite.score = 0
         self.gun_pos = euclid.Vector2(24.0, -12.0)
         self.recording = False
@@ -298,7 +297,6 @@ class Player(Sprite):
         self.walking_sound.set_volume(0.5)
 
         self.morph_sound   = pygame.mixer.Sound('data/sfx/Morph.ogg')
-        self.raygun_sound  = pygame.mixer.Sound('data/sfx/Raygun.ogg')
         self.beam_sound    = pygame.mixer.Sound('data/sfx/Beam.ogg')
         self.walking_sound_isplaying = False
 
@@ -390,8 +388,6 @@ class Player(Sprite):
         if key[K_s] or key[K_DOWN]: dy += 1
         if key[K_a] or key[K_LEFT]: dx -= 1
         if key[K_d] or key[K_RIGHT]: dx += 1
-        if key[K_SPACE] and game.frame % 8 == 0:
-            self.fire(game, sprite)
         if key[K_LSHIFT]:
             self.top_speed = 15.0
             self.speed     = 3.0
@@ -472,10 +468,6 @@ class Player(Sprite):
 
         self.animate(0.2)
         self.view_me(game)
-
-    def fire(self, game, sprite):
-        Bullet('shot', game, sprite)
-        self.raygun_sound.play()
 
     def learn(self, target):
         self.known_items.append(target)
