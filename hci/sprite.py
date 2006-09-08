@@ -249,7 +249,7 @@ class Player(Sprite):
         self.mouse_move = False
         self.speed = 1.0
         self.top_speed = 5.0
-        self.player_target = None
+        self.suck_target = None
         self.impersonating = None
 
         self.state = 'landing'
@@ -272,33 +272,44 @@ class Player(Sprite):
         self.set_image(self.frames[' '][int(self.frame)])
 
     def suck(self, game):
+        if self.suck_target:
+            if not self.suck_target.__class__ in self.known_items:
+                self.suck_target.stop()
+                self.suck_target.speed = 0.0
+                self.suck_target.top_speed = 0.0
+            else:
+                self.suck_target = None
+        
         if self.suck_progress >= 1.0:
-            self.learn(self.player_target)
-            game.sprites.remove(self.player_target.sprite)
-            self.player_target = None
+            if self.suck_target:
+                self.learn(self.suck_target)
+                game.sprites.remove(self.suck_target.sprite)
+            self.suck_target = None
             self.state = 'normal'
             self.beam_sound.stop()
             return
 
-        assert(self.player_target)
-
-        self.player_target.set_rotation(720.0 * self.suck_progress)
-        self.player_target.set_scale(0.1 + (0.9*(1.0-self.suck_progress)))
-
         gun_pos = euclid.Vector2(self.position[0], self.position[1]) + self.gun_pos
 
-        vec = self.player_target.position - gun_pos
-        vec.normalize()
-        vec *= ((1.0-self.suck_progress) * self.suck_distance)
-        self.player_target.position = gun_pos + vec
-        self.player_target.set_sprite_pos()
+        loc = [self.suck_target_pos[0] - game.view.x, \
+               self.suck_target_pos[1] - game.view.y ]     
 
+        if self.suck_target:
+            self.suck_target.set_rotation(720.0 * self.suck_progress)
+            self.suck_target.set_scale(0.1 + (0.9*(1.0-self.suck_progress)))
+
+            vec = self.suck_target.position - gun_pos
+            vec.normalize()
+            vec *= ((1.0-self.suck_progress) * self.suck_distance)
+            self.suck_target.position = gun_pos + vec
+            self.suck_target.set_sprite_pos()
+            
+            loc = [self.suck_target.position[0] - game.view.x, \
+                   self.suck_target.position[1] - game.view.y ]
+            
         # ugly ray gun effect
         relx = gun_pos[0] - game.view.x
         rely = gun_pos[1] - game.view.y
-
-        loc = [self.player_target.position[0] - game.view.x, \
-               self.player_target.position[1] - game.view.y ]
 
         ln = algo.getline([relx, rely], loc)
         for l in xrange(0, len(ln), 7):
@@ -317,6 +328,7 @@ class Player(Sprite):
         for l in xrange(10):
             rsx = random.gauss(0, 7)
             rsy = random.gauss(0, 7)
+            
             SelectionTest(game, (game.view.x + loc[0] + rsx,
                                  game.view.y + loc[1] + rsy), None)
 
@@ -379,28 +391,36 @@ class Player(Sprite):
             if self.recording: self.recorded_path.append(self.target)
 
         if buttons[2] and not self.state == 'sucking':
-            loc = pygame.mouse.get_pos()
-            loc = list(loc)
+            loc       = pygame.mouse.get_pos()
+            click_pos = euclid.Vector2(loc[0]+game.view.x, loc[1]+game.view.y)
+            gun_pos   = self.position + self.gun_pos
 
-            def s2t(x, y):
-                stx = x / game.tile_w
-                sty = y / game.tile_h
-                return stx, sty
+            #def s2t(x, y):
+            #    stx = x / game.tile_w
+            #    sty = y / game.tile_h
+            #    return stx, sty
 
             # find selected tile
-            tx, ty = s2t(game.view.x + loc[0], game.view.y + loc[1])
+            # tx, ty = s2t(game.view.x + loc[0], game.view.y + loc[1])
             #game.set([tx, ty], 2)
 
+            me_to_click       = click_pos - gun_pos
+            distance_to_click = me_to_click.magnitude()
+            
+            if distance_to_click > 100.0:
+                me_to_click /= (distance_to_click)
+                me_to_click *= 100.0
+                click_pos    = gun_pos + me_to_click
+                
+            self.state = 'sucking'
+            self.suck_progress = 0.0
+            self.beam_sound.play()
+            self.suck_distance = (click_pos - gun_pos).magnitude()
+            self.suck_target_pos = click_pos
+            self.suck_target = None
+            
             # ugly ray gun logic
-            SelectionTest(game, (game.view.x + loc[0], game.view.y + loc[1]), None)
-            if self.player_target and not self.player_target.__class__ in self.known_items:
-                self.player_target.stop()
-                self.player_target.speed = 0.0
-                self.player_target.top_speed = 0.0
-                self.state = 'sucking'
-                self.suck_progress = 0.0
-                self.beam_sound.play()
-                self.suck_distance = (self.player_target.position - (self.position + self.gun_pos)).magnitude()
+            SelectionTest(game, (click_pos[0], click_pos[1]), None)
 
         if self.mouse_move:
             if self.move_toward(self.target, self.speed, 10.0):
@@ -642,11 +662,11 @@ class SelectionTest(Sprite):
         if self.lived_once == False:
             self.lived_once = True
             return
-        game.player.player_target = None
+        game.player.suck_target = None
         game.sprites.remove(sprite)
 
     def hit(self, game, sprite, other):
-        game.player.player_target = other.backref
+        game.player.suck_target = other.backref
 
 def push(mover, away_from):
     if mover._rect.bottom <= away_from._rect.top and mover.rect.bottom > away_from.rect.top:
