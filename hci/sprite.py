@@ -197,8 +197,8 @@ class Sprite(object):
         if ang < 247.5: return 'dl'
         if ang < 292.5: return 'l'
         if ang < 337.5: return 'ul'
-        
-        assert(False)        
+
+        assert(False)
 
     def moving(self):
         return self.velocity.magnitude_squared() >= self.MIN_MOVEMENT_SQ
@@ -292,7 +292,7 @@ class Player(Sprite):
 
         game.player = self
 
-        self.known_items = {}
+        self.known_items = []
 
         self.walking_sound = pygame.mixer.Sound('data/sfx/Walking.ogg')
         self.walking_sound.set_volume(0.5)
@@ -308,14 +308,11 @@ class Player(Sprite):
 
     def suck(self, game):
         if self.suck_target:
-            if not self.suck_target.__class__ in self.known_items:
-                self.suck_target.stop()
-                self.suck_target.speed = 0.0
-                self.suck_target.top_speed = 0.0
-                self.suck_target.get_sucked()
-            else:
-                self.suck_target = None
-        
+            self.suck_target.stop()
+            self.suck_target.speed = 0.0
+            self.suck_target.top_speed = 0.0
+            self.suck_target.get_sucked()
+
         if self.suck_progress >= 1.0:
             if self.suck_target:
                 self.learn(self.suck_target)
@@ -328,7 +325,7 @@ class Player(Sprite):
         gun_pos = euclid.Vector2(self.position[0], self.position[1]) + self.gun_pos
 
         loc = [self.suck_target_pos[0] - game.view.x, \
-               self.suck_target_pos[1] - game.view.y ]     
+               self.suck_target_pos[1] - game.view.y ]
 
         if self.suck_target:
             self.suck_target.set_rotation(720.0 * self.suck_progress)
@@ -339,10 +336,10 @@ class Player(Sprite):
             vec *= ((1.0-self.suck_progress) * self.suck_distance)
             self.suck_target.position = gun_pos + vec
             self.suck_target.set_sprite_pos()
-            
+
             loc = [self.suck_target.position[0] - game.view.x, \
                    self.suck_target.position[1] - game.view.y ]
-            
+
         # ugly ray gun effect
         relx = gun_pos[0] - game.view.x
         rely = gun_pos[1] - game.view.y
@@ -364,7 +361,7 @@ class Player(Sprite):
         for l in xrange(10):
             rsx = random.gauss(0, 7)
             rsy = random.gauss(0, 7)
-            
+
             SelectionTest(game, (game.view.x + loc[0] + rsx,
                                  game.view.y + loc[1] + rsy), None)
 
@@ -374,7 +371,6 @@ class Player(Sprite):
         if self.state == 'landing':
             self.view_me(game)
             return
-
 
         game.deferred_effects.append(lambda: self.draw_morph_targets(game))
 
@@ -402,6 +398,11 @@ class Player(Sprite):
         else:
             self.top_speed = 5.0
             self.speed     = 1.0
+
+        if key[K_f]:
+            loc = pygame.mouse.get_pos()
+            click_pos = euclid.Vector2(loc[0] + game.view.x, loc[1] + game.view.y)
+            Chicken(game, (click_pos[0], click_pos[1]), None)
 
         if self.impersonating:
             self.set_image(self.impersonating.get_image())
@@ -442,19 +443,19 @@ class Player(Sprite):
 
             me_to_click       = click_pos - gun_pos
             distance_to_click = me_to_click.magnitude()
-            
+
             if distance_to_click > 150.0:
                 me_to_click /= (distance_to_click)
                 me_to_click *= 150.0
                 click_pos    = gun_pos + me_to_click
-                
+
             self.state = 'sucking'
             self.suck_progress = 0.0
             self.beam_sound.play()
             self.suck_distance = (click_pos - gun_pos).magnitude()
             self.suck_target_pos = click_pos
             self.suck_target = None
-            
+
             # ugly ray gun logic
             SelectionTest(game, (click_pos[0], click_pos[1]), None)
 
@@ -477,7 +478,7 @@ class Player(Sprite):
         self.raygun_sound.play()
 
     def learn(self, target):
-        self.known_items[target.__class__] = target
+        self.known_items.append(target)
 
     def morph(self):
         if not self.impersonating and len(self.known_items) == 0:
@@ -486,7 +487,7 @@ class Player(Sprite):
             self.impersonating = random.choice(self.known_items.values())
             self.state = 'cloaked'
             self.stop()
-            del self.known_items[self.impersonating.__class__]
+            self.known_items.remove(self.impersonating)
             self.morph_sound.play()
         else:
             self.set_image(self.frames[' '][0])
@@ -502,7 +503,7 @@ class Player(Sprite):
     def draw_morph_targets(self, game):
         scale_to = 32.0
         x, y = game.view.w - scale_to, 0
-        for t in self.known_items.values():
+        for t in self.known_items:
             def draw():
                 dx = x
                 dy = y
@@ -531,7 +532,7 @@ class Player(Sprite):
     def hit(self, game, sprite, other):
         if self.suck_target and other is self.suck_target.sprite:
             return
-        
+
         push(sprite, other)
         self.get_sprite_pos()
         self.view_me(game)
@@ -660,7 +661,7 @@ class Cow(Sprite):
         self.frames['dl'].append(game.images['cow_dl0'])
         self.frames['dl'].append(game.images['cow_dl1'])
         self.frames['dr'].append(game.images['cow_dr0'])
-        self.frames['dr'].append(game.images['cow_dr1'])        
+        self.frames['dr'].append(game.images['cow_dr1'])
         self.dir_func = self.direction8
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit = self.hit
@@ -759,6 +760,21 @@ class Tree(Sprite):
 class Bush(Sprite):
     def __init__(self, game, tile, values=None):
         super(Bush, self).__init__('bush', 'Background', game, tile, values)
+
+class Chicken(Sprite):
+    def __init__(self, game, tile, values=None):
+        super(Chicken, self).__init__('chick1', 'Background', game, tile, values)
+        for x in xrange(10):
+            idle = random.randint(0, 60)
+            for y in xrange(idle):
+                self.frames[' '].append(game.images['chick1'])
+            peck = random.randint(0, 7)
+            for y in xrange(peck):
+                self.frames[' '].append(game.images['chick1'])
+                self.frames[' '].append(game.images['chick2'])
+
+    def step(self, game, sprite):
+        self.animate(0.2)
 
 class SelectionTest(Sprite):
     def __init__(self, game, tile, values=None):

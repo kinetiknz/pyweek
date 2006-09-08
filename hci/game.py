@@ -108,6 +108,8 @@ idata = [
     ('laser', 'data/test/laser.png', (0, 0, 8, 8)),
     ('trophy',  'data/test/CollectMe.png', (0, 0, 0, 0)),
     ('none',  'data/test/EmptyImage.png', (0, 0, 0, 0)),
+    ('chick1', 'data/test/chicksmall01.png', (0, 0, 64, 37)),
+    ('chick2', 'data/test/chicksmall02.png', (0, 0, 64, 37)),
     ]
 
 cdata = {
