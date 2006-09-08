@@ -284,6 +284,7 @@ class Player(Sprite):
         self.walking_sound = pygame.mixer.Sound('data/sfx/Walking.ogg')
         self.walking_sound.set_volume(0.5)
 
+        self.morph_sound   = pygame.mixer.Sound('data/sfx/Morph.ogg')
         self.raygun_sound  = pygame.mixer.Sound('data/sfx/Raygun.ogg')
         self.beam_sound    = pygame.mixer.Sound('data/sfx/Beam.ogg')
         self.walking_sound_isplaying = False
@@ -471,6 +472,7 @@ class Player(Sprite):
             self.impersonating = random.choice(self.known_items.values())
             self.state = 'cloaked'
             del self.known_items[self.impersonating.__class__]
+            self.morph_sound.play()
         else:
             self.set_image(self.frames[' '][0])
             self.impersonating = None
