@@ -26,6 +26,7 @@ import sprite_eater
 import visibility
 
 def VectorToDegrees(vec):
+    if vec.magnitude_squared() == 0.0: return 0.0
     ang = 180.0 - math.atan2(vec[0], vec[1]) * 360.0 / (2.0 * math.pi)
     if ang < 0.0: ang += 360.0
     ang = math.fmod(ang, 360.0)
@@ -236,6 +237,7 @@ class Sprite(object):
         path = cPickle.load(file)
         for x, y in path:
             self.waypoints.append(euclid.Vector2(x, y))
+        self.target = self.waypoints[0]
 
     def animate(self, step):
         dir = self.dir_func()
@@ -273,7 +275,7 @@ class Player(Sprite):
         self.frames['r'].append(game.images['player_r3'])
         self.frames['r'].append(game.images['player_r4'])
 
-        self.sprite.agroups = game.string2groups('Background,enemy')
+        self.sprite.agroups = game.string2groups('Background,animal,farmer,fbi')
         self.sprite.hit  = self.hit
         self.sprite.score = 0
         self.gun_pos = {' ': euclid.Vector2(-3.0, 35.0), 'l': euclid.Vector2(-12.0, 35.0)}
@@ -284,6 +286,7 @@ class Player(Sprite):
         self.top_speed = 5.0
         self.suck_target = None
         self.impersonating = None
+        self.lvl_complete = False
 
         self.state = 'landing'
         self.set_image(game.images['none'])
@@ -324,6 +327,13 @@ class Player(Sprite):
             self.suck_target = None
             self.state = 'normal'
             self.beam_sound.stop()
+            
+            lvl_complete = True
+            for s in game.sprites:
+                if s.backref.trophy:
+                    lvl_complete = False
+            if lvl_complete:
+                self.lvl_complete = True
             return
 
         gun_pos = euclid.Vector2(self.position[0], self.position[1]) + self.gun_pos[self.gun_dir()]
@@ -443,9 +453,9 @@ class Player(Sprite):
             me_to_click       = click_pos - gun_pos
             distance_to_click = me_to_click.magnitude()
 
-            if distance_to_click > 150.0:
+            if distance_to_click > 120.0:
                 me_to_click /= (distance_to_click)
-                me_to_click *= 150.0
+                me_to_click *= 120.0
                 click_pos    = gun_pos + me_to_click
 
             self.state = 'sucking'
@@ -550,9 +560,9 @@ class Bullet(Sprite):
         game.player.sprite.score += 500
 
 class Human(Sprite):
-    def __init__(self, image, game, tile, values=None):
-        super(Human, self).__init__(image, 'enemy', game, tile, values)
-        self.sprite.agroups = game.string2groups('Background,enemy')
+    def __init__(self, image, group, game, tile, values=None):
+        super(Human, self).__init__(image, group, game, tile, values)
+        self.sprite.agroups = game.string2groups('Background,farmer,animal')
         self.sprite.hit = self.hit
         self.waypoints.append(euclid.Vector2(self.position[0], 0))
         self.speed = 0.0
@@ -614,7 +624,7 @@ class Human(Sprite):
 
 class FBI(Human):
     def __init__(self, game, tile, values=None):
-        super(FBI, self).__init__('man_d0', game, tile, values)
+        super(FBI, self).__init__('man_d0', 'fbi', game, tile, values)
         self.frames[' '].append(game.images['man_d1'])
         self.speed = 1.0
         self.top_speed = 2.0
@@ -639,14 +649,14 @@ class FBI(Human):
 
 class Farmer(Human):
     def __init__(self, game, tile, values=None):
-        super(Farmer, self).__init__('farmer_d0', game, tile, values)
+        super(Farmer, self).__init__('farmer_d0', 'farmer', game, tile, values)
         self.frames['l'].append(game.images['farmer_l0'])
         self.frames['r'].append(game.images['farmer_r0'])
         self.frames['d'].append(game.images['farmer_d0'])
         self.frames['u'].append(game.images['farmer_u0'])
         self.speed = 1.0
         self.top_speed = 2.0
-        self.target = None
+        self.load_path('lvl2_farmer')
         
     def step(self, game, sprite):
         super(Farmer, self).step(game, sprite)
@@ -666,7 +676,7 @@ class Farmer(Human):
 
 class Cow(Sprite):
     def __init__(self, game, tile, values=None):
-        super(Cow, self).__init__('cow_l1', 'enemy', game, tile, values)
+        super(Cow, self).__init__('cow_l1', 'animal', game, tile, values)
         self.frames['l'].append(game.images['cow_l0'])
         self.frames['l'].append(game.images['cow_l1'])
         self.frames['r'].append(game.images['cow_r0'])
@@ -684,11 +694,10 @@ class Cow(Sprite):
         self.frames['dr'].append(game.images['cow_dr0'])
         self.frames['dr'].append(game.images['cow_dr1'])
         self.dir_func = self.direction8
-        self.sprite.agroups = game.string2groups('Background,player')
+        self.sprite.agroups = game.string2groups('')
         self.sprite.hit = self.hit
         self.speed = 0.2
         self.top_speed = 0.4
-        self.trophy = True
         self.load_path('lvl1_cow')
         self.sound_one_cow = pygame.mixer.Sound('data/sfx/One-Cow.ogg')
         self.sound_one_cow.set_volume(0.3)
@@ -700,9 +709,9 @@ class Cow(Sprite):
         self.move(game)
 
         if self.trophy:
-            relx = self.position[0] - game.view.x - (game.images['trophy'][0].get_width()/2)
-            rely = self.sprite.rect.y - game.view.y - (game.images['trophy'][0].get_height())
-            game.deferred_effects.append(lambda: game.screen.blit(game.images['trophy'][0], (relx, rely, 0, 0)))
+            relx = self.position[0]  - (game.images['trophy'][0].get_width()/2)
+            rely = self.sprite.rect.y  - (game.images['trophy'][0].get_height())
+            game.deferred_effects.append(lambda: game.screen.blit(game.images['trophy'][0], (relx- game.view.x, rely-game.view.y, 0, 0)))
 
     def move(self, game):
         if len(self.waypoints) == 0: return
@@ -719,13 +728,19 @@ class Cow(Sprite):
         self.set_sprite_pos()
 
     def hit(self, game, sprite, other):
-        push(sprite, other)
-        self.get_sprite_pos()
+        # push(sprite, other)
+        # self.get_sprite_pos()
+        pass
 
     def get_sucked(self):
         self.sound_one_cow.play()
         self.sound_two_cows.stop()
 
+class CollectableCow(Cow):
+    def __init__(self, game, tile, values=None):
+        super(CollectableCow, self).__init__(game, tile, values)
+        self.trophy = True
+        
 class Saucer(Sprite):
     def __init__(self, game, tile, values=None):
         super(Saucer, self).__init__('saucer0', 'Background', game, tile, values)
@@ -797,10 +812,16 @@ class Chicken(Sprite):
     def step(self, game, sprite):
         self.animate(0.2)
 
+
+class FBISpawn(Sprite):
+    def __init__(self, game, tile, values=None):
+        super(SelectionTest, self).__init__('none', 'shot', game, tile, values)
+        self.sprite.agroups = game.string2groups('fbi_spawn')
+
 class SelectionTest(Sprite):
     def __init__(self, game, tile, values=None):
         super(SelectionTest, self).__init__('none', 'shot', game, tile, values)
-        self.sprite.agroups = game.string2groups('enemy,Background')
+        self.sprite.agroups = game.string2groups('animal,Background')
         self.sprite.hit = self.hit
         self.lived_once = False
 
