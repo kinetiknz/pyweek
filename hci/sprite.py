@@ -249,7 +249,7 @@ class Sprite(object):
 
     def step(self, game, sprite):
         pass
-    
+
     def get_sucked(self):
         return
 
@@ -271,8 +271,8 @@ class Player(Sprite):
         self.frames['r'].append(game.images['player_r1'])
         self.frames['r'].append(game.images['player_r2'])
         self.frames['r'].append(game.images['player_r3'])
-        self.frames['r'].append(game.images['player_r4'])                        
-        
+        self.frames['r'].append(game.images['player_r4'])
+
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit  = self.hit
         self.sprite.shoot = self.fire
@@ -484,7 +484,7 @@ class Player(Sprite):
         if not self.impersonating and len(self.known_items) == 0:
             return
         if not self.impersonating:
-            self.impersonating = random.choice(self.known_items.values())
+            self.impersonating = random.choice(self.known_items)
             self.state = 'cloaked'
             self.stop()
             self.known_items.remove(self.impersonating)
@@ -601,7 +601,7 @@ class Human(Sprite):
 
     def get_sucked(self):
         self.sound_sucked_scream.play()
-        
+
 class FBI(Human):
     def __init__(self, game, tile, values=None):
         super(FBI, self).__init__('farmer_u0', 'enemy', game, tile, values)
@@ -642,7 +642,7 @@ class FBI(Human):
     def hit(self, game, sprite, other):
         push(sprite, other)
         self.get_sprite_pos()
-        
+
 class Cow(Sprite):
     def __init__(self, game, tile, values=None):
         super(Cow, self).__init__('cow_l1', 'enemy', game, tile, values)
