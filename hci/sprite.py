@@ -26,6 +26,7 @@ import sprite_eater
 import visibility
 
 def VectorToDegrees(vec):
+    if vec.magnitude_squared() == 0.0: return 0.0
     ang = 180.0 - math.atan2(vec[0], vec[1]) * 360.0 / (2.0 * math.pi)
     if ang < 0.0: ang += 360.0
     ang = math.fmod(ang, 360.0)
@@ -236,6 +237,7 @@ class Sprite(object):
         path = cPickle.load(file)
         for x, y in path:
             self.waypoints.append(euclid.Vector2(x, y))
+        self.target = self.waypoints[0]
 
     def animate(self, step):
         dir = self.dir_func()
@@ -654,7 +656,7 @@ class Farmer(Human):
         self.frames['u'].append(game.images['farmer_u0'])
         self.speed = 1.0
         self.top_speed = 2.0
-        self.target = None
+        self.load_path('lvl2_farmer')
         
     def step(self, game, sprite):
         super(Farmer, self).step(game, sprite)
