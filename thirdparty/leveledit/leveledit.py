@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#! /usr/bin/env python
 """<title>a simple level editor for pygame</title>
 <pre>
 usage: leveledit level.tga [tiles.tga] [codes.tga] [tile_w] [tile_h]
