@@ -376,10 +376,10 @@ class Player(Sprite):
             self.suck(game)
 
         dx, dy = 0, 0
-        if key[K_w]: dy -= 1
-        if key[K_s]: dy += 1
-        if key[K_a]: dx -= 1
-        if key[K_d]: dx += 1
+        if key[K_w] or key[K_UP]: dy -= 1
+        if key[K_s] or key[K_DOWN]: dy += 1
+        if key[K_a] or key[K_LEFT]: dx -= 1
+        if key[K_d] or key[K_RIGHT]: dx += 1
         if key[K_SPACE] and game.frame % 8 == 0:
             self.fire(game, sprite)
         if key[K_LSHIFT]:
