@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (c) 2006 Matthew Gregan <kinetik@flim.org> 
+# Copyright (c) 2006 Matthew Gregan <kinetik@flim.org>
 #                    Joseph Miller  <joff@goolehax.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -27,7 +27,7 @@ sys.path.append('thirdparty')
 from hci import game
 
 if len(sys.argv) > 1:
-    if sys.argv[1] == 'profile':
+    if sys.argv[1] == '--profile':
         import hotshot, hotshot.stats
         prof = hotshot.Profile('game.prof')
         prof.runcall(game.run)
@@ -36,7 +36,7 @@ if len(sys.argv) > 1:
         stats.strip_dirs()
         stats.sort_stats('time', 'calls')
         stats.print_stats(20)
-    elif sys.argv[1] == 'psyco':
+    elif sys.argv[1] == '--psyco':
         import psyco
         psyco.full()
         game.run()
