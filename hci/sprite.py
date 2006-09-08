@@ -707,9 +707,9 @@ class Cow(Sprite):
         self.move(game)
 
         if self.trophy:
-            relx = self.position[0] - game.view.x - (game.images['trophy'][0].get_width()/2)
-            rely = self.sprite.rect.y - game.view.y - (game.images['trophy'][0].get_height())
-            game.deferred_effects.append(lambda: game.screen.blit(game.images['trophy'][0], (relx, rely, 0, 0)))
+            relx = self.position[0]  - (game.images['trophy'][0].get_width()/2)
+            rely = self.sprite.rect.y  - (game.images['trophy'][0].get_height())
+            game.deferred_effects.append(lambda: game.screen.blit(game.images['trophy'][0], (relx- game.view.x, rely-game.view.y, 0, 0)))
 
     def move(self, game):
         if len(self.waypoints) == 0: return
