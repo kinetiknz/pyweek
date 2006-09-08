@@ -61,13 +61,17 @@ class Sprite(object):
         self.rotation     = 0.0
 
         # animation
+        self.dir_func = self.direction4
         self.frame = 0.0
         self.frames = { ' ': ([]),
                         'u': ([]),
                         'd': ([]),
                         'l': ([]),
-                        'r': ([]) }
-
+                        'r': ([]),
+                        'ur': ([]),
+                        'dr': ([]),
+                        'ul': ([]),
+                        'dl': ([]), }
         self.frames[' '].append(game.images[self.name])
 
         # movement
@@ -170,16 +174,31 @@ class Sprite(object):
     def velocity(self):
         return self.position - self.last_pos
 
-    def direction(self):
+    def direction4(self):
         vel = self.velocity()
         ang = VectorToDegrees(vel)
 
         if ang >= 315.0 or  ang < 45.0:  return 'u'
-        if ang >=  45.0 and ang < 135.0: return 'r'
-        if ang >= 135.0 and ang < 225.0: return 'd'
-        if ang >= 225.0 and ang < 315.0: return 'l'
+        if ang < 135.0: return 'r'
+        if ang < 225.0: return 'd'
+        if ang < 315.0: return 'l'
 
         assert(False)
+
+    def direction8(self):
+        vel = self.velocity()
+        ang = VectorToDegrees(vel)
+
+        if ang >= 337.5 or  ang < 22.5:  return 'u'
+        if ang < 67.5:  return 'ur'
+        if ang < 112.5: return 'r'
+        if ang < 157.5: return 'dr'
+        if ang < 202.5: return 'd'
+        if ang < 247.5: return 'dl'
+        if ang < 292.5: return 'l'
+        if ang < 337.5: return 'ul'
+        
+        assert(False)        
 
     def moving(self):
         return self.velocity.magnitude_squared() >= self.MIN_MOVEMENT_SQ
@@ -219,7 +238,7 @@ class Sprite(object):
             self.waypoints.append(euclid.Vector2(x, y))
 
     def animate(self, step):
-        dir = self.direction()
+        dir = self.dir_func()
         if (len(self.frames[dir]) == 0):
             dir = ' '
 
@@ -239,6 +258,8 @@ class Player(Sprite):
         self.frames[' '].append(game.images['player3'])
         self.frames[' '].append(game.images['player4'])
         self.frames[' '].append(game.images['player5'])
+        self.frames['l'].append(game.images['player_l0'])
+        self.frames['r'].append(game.images['player_r0'])
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit  = self.hit
         self.sprite.shoot = self.fire
@@ -491,6 +512,9 @@ class Player(Sprite):
             y += scale_to
 
     def hit(self, game, sprite, other):
+        if self.suck_target and other is self.suck_target.sprite:
+            return
+        
         push(sprite, other)
         self.get_sprite_pos()
         self.view_me(game)
@@ -556,13 +580,23 @@ class Human(Sprite):
 class Cow(Sprite):
     def __init__(self, game, tile, values=None):
         super(Cow, self).__init__('cow_l1', 'enemy', game, tile, values)
+        self.frames['l'].append(game.images['cow_l0'])
         self.frames['l'].append(game.images['cow_l1'])
-        self.frames['l'].append(game.images['cow_l2'])
+        self.frames['r'].append(game.images['cow_r0'])
         self.frames['r'].append(game.images['cow_r1'])
-        self.frames['r'].append(game.images['cow_r2'])
+        self.frames['d'].append(game.images['cow_d0'])
         self.frames['d'].append(game.images['cow_d1'])
-        self.frames['d'].append(game.images['cow_d2'])
+        self.frames['u'].append(game.images['cow_u0'])
         self.frames['u'].append(game.images['cow_u1'])
+        self.frames['ul'].append(game.images['cow_ul0'])
+        self.frames['ul'].append(game.images['cow_ul1'])
+        self.frames['ur'].append(game.images['cow_ur0'])
+        self.frames['ur'].append(game.images['cow_ur1'])
+        self.frames['dl'].append(game.images['cow_dl0'])
+        self.frames['dl'].append(game.images['cow_dl1'])
+        self.frames['dr'].append(game.images['cow_dr0'])
+        self.frames['dr'].append(game.images['cow_dr1'])        
+        self.dir_func = self.direction8
         self.sprite.agroups = game.string2groups('Background')
         self.sprite.hit = self.hit
         self.speed = 0.2
