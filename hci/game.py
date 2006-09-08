@@ -104,7 +104,6 @@ idata = [
     ('cow_r0',  'data/test/cow060.png', (10, 10, 90, 50)),
     ('cow_r1',  'data/test/cow061.png', (10, 10, 90, 50)),
     ('warn',   'data/test/Warning.png', (0, 0, 16, 16)),
-    ('shot', 'data/test/shot.png', (1, 2, 6, 4)),
     ('tree', 'data/test/treebiggersize.png', (10, 15, 95, 95)),
     ('bush', 'data/test/treepinkflower.png', (0, 0, 30, 37)),
     ('laser', 'data/test/laser.png', (0, 0, 8, 8)),
@@ -121,20 +120,21 @@ cdata = {
     4: (lambda g, t, v: sprite.Farmer(g, t, v),  None),
     5: (lambda g, t, v: sprite.FBI(g, t, v),     None),
     6: (lambda g, t, v: sprite.Cow(g, t, v),     None),
-    7: (lambda g, t, v: sprite.Cow(g, t, v),     None),
+    7: (lambda g, t, v: sprite.CollectableCow(g, t, v), None),
     8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
     }
 
 tdata = {
     0x02: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x04: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x05: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x06: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x07: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x08: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x09: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x0A: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
-    0x0B: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     }
+
 
 def run():
     initialize_modules()
@@ -247,6 +247,40 @@ def run():
             for e in game.deferred_effects[:]:
                 e()
                 game.deferred_effects.remove(e)
+
+            if game.player.lvl_complete:
+                game = tilevid.Tilevid()
+                game.view.w = 640
+                game.view.h = 480
+                game.tile_w = 32
+                game.tile_h = 32
+                game.screen = pygame.display.set_mode([game.view.w, game.view.h], pygame.DOUBLEBUF)
+                pygame.display.set_caption("PyWeek 3: The Disappearing Act [rev %.6s...]" % version)
+                game.frame = 0
+                recording = False
+                recorded_path = []
+
+                game.tga_load_tiles('data/tilesets/testset.png', [game.tile_w, game.tile_h], tdata)
+                game.tga_load_level('data/maps/level2.tga', True)
+                game.bounds = pygame.Rect(game.tile_w, game.tile_h,
+                                          (len(game.tlayer[0])-2)*game.tile_w,
+                                          (len(game.tlayer)-2)*game.tile_h)
+                
+                game.load_images(idata)
+                game.deferred_effects = []
+
+                game.menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
+                game.run_codes(cdata, (0, 0, len(game.tlayer[0]), len(game.tlayer)))
+                music.stop()
+                music.queue('data/music/Track02.ogg')
+                music.set_endevent(USEREVENT)
+                music.play()
+
+                game.quit = 0
+                game.pause = 0
+
+                game.player.view_me(game)
+               
 
             if recording:
                 # draw recorded path
