@@ -433,9 +433,9 @@ class Player(Sprite):
             me_to_click       = click_pos - gun_pos
             distance_to_click = me_to_click.magnitude()
             
-            if distance_to_click > 100.0:
+            if distance_to_click > 150.0:
                 me_to_click /= (distance_to_click)
-                me_to_click *= 100.0
+                me_to_click *= 150.0
                 click_pos    = gun_pos + me_to_click
                 
             self.state = 'sucking'
@@ -584,6 +584,47 @@ class Human(Sprite):
         push(sprite, other)
         self.get_sprite_pos()
 
+class FBI(Human):
+    def __init__(self, game, tile, values=None):
+        super(FBI, self).__init__('farmer_u0', 'enemy', game, tile, values)
+        self.frames['l'].append(game.images['farmer_l0'])
+        self.frames['r'].append(game.images['farmer_r0'])
+        self.frames['d'].append(game.images['farmer_d0'])
+        self.frames['u'].append(game.images['farmer_u0'])
+        self.sprite.agroups = game.string2groups('Background')
+        self.sprite.hit = self.hit
+        self.waypoints.append(euclid.Vector2(self.position[0], 0))
+        self.speed = 0.1
+        self.top_speed = 0.1
+        #self.load_path('lake_circuit')
+
+    def step(self, game, sprite):
+        self.move(game)
+
+    def move(self, game):
+        if len(self.waypoints) == 0: return
+
+        target = self.waypoints[self.waypoint]
+
+        if not game.player.cloaked() and \
+               visibility.can_be_seen(game.player.position, self.position, target):
+            game.player.seen = True
+            relx = self.position[0] - (game.images['warn'][0].get_width()/2)
+            rely = self.sprite.rect.y  - (game.images['warn'][0].get_height())
+            game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx - game.view.x, rely - game.view.y, 0, 0)))
+
+        if self.move_toward(target, self.speed, 10.0):
+            self.waypoint = (self.waypoint + 1) % len(self.waypoints)
+
+        if not self.verlet_move():
+            self.waypoint = (self.waypoint + 1) % len(self.waypoints)
+
+        self.set_sprite_pos()
+
+    def hit(self, game, sprite, other):
+        push(sprite, other)
+        self.get_sprite_pos()
+        
 class Cow(Sprite):
     def __init__(self, game, tile, values=None):
         super(Cow, self).__init__('cow_l1', 'enemy', game, tile, values)
@@ -696,6 +737,7 @@ class Saucer(Sprite):
 class Tree(Sprite):
     def __init__(self, game, tile, values=None):
         super(Tree, self).__init__('tree', 'Background', game, tile, values)
+        self.suckable = True
 
 class Bush(Sprite):
     def __init__(self, game, tile, values=None):
@@ -716,7 +758,8 @@ class SelectionTest(Sprite):
         game.sprites.remove(sprite)
 
     def hit(self, game, sprite, other):
-        game.player.suck_target = other.backref
+        if  (hasattr(other.backref, 'suckable') and other.backref.suckable) or other.backref.trophy:
+            game.player.suck_target = other.backref
 
 def push(mover, away_from):
     if mover._rect.bottom <= away_from._rect.top and mover.rect.bottom > away_from.rect.top:
