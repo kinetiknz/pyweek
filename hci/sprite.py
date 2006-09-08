@@ -564,7 +564,6 @@ class Human(Sprite):
         super(Human, self).__init__(image, group, game, tile, values)
         self.sprite.agroups = game.string2groups('Background,farmer,animal')
         self.sprite.hit = self.hit
-        self.waypoints.append(euclid.Vector2(self.position[0], 0))
         self.speed = 0.0
         self.top_speed = 0.0
         self.seen_count = 0
@@ -654,8 +653,8 @@ class Farmer(Human):
         self.frames['r'].append(game.images['farmer_r0'])
         self.frames['d'].append(game.images['farmer_d0'])
         self.frames['u'].append(game.images['farmer_u0'])
-        self.speed = 1.0
-        self.top_speed = 2.0
+        self.speed = 2.0
+        self.top_speed = 3.0
         self.load_path('lvl2_farmer')
         
     def step(self, game, sprite):
@@ -670,8 +669,8 @@ class Farmer(Human):
     def hit(self, game, sprite, other):
         super(Farmer, self).hit(game, sprite, other)
 
-    def seen_alien(self, game):
-        super(Farmer, self).seen_alien(game)
+    def seen_alien(self):
+        super(Farmer, self).seen_alien()
         self.sound_spotted_scream.play()
 
 class Cow(Sprite):
