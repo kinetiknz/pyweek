@@ -62,22 +62,22 @@ def tile_block(g, t, a):
     a.backref.stop()
 
 idata = [
-    ('player_d1',  'data/test/alien/alien-d1.png', (4, 4, 48, 24)),
-    ('player_d2',  'data/test/alien/alien-d2.png', (4, 4, 48, 24)),
-    ('player_d3',  'data/test/alien/alien-d3.png', (4, 4, 48, 24)),
-    ('player_d4',  'data/test/alien/alien-d4.png', (4, 4, 48, 24)),
-    ('player_u1',  'data/test/alien/alien-u1.png', (4, 4, 48, 24)),
-    ('player_u2',  'data/test/alien/alien-u2.png', (4, 4, 48, 24)),
-    ('player_u3',  'data/test/alien/alien-u3.png', (4, 4, 48, 24)),
-    ('player_u4',  'data/test/alien/alien-u4.png', (4, 4, 48, 24)),
-    ('player_l1',  'data/test/alien/alien-l1.png', (4, 4, 48, 24)),
-    ('player_l2',  'data/test/alien/alien-l2.png', (4, 4, 48, 24)),
-    ('player_l3',  'data/test/alien/alien-l3.png', (4, 4, 48, 24)),
-    ('player_l4',  'data/test/alien/alien-l4.png', (4, 4, 48, 24)),
-    ('player_r1',  'data/test/alien/alien-r1.png', (4, 4, 48, 24)),
-    ('player_r2',  'data/test/alien/alien-r2.png', (4, 4, 48, 24)),
-    ('player_r3',  'data/test/alien/alien-r3.png', (4, 4, 48, 24)),
-    ('player_r4',  'data/test/alien/alien-r4.png', (4, 4, 48, 24)),
+    ('player_d1',  'data/test/alien/alien-d1.png', (5, 6, 22, 55)),
+    ('player_d2',  'data/test/alien/alien-d2.png', (5, 6, 22, 55)),
+    ('player_d3',  'data/test/alien/alien-d3.png', (5, 6, 22, 55)),
+    ('player_d4',  'data/test/alien/alien-d4.png', (5, 6, 22, 55)),
+    ('player_u1',  'data/test/alien/alien-u1.png', (5, 6, 22, 55)),
+    ('player_u2',  'data/test/alien/alien-u2.png', (5, 6, 22, 55)),
+    ('player_u3',  'data/test/alien/alien-u3.png', (5, 6, 22, 55)),
+    ('player_u4',  'data/test/alien/alien-u4.png', (5, 6, 22, 55)),
+    ('player_l1',  'data/test/alien/alien-l1.png', (5, 6, 22, 55)),
+    ('player_l2',  'data/test/alien/alien-l2.png', (5, 6, 22, 55)),
+    ('player_l3',  'data/test/alien/alien-l3.png', (5, 6, 22, 55)),
+    ('player_l4',  'data/test/alien/alien-l4.png', (5, 6, 22, 55)),
+    ('player_r1',  'data/test/alien/alien-r1.png', (5, 6, 22, 55)),
+    ('player_r2',  'data/test/alien/alien-r2.png', (5, 6, 22, 55)),
+    ('player_r3',  'data/test/alien/alien-r3.png', (5, 6, 22, 55)),
+    ('player_r4',  'data/test/alien/alien-r4.png', (5, 6, 22, 55)),
     ('man_d0',     'data/test/man010.png', (4, 4, 48, 72)),
     ('man_d1',     'data/test/man011.png', (4, 4, 48, 72)),
     ('saucer0', 'data/test/Saucer0.png', (20, 20, 140, 70)),
@@ -126,13 +126,13 @@ cdata = {
 
 tdata = {
     0x02: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
-    0x04: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x05: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x06: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x07: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x08: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x09: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x0A: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x0B: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     }
 
 
