@@ -113,16 +113,29 @@ idata = [
     ('chick2', 'data/test/chicksmall02.png', (0, 0, 64, 37)),
     ]
 
-cdata = {
+cdata = [ 
+    {
     1: (lambda g, t, v: sprite.Player(g, t, v),  None),
     2: (lambda g, t, v: sprite.Bush(g, t, v),    None),
     3: (lambda g, t, v: sprite.Tree(g, t, v),    None),    
     4: (lambda g, t, v: sprite.Farmer(g, t, v),  None),
-    5: (lambda g, t, v: sprite.FBI(g, t, v),     None),
+    5: (lambda g, t, v: sprite.FBISpawn(g, t, v),None),
+    6: (lambda g, t, v: sprite.Cow(g, t, v),     None),
+    7: (lambda g, t, v: sprite.CollectableCow(g, t, v), ['lvl1_cow']),
+    8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
+    },
+    
+    {
+    1: (lambda g, t, v: sprite.Player(g, t, v),  None),
+    2: (lambda g, t, v: sprite.Bush(g, t, v),    None),
+    3: (lambda g, t, v: sprite.Tree(g, t, v),    None),    
+    4: (lambda g, t, v: sprite.Farmer(g, t, v),  ['lvl2_farmer']),
+    5: (lambda g, t, v: sprite.FBISpawn(g, t, v),None),
     6: (lambda g, t, v: sprite.Cow(g, t, v),     None),
     7: (lambda g, t, v: sprite.CollectableCow(g, t, v), None),
     8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
-    }
+    } 
+    ]
 
 tdata = {
     0x02: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
@@ -135,34 +148,53 @@ tdata = {
     0x0B: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     }
 
+map_files  = ['level1.tga', 'level2.tga']
+music_files = ['Track01.ogg', 'Track02.ogg']
 
-def run():
-    initialize_modules()
-
+def load_level(lvl_num):
     try:
         version = open('_MTN/revision').read().strip()
     except IOError, e:
         version = '?'
-
+    
     game = tilevid.Tilevid()
     game.view.w = 640
     game.view.h = 480
     game.tile_w = 32
     game.tile_h = 32
-    game.fullscreen = False
     game.screen = pygame.display.set_mode([game.view.w, game.view.h], pygame.DOUBLEBUF)
     pygame.display.set_caption("PyWeek 3: The Disappearing Act [rev %.6s...]" % version)
     game.frame = 0
-    recording = False
-    recorded_path = []
-
+    game.recording = False
+    game.recorded_path = []
+    
     game.tga_load_tiles('data/tilesets/testset.png', [game.tile_w, game.tile_h], tdata)
-    game.tga_load_level('data/maps/level1.tga', True)
+    game.tga_load_level('data/maps/' + map_files[lvl_num], True)
     game.bounds = pygame.Rect(game.tile_w, game.tile_h,
                               (len(game.tlayer[0])-2)*game.tile_w,
                               (len(game.tlayer)-2)*game.tile_h)
-
+    
     game.load_images(idata)
+    game.deferred_effects = []
+    
+    game.menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
+    game.run_codes(cdata[1], (0, 0, len(game.tlayer[0]), len(game.tlayer)))
+    game.music = pygame.mixer.music
+    game.music.queue('data/music/' + music_files[lvl_num])
+    game.music.set_endevent(USEREVENT)
+    
+    game.quit = 0
+    game.pause = 0
+    
+    game.player.view_me(game)
+    
+    return game 
+
+def run():
+    initialize_modules()
+
+    level = 0
+    game  = load_level(level)
 
     splash_image = pygame.image.load('data/screens/splash.png')
     menu_image   = pygame.image.load('data/screens/menu.png')
@@ -171,15 +203,7 @@ def run():
     # pygame.time.wait(500)
     # splashscreen.fade_out(game.screen, splash_image)
 
-    game.deferred_effects = []
-
-    game.menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
     selection = menu.show([game.view.w, game.view.h], game.screen, menu_image, game.menu_font)
-
-    game.run_codes(cdata, (0, 0, len(game.tlayer[0]), len(game.tlayer)))
-    music = pygame.mixer.music
-    music.queue('data/music/Track01.ogg')
-    music.set_endevent(USEREVENT)
 
     t = pygame.time.Clock()
 
@@ -215,20 +239,20 @@ def run():
                         file = open('data/paths/path' + str(time.time()), 'wb');
                         cPickle.dump(recorded_path, file, protocol=2)
                         file.close()
-                        recording = False
+                        game.recording = False
                     else:
-                        recording = True
-                        recorded_path = []
+                        game.recording = True
+                        game.recorded_path = []
             if e.type is MOUSEBUTTONDOWN:
                 if e.button == 1:
                     if recording:
-                        recorded_path.append((game.view.x + e.pos[0], game.view.y + e.pos[1]))
+                        game.recorded_path.append((game.view.x + e.pos[0], game.view.y + e.pos[1]))
             if e.type is USEREVENT:
-                music.play()
+                game.music.play()
 
         if game.pause:
             caption = "GAME PAUSED"
-            music.pause()
+            game.music.pause()
             txt = text.render(caption, 1, [0, 0, 0])
             dx = game.view.w/2 - txt.get_rect().w/2
             dy = game.view.h/2 - txt.get_rect().h/2
@@ -237,7 +261,7 @@ def run():
             game.screen.blit(txt, [dx, dy])
             pygame.display.flip()
         else:
-            music.unpause()
+            game.music.unpause()
             if game.view.x == game.bounds.w - game.view.w + game.tile_w \
                    and direction == 1:
                 direction = -1
@@ -255,47 +279,19 @@ def run():
                 game.deferred_effects.remove(e)
 
             if game.player.lvl_complete:
-                game = tilevid.Tilevid()
-                game.view.w = 640
-                game.view.h = 480
-                game.tile_w = 32
-                game.tile_h = 32
-                game.screen = pygame.display.set_mode([game.view.w, game.view.h], pygame.DOUBLEBUF)
-                pygame.display.set_caption("PyWeek 3: The Disappearing Act [rev %.6s...]" % version)
-                game.frame = 0
-                recording = False
-                recorded_path = []
+                level = (level + 1) % 2
+                game.music.stop()
+                game = load_level(level)
+                game.music.play()
 
-                game.tga_load_tiles('data/tilesets/testset.png', [game.tile_w, game.tile_h], tdata)
-                game.tga_load_level('data/maps/level2.tga', True)
-                game.bounds = pygame.Rect(game.tile_w, game.tile_h,
-                                          (len(game.tlayer[0])-2)*game.tile_w,
-                                          (len(game.tlayer)-2)*game.tile_h)
-                
-                game.load_images(idata)
-                game.deferred_effects = []
-
-                game.menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
-                game.run_codes(cdata, (0, 0, len(game.tlayer[0]), len(game.tlayer)))
-                music.stop()
-                music.queue('data/music/Track02.ogg')
-                music.set_endevent(USEREVENT)
-                music.play()
-
-                game.quit = 0
-                game.pause = 0
-
-                game.player.view_me(game)
-               
-
-            if recording:
+            if game.recording:
                 # draw recorded path
                 def sub_gv(pt):
                     return (pt[0]-game.view.x, pt[1]-game.view.y)
 
-                for pt in xrange(len(recorded_path)):
-                    start = sub_gv(recorded_path[pt-1])
-                    end   = sub_gv(recorded_path[pt])
+                for pt in xrange(len(game.recorded_path)):
+                    start = sub_gv(game.recorded_path[pt-1])
+                    end   = sub_gv(game.recorded_path[pt])
                     pygame.draw.line(game.screen, [random.randint(0, 255),random.randint(0, 255),random.randint(0, 255)], start, end, 2)
 
                 if (game.frame / 30) % 2 == 0:

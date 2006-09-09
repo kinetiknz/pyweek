@@ -86,7 +86,10 @@ class Sprite(object):
         self.target    = None
         self.waypoint = 0
         self.waypoints = []
-
+        if values:
+            self.load_path(values[0])
+            values = values[1:]
+            
         # something to do with PGU?
         if hasattr(tile, 'rect'):
             game.clayer[tile.ty][tile.tx] = 0
@@ -576,7 +579,6 @@ class Human(Sprite):
         self.top_speed = 0.0
         self.seen_count = 0
         self.target = None
-        #self.load_path('lake_circuit')
         self.sound_sucked_scream = pygame.mixer.Sound('data/sfx/Wilhelm-Long.ogg')
         self.sound_spotted_scream = pygame.mixer.Sound('data/sfx/Wilhelm.ogg')
         self.sound_spotted_scream.set_volume(0.25)
@@ -674,7 +676,6 @@ class Farmer(Human):
         self.frames['u'].append(game.images['farmer_u0'])
         self.speed = 0.5
         self.top_speed = 1.0
-        self.load_path('lvl2_farmer')
         
     def step(self, game, sprite):
         super(Farmer, self).step(game, sprite)
@@ -726,7 +727,7 @@ class Cow(Sprite):
         self.sprite.hit = self.hit
         self.speed = 0.2
         self.top_speed = 0.4
-        self.load_path('lvl1_cow')
+        
         self.sound_one_cow = pygame.mixer.Sound('data/sfx/One-Cow.ogg')
         self.sound_one_cow.set_volume(0.3)
         self.sound_two_cows = pygame.mixer.Sound('data/sfx/Two-Cows-Loop.ogg')
@@ -843,7 +844,7 @@ class Chicken(Sprite):
 
 class FBISpawn(Sprite):
     def __init__(self, game, tile, values=None):
-        super(SelectionTest, self).__init__('none', 'shot', game, tile, values)
+        super(FBISpawn, self).__init__('none', 'shot', game, tile, values)
         self.sprite.agroups = game.string2groups('fbi_spawn')
 
 class SelectionTest(Sprite):
