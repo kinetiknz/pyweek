@@ -230,7 +230,7 @@ tdata = {
 
 map_files  = ['level1.tga', 'level2.tga', 'level3.tga', 'level4.tga']
 music_files = ['Track01.ogg', 'Track02.ogg', 'Track03.ogg']
-
+fbi_limit   = [0,1,2,4]
 def do_menu(screen, width, height, game_running=False):
     menu_image   = pygame.image.load('data/screens/menu.png')
     menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
@@ -344,7 +344,7 @@ def load_level(lvl_num, screen, wide, high, load_image):
     game.music.play(-1)
 
     game.agents = 0
-    game.max_fbi_agents = lvl_num * 2
+    game.max_fbi_agents = fbi_limit[lvl_num]
     game.quit = 0
     game.pause = 0
     game.game_over = False
