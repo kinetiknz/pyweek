@@ -58,6 +58,9 @@ def tile_block(g, t, a):
         a.rect.top = t.rect.bottom
 
     # craziness
+    if hasattr(a.backref, 'tile_blocked'):
+        a.backref.tile_blocked()
+
     a.backref.get_sprite_pos()
     a.backref.stop()
 
@@ -78,8 +81,14 @@ idata = [
     ('player_r2',  'data/test/alien/alien-r2.png', (5, 6, 22, 55)),
     ('player_r3',  'data/test/alien/alien-r3.png', (5, 6, 22, 55)),
     ('player_r4',  'data/test/alien/alien-r4.png', (5, 6, 22, 55)),
-    ('man_d0',     'data/test/man010.png', (4, 4, 48, 72)),
-    ('man_d1',     'data/test/man011.png', (4, 4, 48, 72)),
+    ('fbi_r1',     'data/test/fbi_E1.png', (4, 4, 48, 72)),
+    ('fbi_r2',     'data/test/fbi_E2.png', (4, 4, 48, 72)),
+    ('fbi_l1',     'data/test/fbi_W1.png', (4, 4, 48, 72)),
+    ('fbi_l2',     'data/test/fbi_W2.png', (4, 4, 48, 72)),
+    ('fbi_u1',     'data/test/fbi_N1.png', (4, 4, 48, 72)),
+    ('fbi_u2',     'data/test/fbi_N2.png', (4, 4, 48, 72)),
+    ('fbi_d1',     'data/test/fbi_S1.png', (4, 4, 48, 72)),
+    ('fbi_d2',     'data/test/fbi_S2.png', (4, 4, 48, 72)),
     ('saucer0', 'data/test/Saucer0.png', (20, 20, 140, 70)),
     ('saucer1', 'data/test/Saucer1.png', (20, 20, 140, 70)),
     ('saucer2', 'data/test/Saucer2.png', (20, 20, 140, 70)),
@@ -113,28 +122,28 @@ idata = [
     ('chick2', 'data/test/chicksmall02.png', (0, 0, 64, 37)),
     ]
 
-cdata = [ 
+cdata = [
     {
     1: (lambda g, t, v: sprite.Player(g, t, v),  None),
     2: (lambda g, t, v: sprite.Bush(g, t, v),    None),
-    3: (lambda g, t, v: sprite.Tree(g, t, v),    None),    
+    3: (lambda g, t, v: sprite.Tree(g, t, v),    None),
     4: (lambda g, t, v: sprite.Farmer(g, t, v),  None),
     5: (lambda g, t, v: sprite.FBISpawn(g, t, v),None),
     6: (lambda g, t, v: sprite.Cow(g, t, v),     None),
     7: (lambda g, t, v: sprite.CollectableCow(g, t, v), ['lvl1_cow']),
     8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
     },
-    
+
     {
     1: (lambda g, t, v: sprite.Player(g, t, v),  None),
     2: (lambda g, t, v: sprite.Bush(g, t, v),    None),
-    3: (lambda g, t, v: sprite.Tree(g, t, v),    None),    
+    3: (lambda g, t, v: sprite.Tree(g, t, v),    None),
     4: (lambda g, t, v: sprite.Farmer(g, t, v),  ['lvl2_farmer']),
     5: (lambda g, t, v: sprite.FBISpawn(g, t, v),None),
     6: (lambda g, t, v: sprite.Cow(g, t, v),     None),
     7: (lambda g, t, v: sprite.CollectableCow(g, t, v), None),
     8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
-    } 
+    }
     ]
 
 tdata = {
@@ -156,40 +165,41 @@ def load_level(lvl_num):
         version = open('_MTN/revision').read().strip()
     except IOError, e:
         version = '?'
-    
+
     game = tilevid.Tilevid()
     game.view.w = 640
     game.view.h = 480
     game.tile_w = 32
     game.tile_h = 32
     game.screen = pygame.display.set_mode([game.view.w, game.view.h], pygame.DOUBLEBUF)
-    pygame.display.set_caption("PyWeek 3: The Disappearing Act [rev %.6s...]" % version)
+    pygame.display.set_caption("The Extraterrorestrial [rev %.6s...]" % version)
     game.frame = 0
     game.recording = False
     game.recorded_path = []
-    
+
     game.tga_load_tiles('data/tilesets/testset.png', [game.tile_w, game.tile_h], tdata)
     game.tga_load_level('data/maps/' + map_files[lvl_num], True)
     game.bounds = pygame.Rect(game.tile_w, game.tile_h,
                               (len(game.tlayer[0])-2)*game.tile_w,
                               (len(game.tlayer)-2)*game.tile_h)
-    
+
     game.load_images(idata)
     game.deferred_effects = []
     game.fbi_spawns = []
-    
+
     game.menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
     game.run_codes(cdata[lvl_num], (0, 0, len(game.tlayer[0]), len(game.tlayer)))
     game.music = pygame.mixer.music
     game.music.queue('data/music/' + music_files[lvl_num])
     game.music.set_endevent(USEREVENT)
-    
+
     game.quit = 0
     game.pause = 0
-    
+    game.game_over = False
+
     game.player.view_me(game)
-    
-    return game 
+
+    return game
 
 def run():
     initialize_modules()
@@ -199,6 +209,7 @@ def run():
 
     splash_image = pygame.image.load('data/screens/splash.png')
     menu_image   = pygame.image.load('data/screens/menu.png')
+    death_image  = pygame.image.load('data/screens/GameOverMan.png')
 
     # splashscreen.fade_in(game.screen, splash_image)
     # pygame.time.wait(500)
@@ -232,9 +243,14 @@ def run():
                     if not game.fullscreen:
                         flags |= pygame.FULLSCREEN
                         game.fullscreen = True
-                    pygame.display.set_mode([game.view.w, game.view.h], flags)
+                    game.screen = pygame.display.set_mode([game.view.w, game.view.h], flags)
                 if e.key == K_r: game.player.morph()
-                if e.key == K_RETURN: game.pause = not game.pause
+                if e.key == K_RETURN:
+                     if not game.game_over:
+                         game.pause = not game.pause
+                     else:
+                         game = load_level(level)
+                         game.music.play()
                 if e.key == K_BACKQUOTE:
                     if game.recording:
                         file = open('data/paths/path' + str(time.time()), 'wb');
@@ -261,6 +277,12 @@ def run():
             txt = text.render(caption, 1, [255, 255, 255])
             game.screen.blit(txt, [dx, dy])
             pygame.display.flip()
+        elif game.game_over:
+            game.player.walking_sound.stop()
+            game.music.stop()
+            game.screen.fill([0, 0, 0])
+            game.screen.blit(death_image, [0,0])
+            pygame.display.flip()
         else:
             game.music.unpause()
             if game.view.x == game.bounds.w - game.view.w + game.tile_w \
@@ -284,6 +306,8 @@ def run():
                 game.music.stop()
                 game = load_level(level)
                 game.music.play()
+
+
 
             if game.recording:
                 # draw recorded path

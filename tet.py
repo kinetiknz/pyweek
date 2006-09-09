@@ -20,9 +20,21 @@ try:
     import pygame
     import pygame.surfarray
 except ImportError, e:
-    print >> sys.stderr, "fatal: %s. " % e
-    print >> sys.stderr, "pygame and numeric must be installed."
-    sys.exit(1)
+    txt = "Fatal error: %s\n\npygame and numeric must be installed." % e
+    try:
+        from Tkinter import *
+        root = Tk()
+        frame = Frame(root)
+        frame.pack()
+        label = Label(frame, text=txt)
+        label.pack()
+        button = Button(frame, text="Okay", command=frame.quit)
+        button.pack()
+        root.mainloop()
+        sys.exit(1)
+    except ImportError, e:
+        print >> sys.stderr, txt
+        sys.exit(1)
 
 sys.path.append('thirdparty')
 

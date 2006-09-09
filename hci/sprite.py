@@ -89,7 +89,7 @@ class Sprite(object):
         if values:
             self.load_path(values[0])
             values = values[1:]
-            
+
         # something to do with PGU?
         if hasattr(tile, 'rect'):
             game.clayer[tile.ty][tile.tx] = 0
@@ -253,7 +253,11 @@ class Sprite(object):
             self.set_image(self.frames[dir][int(self.frame)])
 
     def step(self, game, sprite):
-        pass
+        if self.trophy:
+            relx = self.position[0]  - (game.images['trophy'][0].get_width()/2)
+            rely = self.sprite.rect.y  - (game.images['trophy'][0].get_height())
+            game.deferred_effects.append(lambda: game.screen.blit(game.images['trophy'][0], (relx- game.view.x, rely-game.view.y, 0, 0)))
+
 
     def get_sucked(self):
         return
@@ -329,6 +333,7 @@ class Player(Sprite):
             self.suck_target.waypoints = []
             self.suck_target.waypoint = 0
             self.suck_target.target = None
+            self.suck_target.trophy = False
             self.suck_target.get_sucked()
 
         if self.suck_progress >= 1.0:
@@ -338,7 +343,7 @@ class Player(Sprite):
             self.suck_target = None
             self.state = 'normal'
             self.beam_sound.stop()
-            
+
             lvl_complete = True
             for s in game.sprites:
                 if s.backref.trophy:
@@ -549,6 +554,9 @@ class Player(Sprite):
         if self.suck_target and other is self.suck_target.sprite:
             return
 
+        if other.backref.group == 'fbi':
+            game.game_over = True
+
         push(sprite, other)
         self.get_sprite_pos()
         self.view_me(game)
@@ -594,22 +602,22 @@ class Human(Sprite):
             self.seeing_alien(game)
         else:
             self.not_seeing_alien()
-            
+
             if self.seen_count > 0:
                 self.seen_count = 0
                 self.lost_alien(game)
 
         self.move(game)
- 
+
     def lost_alien(self, game):
         pass
-               
+
     def seen_alien(self, game):
         pass
-        
+
     def not_seeing_alien(self):
         pass
-    
+
     def seeing_alien(self, game):
         if self.seen_count > 1:
             relx = self.position[0] - (game.images['warn'][0].get_width()/2)
@@ -622,18 +630,18 @@ class Human(Sprite):
 
     def move_blocked(self):
         pass
-    
+
     def move(self, game):
         got_there = False
-        
+
         if self.target:
             if self.move_toward(self.target, self.speed, 40.0):
                 self.reached_target()
                 got_there = True
-            
+
         if not self.verlet_move() and not got_there:
             self.move_blocked()
-            
+
         self.set_sprite_pos()
 
     def hit(self, game, sprite, other):
@@ -645,20 +653,28 @@ class Human(Sprite):
 
 class FBI(Human):
     def __init__(self, game, tile, values=None):
-        super(FBI, self).__init__('man_d0', 'fbi', game, tile, values)
-        self.frames[' '].append(game.images['man_d1'])
+        super(FBI, self).__init__('fbi_d1', 'fbi', game, tile, values)
+        self.sprite.agroups = game.string2groups('Background,farmer,player,animal')
+        self.frames['d'].append(game.images['fbi_d1'])
+        self.frames['d'].append(game.images['fbi_d2'])
+        self.frames['u'].append(game.images['fbi_u1'])
+        self.frames['u'].append(game.images['fbi_u2'])
+        self.frames['l'].append(game.images['fbi_l1'])
+        self.frames['l'].append(game.images['fbi_l2'])
+        self.frames['r'].append(game.images['fbi_r1'])
+        self.frames['r'].append(game.images['fbi_r2'])
         self.speed = 3.0
         self.top_speed = 5.0
         self.target = None
-        
+
     def seeing_alien(self, game):
         super(FBI, self).seeing_alien(game)
-        self.target = game.player.position 
- 
+        self.target = game.player.position
+
     def not_seeing_alien(self):
         super(FBI, self).not_seeing_alien()
         #self.target = None
-        
+
     def move(self, game):
         if self.target:
             self.move_toward(self.target, self.speed, 40.0)
@@ -666,7 +682,16 @@ class FBI(Human):
         if self.verlet_move():
             self.animate(0.1)
 
-        self.set_sprite_pos()        
+        self.set_sprite_pos()
+
+        if (self.position - game.player.position).magnitude() < 50.0:
+            game.game_over = True
+
+    def hit(self, game, sprite, other):
+        super(FBI, self).hit(game, sprite, other)
+
+        if (other.backref is game.player):
+            game.game_over = True
 
 class Farmer(Human):
     def __init__(self, game, tile, values=None):
@@ -677,14 +702,14 @@ class Farmer(Human):
         self.frames['u'].append(game.images['farmer_u0'])
         self.speed = 0.5
         self.top_speed = 1.0
-        
+
     def step(self, game, sprite):
         super(Farmer, self).step(game, sprite)
 
     def move_blocked(self):
         self.waypoint = (self.waypoint + 1) % len(self.waypoints)
         self.target = self.waypoints[self.waypoint]
-        
+
     def reached_target(self):
         if self.seen_count > 0:
             # we reached the alien.. do nothing
@@ -702,18 +727,18 @@ class Farmer(Human):
         if len(self.waypoints) > 0:
             self.target = self.waypoints[self.waypoint]
             self.top_speed = 1.0
-            
+
     def seen_alien(self, game):
         super(Farmer, self).seen_alien(game)
         self.sound_spotted_scream.play()
         self.stop()
         self.top_speed = 0.5
         self.target = game.player.position
-        
+
         # spawn an FBI agent!
         if len(game.fbi_spawns) > 0:
             random.choice(game.fbi_spawns).spawn(game.player.position.copy())
-    
+
     def seeing_alien(self, game):
         super(Farmer, self).seeing_alien(game)
         self.target = game.player.position
@@ -742,7 +767,7 @@ class Cow(Sprite):
         self.sprite.hit = self.hit
         self.speed = 0.2
         self.top_speed = 0.4
-        
+
         self.sound_one_cow = pygame.mixer.Sound('data/sfx/One-Cow.ogg')
         self.sound_one_cow.set_volume(0.3)
         self.sound_two_cows = pygame.mixer.Sound('data/sfx/Two-Cows-Loop.ogg')
@@ -750,12 +775,8 @@ class Cow(Sprite):
         self.sound_two_cows.play(-1)
 
     def step(self, game, sprite):
+        super(Cow, self).step(game, sprite)
         self.move(game)
-        
-        if self.trophy:
-            relx = self.position[0]  - (game.images['trophy'][0].get_width()/2)
-            rely = self.sprite.rect.y  - (game.images['trophy'][0].get_height())
-            game.deferred_effects.append(lambda: game.screen.blit(game.images['trophy'][0], (relx- game.view.x, rely-game.view.y, 0, 0)))
 
     def move(self, game):
         if len(self.waypoints) == 0: return
@@ -784,7 +805,7 @@ class CollectableCow(Cow):
     def __init__(self, game, tile, values=None):
         super(CollectableCow, self).__init__(game, tile, values)
         self.trophy = True
-        
+
 class Saucer(Sprite):
     def __init__(self, game, tile, values=None):
         super(Saucer, self).__init__('saucer0', 'Background', game, tile, values)
@@ -859,7 +880,7 @@ class Chicken(Sprite):
 
 class FBISpawn(Sprite):
     def __init__(self, game, tile, values=None):
-        super(FBISpawn, self).__init__('none', 'shot', game, tile, values)
+        super(FBISpawn, self).__init__('none', 'hidden', game, tile, values)
         self.sprite.agroups = game.string2groups('fbi_spawn')
         game.fbi_spawns.append(self)
         self.tile = vid.Tile(tile.image)
@@ -868,16 +889,36 @@ class FBISpawn(Sprite):
         self.tile.agroups = tile.agroups
         self.tile.rect    = tile.rect.inflate(0,0)
         self.game = game
-        
+
         if values:
             self.values = values[:]
         else:
             self.values = None
-            
-    
+
+
     def spawn(self, target_pos):
         agent = FBI(self.game, self.tile, self.values)
         agent.target = target_pos
+
+class VisionTest(Sprite):
+    def __init__(self, game, tile, values=None):
+        super(VisionTest, self).__init__('none', 'hidden', game, tile, values)
+        self.sprite.agroups = game.string2groups('animal,Background,farmer,fbi,player')
+        self.sprite.hit = self.hit
+        self.lived_once = False
+
+    def step(self, game, sprite):
+        if self.lived_once == False:
+            self.lived_once = True
+            return
+        game.sprites.remove(sprite)
+
+    def tile_blocked(self):
+        pass
+
+    def hit(self, game, sprite, other):
+        pass
+
 
 class SelectionTest(Sprite):
     def __init__(self, game, tile, values=None):
