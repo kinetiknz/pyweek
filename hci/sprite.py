@@ -147,8 +147,8 @@ class Sprite(object):
     def stop(self):
         self.last_pos[0] = self.position[0]
         self.last_pos[1] = self.position[1]
-        self.waypoint = 0
-        self.waypoints = []
+        #self.waypoint = 0
+        #self.waypoints = []
 
     def accelerate(self, vector):
         move_vec = self.velocity() + vector
@@ -578,21 +578,29 @@ class Human(Sprite):
                visibility.can_be_seen(game.player.position, self.position, self.target):
             if not game.player.seen:
                 game.player.seen = True
-                self.seen_alien()
+                self.seen_count = 60
+                self.seen_alien(game)
             self.seeing_alien(game)
         else:
             self.not_seeing_alien()
+            
+            if self.seen_count > 0:
+                self.seen_count = 0
+                self.lost_alien()
 
         self.move(game)
-        
-    def seen_alien(self):
-        self.seen_count = 60
+ 
+    def lost_alien(self, game):
+        pass
+               
+    def seen_alien(self, game):
+        pass
         
     def not_seeing_alien(self):
         pass
     
     def seeing_alien(self, game):
-        if self.seen_count > 0:
+        if self.seen_count > 1:
             relx = self.position[0] - (game.images['warn'][0].get_width()/2)
             rely = self.sprite.rect.y  - (game.images['warn'][0].get_height()) - 5
             game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx - game.view.x, rely - game.view.y, 0, 0)))
@@ -605,11 +613,14 @@ class Human(Sprite):
         pass
     
     def move(self, game):
+        got_there = False
+        
         if self.target:
             if self.move_toward(self.target, self.speed, 10.0):
                 self.reached_target()
+                got_there = True
             
-        if not self.verlet_move():
+        if not self.verlet_move() and not got_there:
             self.move_blocked()
             
         self.set_sprite_pos()
@@ -653,25 +664,35 @@ class Farmer(Human):
         self.frames['r'].append(game.images['farmer_r0'])
         self.frames['d'].append(game.images['farmer_d0'])
         self.frames['u'].append(game.images['farmer_u0'])
-        self.speed = 2.0
-        self.top_speed = 3.0
+        self.speed = 0.5
+        self.top_speed = 1.0
         self.load_path('lvl2_farmer')
         
     def step(self, game, sprite):
         super(Farmer, self).step(game, sprite)
 
-    def move_blocked(self):        
+    def move_blocked(self):
         self.waypoint = (self.waypoint + 1) % len(self.waypoints)
+        self.target = self.waypoints[self.waypoint]
         
     def reached_target(self):        
         self.waypoint = (self.waypoint + 1) % len(self.waypoints)
+        self.target = self.waypoints[self.waypoint]
 
     def hit(self, game, sprite, other):
         super(Farmer, self).hit(game, sprite, other)
 
-    def seen_alien(self):
-        super(Farmer, self).seen_alien()
+    def lost_alien(self):
+        if len(self.waypoints) > 0:
+            self.target = self.waypoints[self.waypoint]
+            self.top_speed = 1.0
+            
+    def seen_alien(self, game):
+        super(Farmer, self).seen_alien(game)
         self.sound_spotted_scream.play()
+        self.stop()
+        self.top_speed = 0.5
+        self.target = game.player.position
 
 class Cow(Sprite):
     def __init__(self, game, tile, values=None):
