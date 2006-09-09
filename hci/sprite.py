@@ -751,11 +751,23 @@ class FBI(Human):
 
 class Farmer(Human):
     def __init__(self, game, tile, values=None):
-        super(Farmer, self).__init__('farmer_d0', 'farmer', game, tile, values)
-        self.frames['l'].append(game.images['farmer_l0'])
-        self.frames['r'].append(game.images['farmer_r0'])
-        self.frames['d'].append(game.images['farmer_d0'])
-        self.frames['u'].append(game.images['farmer_u0'])
+        super(Farmer, self).__init__('farmer_d1', 'farmer', game, tile, values)
+        self.frames['l'].append(game.images['farmer_l1'])
+        self.frames['l'].append(game.images['farmer_l2'])        
+        self.frames['l'].append(game.images['farmer_l3'])
+        self.frames['l'].append(game.images['farmer_l4'])
+        self.frames['r'].append(game.images['farmer_r1'])
+        self.frames['r'].append(game.images['farmer_r2'])
+        self.frames['r'].append(game.images['farmer_r3'])
+        self.frames['r'].append(game.images['farmer_r4'])        
+        self.frames['d'].append(game.images['farmer_d1'])
+        self.frames['d'].append(game.images['farmer_d2'])
+        self.frames['d'].append(game.images['farmer_d3'])
+        self.frames['d'].append(game.images['farmer_d4'])
+        self.frames['u'].append(game.images['farmer_u1'])
+        self.frames['u'].append(game.images['farmer_u2'])
+        self.frames['u'].append(game.images['farmer_u3'])
+        self.frames['u'].append(game.images['farmer_u4'])                        
         self.speed = 0.5
         self.top_speed = 1.0
 
@@ -763,6 +775,8 @@ class Farmer(Human):
         super(Farmer, self).step(game, sprite)
 
     def move_blocked(self):
+        if not self.waypoint:
+            return
         self.waypoint = (self.waypoint + 1) % len(self.waypoints)
         self.target = self.waypoints[self.waypoint]
 
@@ -979,7 +993,7 @@ class Chicken(Sprite):
             
             self.clucking_sound = pygame.mixer.Sound('data/sfx/Chicken-Loop.ogg')
             self.clucking_sound.set_volume(0.7)
-            self.sucked_sound = pygame.mixer.Sound('data/sfx/Chicken-Snatched.ogg')
+            self.sucked_sound = pygame.mixer.Sound('data/sfx/Chicken-Snatch.ogg')
             
             self.sound_offset = (random.randint(1,600))
             self.framecount = 0
