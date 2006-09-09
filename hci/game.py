@@ -229,9 +229,9 @@ tdata = {
     }
 
 map_files  = ['level1.tga', 'level2.tga', 'level3.tga', 'level4.tga']
-music_files = ['Track01.ogg', 'Track02.ogg', 'Track01.ogg', 'Track02.ogg']
+music_files = ['Track01.ogg', 'Track02.ogg']
 
-def load_level(lvl_num):
+def load_level(lvl_num, screen, wide, high, load_image):
     if debug:
         try:
             version = open('_MTN/revision').read().strip()
@@ -248,11 +248,13 @@ def load_level(lvl_num):
     sprite.FBI.called_the_cops = False
 
     game = tilevid.Tilevid()
-    game.view.w = 640
-    game.view.h = 480
+    game.view.w = wide
+    game.view.h = high
     game.tile_w = 32
     game.tile_h = 32
-    game.screen = pygame.display.set_mode([game.view.w, game.view.h], pygame.DOUBLEBUF)
+    game.screen = screen
+    game.screen.blit(load_image, [0,0])
+    pygame.display.flip()
     if debug:
         pygame.display.set_caption("The Extraterrorestrial [rev %.6s...]" % version)
     else:
@@ -271,7 +273,6 @@ def load_level(lvl_num):
     game.deferred_effects = []
     game.fbi_spawns = []
 
-    game.menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
     game.run_codes(cdata[lvl_num], (0, 0, len(game.tlayer[0]), len(game.tlayer)))
 
     game.music = pygame.mixer.music
@@ -294,18 +295,28 @@ def run():
     initialize_modules()
     pygame.mixer.set_num_channels(16)
 
-    level = 0
-    game  = load_level(level)
-
     splash_image = pygame.image.load('data/screens/splash.png')
     menu_image   = pygame.image.load('data/screens/menu.png')
     death_image  = pygame.image.load('data/screens/GameOverMan.png')
+    load_image   = pygame.image.load('data/screens/Loading.png')
 
-    # splashscreen.fade_in(game.screen, splash_image)
-    # pygame.time.wait(500)
-    # splashscreen.fade_out(game.screen, splash_image)
+    width = 640
+    height = 480
 
-    selection = menu.show([game.view.w, game.view.h], game.screen, menu_image, game.menu_font)
+    screen    = pygame.display.set_mode([width, height], pygame.DOUBLEBUF)
+    menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
+
+    splashscreen.fade_in(screen, splash_image)
+    pygame.time.wait(500)
+    splashscreen.fade_out(screen, splash_image)
+
+    selection = menu.show([width, height], screen, menu_image, menu_font, [ 'Start Game', 'Instructions', 'Quit'])
+
+    if selection == -1 or selection == 2:
+        sys.exit()
+
+    level = 0
+    game  = load_level(level, screen, width, height, load_image)
 
     t = pygame.time.Clock()
 
@@ -313,8 +324,6 @@ def run():
     game.paint(game.screen)
 
     game.pause = 0
-
-    if selection == -1: game.quit = 1
 
     text = pygame.font.Font('data/fonts/Another_.ttf', 36)
     text_sm = pygame.font.Font('data/fonts/Another_.ttf', 16)
@@ -327,14 +336,17 @@ def run():
         for e in pygame.event.get():
             if e.type is QUIT: game.quit = 1
             if e.type is KEYDOWN:
-                if e.key == K_ESCAPE: game.quit = 1
+                if e.key == K_ESCAPE:
+                    selection = menu.show([width, height], screen, menu_image, menu_font, [ 'Resume Game', 'Instructions', 'Quit'])
+                    if selection == -1 or selection == 2:
+                        sys.exit() 
                 if e.key == K_F10:
                     flags = pygame.DOUBLEBUF
                     if not game.fullscreen:
                         flags |= pygame.FULLSCREEN
                         game.fullscreen = True
                     game.screen = pygame.display.set_mode([game.view.w, game.view.h], flags)
-                if e.key == K_r: game.player.morph()
+                if e.key == K_SPACE: game.player.morph()
                 if e.key == K_RETURN:
                      if not game.game_over:
                          game.pause = not game.pause
@@ -402,7 +414,7 @@ def run():
             if game.player.state == "done":
                 level = (level + 1) % len(map_files)
                 game.music.stop()
-                game = load_level(level)
+                game = load_level(level, screen, width, height, load_image)
                 game.music.play()
 
             if game.recording:

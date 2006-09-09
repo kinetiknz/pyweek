@@ -351,6 +351,7 @@ class Player(Sprite):
         if self.suck_progress >= 1.0:
             if self.suck_target:
                 self.learn(self.suck_target)
+                game.sprites.remove(self.suck_target.sprite)
             self.suck_target = None
             self.state = 'normal'
             self.beam_sound.stop()
@@ -517,7 +518,6 @@ class Player(Sprite):
 
     def learn(self, target):
         self.known_items.append(target)
-        game.sprites.remove(self.suck_target.sprite)
         if target in self.required_trophies:
             self.required_trophies.remove(target)
 
