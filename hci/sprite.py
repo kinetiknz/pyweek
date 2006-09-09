@@ -278,7 +278,12 @@ class Player(Sprite):
         self.sprite.agroups = game.string2groups('Background,animal,farmer,fbi')
         self.sprite.hit  = self.hit
         self.sprite.score = 0
-        self.gun_pos = {' ': euclid.Vector2(-3.0, 35.0), 'l': euclid.Vector2(-12.0, 35.0)}
+        self.gun_pos = {' ': euclid.Vector2(0.0, 0.0),
+                        'r': euclid.Vector2(7.0, 21.0),
+                        'l': euclid.Vector2(0.0, 21.0),
+                        'u': euclid.Vector2(-12.0, 18.0),
+                        'd': euclid.Vector2(11.0, 20.0),
+                        }
         self.recording = False
         self.seen = False
         self.mouse_move = False
