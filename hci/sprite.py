@@ -307,7 +307,7 @@ class Player(Sprite):
         game.player = self
 
         self.known_items = []
-        
+
 
         self.walking_sound = pygame.mixer.Sound('data/sfx/Walking.ogg')
         self.walking_sound.set_volume(0.5)
@@ -400,7 +400,7 @@ class Player(Sprite):
         if self.state == 'landing':
             self.view_me(game)
             return
-        
+
         if not self.last_sweat_drop or (self.position - self.last_sweat_drop.position).magnitude() > 50.0:
             drop = SweatDrop(game, (self.position[0], self.position[1]))
             if self.last_sweat_drop: self.last_sweat_drop.next = drop
@@ -719,11 +719,11 @@ class FBI(Human):
         if (other.backref.__class__ is SweatDrop):
             if (self.seen_count <= 0):
                 if other.backref.next:
-                    self.target = other.backref.next.position            
+                    self.target = other.backref.next.position
             other.self_destruct = True
         else:
             super(FBI, self).hit(game, sprite, other)
- 
+
         if (other.backref is game.player):
             game.game_over = True
 
@@ -802,11 +802,11 @@ class Cow(Sprite):
         self.sprite.hit = self.hit
         self.speed = 0.2
         self.top_speed = 0.4
-        
+
         if self.waypoints == 0:
             self.target = euclid.Vector2([random.uniform(-10.0, 10.0), \
                                           random.uniform(-10.0, 10.0) ] )
-            
+
         self.sound_one_cow = pygame.mixer.Sound('data/sfx/One-Cow.ogg')
         self.sound_one_cow.set_volume(0.3)
         self.sound_two_cows = pygame.mixer.Sound('data/sfx/Two-Cows-Loop.ogg')
@@ -814,7 +814,7 @@ class Cow(Sprite):
 
         self.sound_offset = (random.randint(1,300))
         self.framecount = 0
-        
+
 
     def step(self, game, sprite):
         super(Cow, self).step(game, sprite)
@@ -926,25 +926,25 @@ class Chicken(Sprite):
             for y in xrange(peck):
                 self.frames[' '].append(game.images['chick1'])
                 self.frames[' '].append(game.images['chick2'])
-            
+
             self.clucking_sound = pygame.mixer.Sound('data/sfx/Chicken-Loop.ogg')
             self.clucking_sound.set_volume(0.7)
             self.sucked_sound = pygame.mixer.Sound('data/sfx/Chicken-Snatched.ogg')
-            
+
             self.sound_offset = (random.randint(1,300))
             self.framecount = 0
-            
+
 
     def step(self, game, sprite):
         self.animate(0.2)
         self.framecount += 1
         if self.framecount > self.sound_offset:
             self.clucking_sound.play(-1)
-        
+
     def get_sucked(self):
         self.clucking_sound.stop();
         self.sucked_sound.play();
-        
+
 
 class FBISpawn(Sprite):
     def __init__(self, game, tile, values=None):
@@ -967,7 +967,7 @@ class FBISpawn(Sprite):
     def spawn(self, game, target_pos):
         if game.agents == game.max_fbi_agents:
             return
-        
+
         game.agents += 1
         agent = FBI(self.game, self.tile, self.values)
         agent.target = target_pos
