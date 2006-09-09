@@ -881,6 +881,7 @@ class Saucer(Sprite):
         self.land_distance = (self.land_pos - self.position).magnitude()
         self.stop()
         self.landing_sound = pygame.mixer.Sound('data/sfx/SaucerLand.ogg')
+        self.takeoff_sound = pygame.mixer.Sound('data/sfx/TakeOff.ogg')
         self.landing_sound.play()
 
         #d = time.time()
@@ -894,9 +895,10 @@ class Saucer(Sprite):
         #logit('took', time.time() - d)
 
     def take_off(self, game):
+        self.takeoff_sound.play()
         self.land_pos = self.position.copy()
         self.land_pos[1] = game.view.y
-        self.speed     = 3.0
+        self.speed     = 0.8
         self.top_speed = 7.0
         self.land_distance = (self.land_pos - self.position).magnitude()
         
