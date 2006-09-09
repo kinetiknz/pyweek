@@ -562,7 +562,7 @@ class Player(Sprite):
             return
 
         if other.backref.group == 'fbi':
-            game.game_over = True
+            self.busted(game)
 
         if other.backref.__class__ == Saucer and self.state == 'going-home':
             self.state = 'take-off'
@@ -573,6 +573,10 @@ class Player(Sprite):
         self.get_sprite_pos()
         self.view_me(game)
         self.stop()
+
+    def busted(self, game):
+        if self.state != 'take-off' and self.state != 'landing':
+            game.game_over = True
 
 class Bullet(Sprite):
     def __init__(self, name, game, tile, values=None):
@@ -732,7 +736,7 @@ class FBI(Human):
             super(FBI, self).hit(game, sprite, other)
  
         if (other.backref is game.player):
-            game.game_over = True
+            game.player.busted(game)
 
 class Farmer(Human):
     def __init__(self, game, tile, values=None):
