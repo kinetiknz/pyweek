@@ -351,7 +351,7 @@ def run():
                      if not game.game_over:
                          game.pause = not game.pause
                      else:
-                         game = load_level(level)
+                         game = load_level(level, screen, width, height, load_image)
                          game.music.play()
                 if e.key == K_BACKQUOTE:
                     if game.recording:
