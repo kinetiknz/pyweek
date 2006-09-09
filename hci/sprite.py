@@ -830,7 +830,7 @@ class Farmer(Human):
         super(Farmer, self).step(game, sprite)
 
     def move_blocked(self):
-        if not self.waypoint:
+        if not self.waypoints:
             return
         self.waypoint = (self.waypoint + 1) % len(self.waypoints)
         self.target = self.waypoints[self.waypoint]
