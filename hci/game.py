@@ -149,44 +149,44 @@ idata = [
     ]
 
 cdata = [
-#    {
-#    1: (lambda g, t, v: sprite.Player(g, t, v),  None),
-#    2: (lambda g, t, v: sprite.Bush(g, t, v),    None),
-#    3: (lambda g, t, v: sprite.Tree(g, t, v),    None),
-#    4: (lambda g, t, v: sprite.Farmer(g, t, v),  None),
-#    5: (lambda g, t, v: sprite.FBISpawn(g, t, v),None),
-#    6: (lambda g, t, v: sprite.Cow(g, t, v),     None),
-#    7: (lambda g, t, v: sprite.CollectableCow(g, t, v), ['lvl1_cow']),
-#    8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
-#    9: (lambda g, t, v: sprite.SUV(g, t, v), None),
-#    10: (lambda g, t, v: sprite.HayBale(g, t, v), None),
-#    },
-#
-#    {
-#    1: (lambda g, t, v: sprite.Player(g, t, v),  None),
-#    2: (lambda g, t, v: sprite.Bush(g, t, v),    None),
-#    3: (lambda g, t, v: sprite.Tree(g, t, v),    None),
-#    4: (lambda g, t, v: sprite.Farmer(g, t, v),  ['lvl2_farmer']),
-#    5: (lambda g, t, v: sprite.FBISpawn(g, t, v),None),
-#    6: (lambda g, t, v: sprite.StationaryCow(g, t, v),  None),
-#    7: (lambda g, t, v: sprite.CollectableCow(g, t, v), None),
-#    8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
-#    9: (lambda g, t, v: sprite.SUV(g, t, v), None),
-#    10: (lambda g, t, v: sprite.HayBale(g, t, v), None),
-#    },
-#
-#    {
-#    1: (lambda g, t, v: sprite.Player(g, t, v),  None),
-#    2: (lambda g, t, v: sprite.Bush(g, t, v),    None),
-#    3: (lambda g, t, v: sprite.Tree(g, t, v),    None),
-#    4: (lambda g, t, v: sprite.Farmer(g, t, v),  ['lvl3_farmer', 'lvl3_farmer01', 'lvl3_farmer02', 'lvl3_farmer03']),
-#    5: (lambda g, t, v: sprite.FBISpawn(g, t, v),None),
-#    6: (lambda g, t, v: sprite.StationaryCow(g, t, v),  None),
-#    7: (lambda g, t, v: sprite.CollectableCow(g, t, v), ['lvl3_cow01', 'lvl3_cow02', 'lvl3_cow03', 'lvl3_cow04', 'lvl3_cow05', 'lvl3_cow06', 'lvl3_cow07', 'lvl3_cow08']),
-#    8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
-#    9: (lambda g, t, v: sprite.SUV(g, t, v), None),
-#    10: (lambda g, t, v: sprite.HayBale(g, t, v), None),
-#    },
+    {
+    1: (lambda g, t, v: sprite.Player(g, t, v),  None),
+    2: (lambda g, t, v: sprite.Bush(g, t, v),    None),
+    3: (lambda g, t, v: sprite.Tree(g, t, v),    None),
+    4: (lambda g, t, v: sprite.Farmer(g, t, v),  None),
+    5: (lambda g, t, v: sprite.FBISpawn(g, t, v),None),
+    6: (lambda g, t, v: sprite.Cow(g, t, v),     None),
+    7: (lambda g, t, v: sprite.CollectableCow(g, t, v), ['lvl1_cow']),
+    8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
+    9: (lambda g, t, v: sprite.SUV(g, t, v), None),
+    10: (lambda g, t, v: sprite.HayBale(g, t, v), None),
+    },
+
+    {
+    1: (lambda g, t, v: sprite.Player(g, t, v),  None),
+    2: (lambda g, t, v: sprite.Bush(g, t, v),    None),
+    3: (lambda g, t, v: sprite.Tree(g, t, v),    None),
+    4: (lambda g, t, v: sprite.Farmer(g, t, v),  ['lvl2_farmer']),
+    5: (lambda g, t, v: sprite.FBISpawn(g, t, v),None),
+    6: (lambda g, t, v: sprite.StationaryCow(g, t, v),  None),
+    7: (lambda g, t, v: sprite.CollectableCow(g, t, v), None),
+    8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
+    9: (lambda g, t, v: sprite.SUV(g, t, v), None),
+    10: (lambda g, t, v: sprite.HayBale(g, t, v), None),
+    },
+
+    {
+    1: (lambda g, t, v: sprite.Player(g, t, v),  None),
+    2: (lambda g, t, v: sprite.Bush(g, t, v),    None),
+    3: (lambda g, t, v: sprite.Tree(g, t, v),    None),
+    4: (lambda g, t, v: sprite.Farmer(g, t, v),  ['lvl3_farmer', 'lvl3_farmer01', 'lvl3_farmer02', 'lvl3_farmer03']),
+    5: (lambda g, t, v: sprite.FBISpawn(g, t, v),None),
+    6: (lambda g, t, v: sprite.StationaryCow(g, t, v),  None),
+    7: (lambda g, t, v: sprite.CollectableCow(g, t, v), ['lvl3_cow01', 'lvl3_cow02', 'lvl3_cow03', 'lvl3_cow04', 'lvl3_cow05', 'lvl3_cow06', 'lvl3_cow07', 'lvl3_cow08']),
+    8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
+    9: (lambda g, t, v: sprite.SUV(g, t, v), None),
+    10: (lambda g, t, v: sprite.HayBale(g, t, v), None),
+    },
 
     {
     1: (lambda g, t, v: sprite.Player(g, t, v),  None),
@@ -228,8 +228,7 @@ tdata = {
     0x19: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     }
 
-#map_files  = ['level1.tga', 'level2.tga', 'level3.tga', 'level4.tga']
-map_files  = ['level4.tga']
+map_files  = ['level1.tga', 'level2.tga', 'level3.tga', 'level4.tga']
 music_files = ['Track01.ogg', 'Track02.ogg', 'Track03.ogg']
 
 def do_menu(screen, width, height, game_running=False):
