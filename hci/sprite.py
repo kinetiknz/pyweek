@@ -755,6 +755,7 @@ class FBI(Human):
         self.target = None
 
     def move(self, game):
+        print (self.target)
         if self.target:
             self.move_toward(self.target, self.speed, 10.0)
         else:
