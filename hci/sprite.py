@@ -774,11 +774,18 @@ class Cow(Sprite):
         self.sound_one_cow.set_volume(0.3)
         self.sound_two_cows = pygame.mixer.Sound('data/sfx/Two-Cows-Loop.ogg')
         self.sound_two_cows.set_volume(0.3)
-        self.sound_two_cows.play(-1)
+
+        self.sound_offset = (random.randint(1,300))
+        self.framecount = 0
+        
 
     def step(self, game, sprite):
         super(Cow, self).step(game, sprite)
         self.move(game)
+        self.framecount += 1
+        if self.framecount > self.sound_offset:
+            #now we can start playing the sound loop
+            self.sound_two_cows.play(-1)
 
     def move(self, game):
         if len(self.waypoints) == 0: return
@@ -875,10 +882,25 @@ class Chicken(Sprite):
             for y in xrange(peck):
                 self.frames[' '].append(game.images['chick1'])
                 self.frames[' '].append(game.images['chick2'])
+            
+            self.clucking_sound = pygame.mixer.Sound('data/sfx/Chicken-Loop.ogg')
+            self.clucking_sound.set_volume(0.7)
+            self.sucked_sound = pygame.mixer.Sound('data/sfx/Chicken-Snatched.ogg')
+            
+            self.sound_offset = (random.randint(1,300))
+            self.framecount = 0
+            
 
     def step(self, game, sprite):
         self.animate(0.2)
-
+        self.framecount += 1
+        if self.framecount > self.sound_offset:
+            self.clucking_sound.play(-1)
+        
+    def get_sucked(self):
+        self.clucking_sound.stop();
+        self.sucked_sound.play();
+        
 
 class FBISpawn(Sprite):
     def __init__(self, game, tile, values=None):
