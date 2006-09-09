@@ -626,7 +626,7 @@ class Human(Sprite):
         alien_visible = False
 
         if not game.player.cloaked() and self.target and \
-            visibility.can_be_seen(game.player.position, self.position, self.target):
+            visibility.can_be_seen(game.player.position, self.last_pos, self.position):
             if self.raytest:
                 if self.rayresult:
                     alien_visible = True
@@ -743,7 +743,6 @@ class FBI(Human):
         self.target = game.player.position
         game.player_last_seen = game.player.position
         self.state = 'hunting'
-        print('hunting-seen')
 
     def not_seeing_alien(self):
         super(FBI, self).not_seeing_alien()
@@ -753,38 +752,50 @@ class FBI(Human):
         self.target = None
 
     def move(self, game):
+        #if self.velocity().magnitude_squared() < 4.0:
+        #    self.stuck_count += 1
+        #    if (self.stuck_count > 200):
+        #        print('STUCK! - move')
+        #        self.target = None
+        #        self.stuck_count = 0
+                
         if self.target:
             if self.move_toward(self.target, self.speed, 10.0):
                 self.target = None
+                print('Reached Target!')
+            else:
+                self.wander_count += 1
         else:
             if game.player_last_seen and random.randint(0,99) < 10:
                 print('hunting-move')
                 self.state = 'hunting'
                 self.target = game.player_last_seen     
-            else:       
-                print('wandering')
+            elif self.state != 'wandering':       
                 self.state = 'wandering'
                 self.wander_count = 0
                 self.stuck_count = 0
                 self.target = self.position + \
                               euclid.Vector2(random.uniform(-200.0, 200.0), random.uniform(-200.0, 200.0))
+                print('wandering')
 
         if self.verlet_move():
             self.animate(0.1)
         else:
             # stuck!
-            if self.state == 'wandering' and self.wander_count > 200:
-                self.target = None
-            else:
-                self.target = None
-        
-        if self.velocity().magnitude_squared() < 36.0:
+            print('Verlet move failed', self.wander_count, self.stuck_count)
             self.stuck_count += 1
             if (self.stuck_count > 200):
+                print('STUCK! -verlet')
                 self.target = None
                 self.stuck_count = 0
+           
+            if self.state == 'wandering' and self.wander_count > 200:
+                self.target = None
+            elif self.state != 'wandering':
+                self.target = None
         
         if self.state == 'wandering' and self.wander_count > 300:
+            print('wandering too long')
             self.target = None
 
         self.set_sprite_pos()
