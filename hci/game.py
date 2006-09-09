@@ -58,6 +58,9 @@ def tile_block(g, t, a):
         a.rect.top = t.rect.bottom
 
     # craziness
+    if hasattr(a.backref, 'tile_blocked'):
+        a.backref.tile_blocked()
+        
     a.backref.get_sprite_pos()
     a.backref.stop()
 
@@ -186,6 +189,7 @@ def load_level(lvl_num):
 
     game.quit = 0
     game.pause = 0
+    game.game_over = False
 
     game.player.view_me(game)
 
@@ -199,6 +203,7 @@ def run():
 
     splash_image = pygame.image.load('data/screens/splash.png')
     menu_image   = pygame.image.load('data/screens/menu.png')
+    death_image  = pygame.image.load('data/screens/GameOverMan.png')
 
     # splashscreen.fade_in(game.screen, splash_image)
     # pygame.time.wait(500)
@@ -234,7 +239,12 @@ def run():
                         game.fullscreen = True
                     game.screen = pygame.display.set_mode([game.view.w, game.view.h], flags)
                 if e.key == K_r: game.player.morph()
-                if e.key == K_RETURN: game.pause = not game.pause
+                if e.key == K_RETURN:
+                     if not game.game_over:
+                         game.pause = not game.pause
+                     else:
+                         game = load_level(level)
+                         game.music.play()
                 if e.key == K_BACKQUOTE:
                     if game.recording:
                         file = open('data/paths/path' + str(time.time()), 'wb');
@@ -260,6 +270,12 @@ def run():
             game.screen.blit(txt, [dx + 1, dy + 1])
             txt = text.render(caption, 1, [255, 255, 255])
             game.screen.blit(txt, [dx, dy])
+            pygame.display.flip()
+        elif game.game_over:
+            game.player.walking_sound.stop()
+            game.music.stop()            
+            game.screen.fill([0, 0, 0])
+            game.screen.blit(death_image, [0,0])
             pygame.display.flip()
         else:
             game.music.unpause()

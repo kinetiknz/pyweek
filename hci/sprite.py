@@ -253,7 +253,11 @@ class Sprite(object):
             self.set_image(self.frames[dir][int(self.frame)])
 
     def step(self, game, sprite):
-        pass
+        if self.trophy:
+            relx = self.position[0]  - (game.images['trophy'][0].get_width()/2)
+            rely = self.sprite.rect.y  - (game.images['trophy'][0].get_height())
+            game.deferred_effects.append(lambda: game.screen.blit(game.images['trophy'][0], (relx- game.view.x, rely-game.view.y, 0, 0)))
+
 
     def get_sucked(self):
         return
@@ -329,6 +333,7 @@ class Player(Sprite):
             self.suck_target.waypoints = []
             self.suck_target.waypoint = 0
             self.suck_target.target = None
+            self.suck_target.trophy = False
             self.suck_target.get_sucked()
 
         if self.suck_progress >= 1.0:
@@ -549,6 +554,9 @@ class Player(Sprite):
         if self.suck_target and other is self.suck_target.sprite:
             return
 
+        if other.backref.group == 'fbi':
+            game.game_over = True
+
         push(sprite, other)
         self.get_sprite_pos()
         self.view_me(game)
@@ -646,6 +654,7 @@ class Human(Sprite):
 class FBI(Human):
     def __init__(self, game, tile, values=None):
         super(FBI, self).__init__('man_d0', 'fbi', game, tile, values)
+        self.sprite.agroups = game.string2groups('Background,farmer,player,animal')
         self.frames[' '].append(game.images['man_d1'])
         self.speed = 3.0
         self.top_speed = 5.0
@@ -668,6 +677,15 @@ class FBI(Human):
 
         self.set_sprite_pos()
 
+        if (self.position - game.player.position).magnitude() < 50.0:
+            game.game_over = True
+            
+    def hit(self, game, sprite, other):
+        super(FBI, self).hit(game, sprite, other)
+        
+        if (other.backref is game.player):
+            game.game_over = True
+        
 class Farmer(Human):
     def __init__(self, game, tile, values=None):
         super(Farmer, self).__init__('farmer_d0', 'farmer', game, tile, values)
@@ -750,13 +768,9 @@ class Cow(Sprite):
         self.sound_two_cows.play(-1)
 
     def step(self, game, sprite):
+        super(Cow, self).step(game, sprite)
         self.move(game)
         
-        if self.trophy:
-            relx = self.position[0]  - (game.images['trophy'][0].get_width()/2)
-            rely = self.sprite.rect.y  - (game.images['trophy'][0].get_height())
-            game.deferred_effects.append(lambda: game.screen.blit(game.images['trophy'][0], (relx- game.view.x, rely-game.view.y, 0, 0)))
-
     def move(self, game):
         if len(self.waypoints) == 0: return
 
@@ -859,7 +873,7 @@ class Chicken(Sprite):
 
 class FBISpawn(Sprite):
     def __init__(self, game, tile, values=None):
-        super(FBISpawn, self).__init__('none', 'shot', game, tile, values)
+        super(FBISpawn, self).__init__('none', 'hidden', game, tile, values)
         self.sprite.agroups = game.string2groups('fbi_spawn')
         game.fbi_spawns.append(self)
         self.tile = vid.Tile(tile.image)
@@ -879,6 +893,26 @@ class FBISpawn(Sprite):
         agent = FBI(self.game, self.tile, self.values)
         agent.target = target_pos
 
+class VisionTest(Sprite):
+    def __init__(self, game, tile, values=None):
+        super(VisionTest, self).__init__('none', 'hidden', game, tile, values)
+        self.sprite.agroups = game.string2groups('animal,Background,farmer,fbi,player')
+        self.sprite.hit = self.hit
+        self.lived_once = False
+        
+    def step(self, game, sprite):
+        if self.lived_once == False:
+            self.lived_once = True
+            return
+        game.sprites.remove(sprite)
+        
+    def tile_blocked(self):
+        pass
+    
+    def hit(self, game, sprite, other):
+        pass
+        
+            
 class SelectionTest(Sprite):
     def __init__(self, game, tile, values=None):
         super(SelectionTest, self).__init__('none', 'shot', game, tile, values)
