@@ -44,10 +44,9 @@ def can_be_seen(mypos, otherpos, other_look_at, view_angle = (math.pi/2.0), view
     them_look.normalize()
     them2me.normalize()
 
-    if them_look == them2me: return True
-
+    if (them2me - them_look).magnitude_squared() < 0.0001: return True
+    
     angle_between = math.acos(them2me.dot(them_look))
-
 
     if (angle_between > view_angle/2.0):
         return False

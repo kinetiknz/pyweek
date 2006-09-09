@@ -396,7 +396,7 @@ class Player(Sprite):
         self.suck_progress += 0.02
 
     def step(self, game, sprite):
-        if self.state == 'landing':
+        if self.state == 'landing' or self.state == 'take-off':
             self.view_me(game)
             return
         
@@ -567,6 +567,7 @@ class Player(Sprite):
         if other.backref.__class__ == Saucer and self.state == 'going-home':
             self.state = 'take-off'
             self.set_image(game.images['none'])
+            other.backref.take_off(game)
 
         push(sprite, other)
         self.get_sprite_pos()
@@ -892,6 +893,13 @@ class Saucer(Sprite):
         #    self.frames.append(newimage)
         #logit('took', time.time() - d)
 
+    def take_off(self, game):
+        self.land_pos = self.position.copy()
+        self.land_pos[1] = game.view.y
+        self.speed     = 3.0
+        self.top_speed = 7.0
+        self.land_distance = (self.land_pos - self.position).magnitude()
+        
     def step(self, game, sprite):
         if game.player.state == 'landing':
             percent = 1.0 - ((self.land_pos - self.position).magnitude() / self.land_distance)
@@ -915,20 +923,19 @@ class Saucer(Sprite):
             percent = 1.0 - ((self.land_pos - self.position).magnitude() / self.land_distance)
             self.move_toward(self.land_pos, self.speed * (1.0 - percent), 10.0)
 
-            if not self.verlet_move(False):
+            if percent >= 0.9:
                 game.player.state = 'done'
                 self.stop()
                 self.speed = 0.0
                 self.top_speed = 0.0
-                self.set_scale(1.0)
-                self.set_rotation(0.0)
                 self.set_sprite_pos()
                 return
 
+            self.verlet_move(False)
             self.set_sprite_pos()
-            self.animate(1.0 - (0.9 * percent))
-            self.set_scale(3.0 - (2.0 * (math.pow(percent, 1.5))))
-            self.set_rotation(math.sin(percent*math.pi*6.0)*1.0)            
+            self.animate(1.0 - (0.9 * (1.0-percent)))
+            self.set_scale(3.0 - (2.0 * (math.pow((1.0-percent), 1.5))))
+            self.set_rotation(math.sin((1.0-percent)*math.pi*6.0)*1.0)            
         else:
             self.animate(0.1)
 
