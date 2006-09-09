@@ -405,9 +405,7 @@ class Player(Sprite):
             game.deferred_effects.append(lambda: game.screen.blit(game.images['laser'][0], ( rsx - game.view.x, rsy - game.view.y, 0, 0)))
         self.suck_progress += 0.02
 
-    def step(self, game, sprite):
-        print(self.seen_by)
-        
+    def step(self, game, sprite):        
         if self.state == 'landing' or self.state == 'take-off':
             self.view_me(game)
             return
@@ -1122,7 +1120,7 @@ class FBISpawn(Sprite):
 
 class SweatDrop(Sprite):
     def __init__(self, game, tile, values=None):
-        super(SweatDrop, self).__init__('laser', 'sweatdrop', game, tile, values)
+        super(SweatDrop, self).__init__('none', 'sweatdrop', game, tile, values)
         self.sprite.agroups = 0
         self.next = None
         self.self_destruct = False
