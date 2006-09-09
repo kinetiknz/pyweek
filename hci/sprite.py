@@ -312,6 +312,7 @@ class Player(Sprite):
         self.walking_sound.set_volume(0.5)
 
         self.morph_sound   = pygame.mixer.Sound('data/sfx/Morph.ogg')
+        self.unmorph_sound = pygame.mixer.Sound('data/sfx/MorphBack.ogg')
         self.beam_sound    = pygame.mixer.Sound('data/sfx/Beam.ogg')
         self.walking_sound_isplaying = False
 
@@ -511,6 +512,7 @@ class Player(Sprite):
             self.known_items.remove(self.impersonating)
             self.morph_sound.play()
         else:
+            self.unmorph_sound.play()
             self.set_image(self.frames[' '][0])
             self.impersonating = None
 
