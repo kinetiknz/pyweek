@@ -219,7 +219,7 @@ def load_level(lvl_num):
 
     game.menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
     game.run_codes(cdata[lvl_num], (0, 0, len(game.tlayer[0]), len(game.tlayer)))
-    
+
     game.music = pygame.mixer.music
     game.music.load('data/music/' + music_files[lvl_num])
     game.music.play(-1)
