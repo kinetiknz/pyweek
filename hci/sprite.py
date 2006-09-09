@@ -433,11 +433,6 @@ class Player(Sprite):
         if key[K_a] or key[K_LEFT]: dx -= 1
         if key[K_d] or key[K_RIGHT]: dx += 1
 
-        if key[K_f]:
-            loc = pygame.mouse.get_pos()
-            click_pos = euclid.Vector2(loc[0] + game.view.x, loc[1] + game.view.y)
-            StationaryCow(game, (click_pos[0], click_pos[1]), None)
-
         if self.impersonating:
             self.set_image(self.impersonating.get_image())
             return
