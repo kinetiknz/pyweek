@@ -303,6 +303,7 @@ class Player(Sprite):
         self.going_home = False
 
         self.required_trophies = []
+        self.render_text = True
 
         self.state = 'landing'
         self.set_image(game.images['none'])
@@ -523,7 +524,7 @@ class Player(Sprite):
 
     def morph(self):
         if self.state == 'sucking': return
-        
+
         if not self.impersonating and len(self.known_items) == 0:
             return
         if not self.impersonating:
@@ -548,15 +549,20 @@ class Player(Sprite):
         scale_to = 40.0
         x, y = game.view.w - scale_to, 0
         font = pygame.font.Font('data/fonts/Another_.ttf', 24)
+        text = None
         if len(self.required_trophies) == 0:
-            text = font.render("Return to your ship!", 1, [255, 255, 255])
+            if game.frame % 30 == 0:
+                self.render_text = not self.render_text
+            if self.render_text:
+                text = font.render("Return to your ship!", 1, [255, 255, 255])
         else:
             text = font.render("Trophies to collect: % 2d" % len(self.required_trophies),
                                1, [255, 255, 255])
-        textrect = text.get_rect()
-        textrect.x = game.view.w / 2 - textrect.w /2
-        textrect.y = game.view.h - textrect.h
-        game.deferred_effects.append(lambda: game.screen.blit(text, textrect))
+        if text:
+            textrect = text.get_rect()
+            textrect.x = game.view.w / 2 - textrect.w /2
+            textrect.y = game.view.h - textrect.h
+            game.deferred_effects.append(lambda: game.screen.blit(text, textrect))
         for t in self.known_items:
             def draw():
                 dx = x
@@ -621,7 +627,7 @@ class Human(Sprite):
 
     def step(self, game, sprite):
         alien_visible = False
-        
+
         if not game.player.cloaked() and self.target and \
             visibility.can_be_seen(game.player.position, self.position, self.target):
             if self.raytest:
@@ -632,8 +638,8 @@ class Human(Sprite):
                         self.seen_count = 60
                         print(self.seen_count)
                         self.seen_alien(game)
-            
-            # do a ray test.... 
+
+            # do a ray test....
             me_to_them = (game.player.position - self.position)
             magnitude  = me_to_them.magnitude()
             me_to_them.normalize()
@@ -641,15 +647,15 @@ class Human(Sprite):
             pt = self.position.copy()
             for i in xrange(int(magnitude / 16.0)-1):
                 pt += me_to_them
-                VisionTest(game, (pt[0], pt[1]), self, [self.sprite, game.player.sprite])            
+                VisionTest(game, (pt[0], pt[1]), self, [self.sprite, game.player.sprite])
             self.raytest = True
             self.rayresult = True
 
-                
+
         if alien_visible:
             self.seeing_alien(game)
         else:
-            self.not_seeing_alien()            
+            self.not_seeing_alien()
             if self.seen_count > 0:
                 self.seen_count = 0
                 print(self.seen_count, self.target, self.raytest, self.rayresult)
@@ -675,7 +681,7 @@ class Human(Sprite):
             game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx - game.view.x, rely - game.view.y, 0, 0)))
             self.seen_count -= 1
             print(self.seen_count)
-            
+
 
     def reached_target(self):
         pass
@@ -747,7 +753,7 @@ class FBI(Human):
 
     def move_blocked(self):
         self.target = None
-        
+
     def move(self, game):
         if self.target:
             self.move_toward(self.target, self.speed, 10.0)
@@ -770,13 +776,13 @@ class FBI(Human):
         if (self.position - game.player.position).magnitude() < 100.0:
             if game.player.state == 'cloaked':
                 self.lost_the_trail(game)
-            
+
         if (self.position - game.player.position).magnitude() < 50.0:
             if game.player.state == 'cloaked':
                 self.lost_the_trail(game)
             else:
                 game.player.busted(game)
-                
+
     def lost_the_trail(self, game):
         self.sweat_trail = None
         self.target = None
@@ -785,7 +791,7 @@ class FBI(Human):
             drop.self_destruct = True
             drop = drop.next
         game.player.first_sweat_drop = None
- 
+
 
     def hit(self, game, sprite, other):
         if (other.backref.__class__ is SweatDrop):
