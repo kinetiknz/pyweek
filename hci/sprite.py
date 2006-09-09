@@ -1034,6 +1034,14 @@ class Bush(Sprite):
     def __init__(self, game, tile, values=None):
         super(Bush, self).__init__('bush', 'Background', game, tile, values)
 
+class HayBale(Sprite):
+    def __init__(self, game, tile, values=None):
+        super(HayBale, self).__init__('hay1', 'Background', game, tile, values)
+
+class SUV(Sprite):
+    def __init__(self, game, tile, values=None):
+        super(SUV, self).__init__('suv', 'Background', game, tile, values)
+
 class Chicken(Sprite):
     def __init__(self, game, tile, values=None):
         super(Chicken, self).__init__('chick1', 'Background', game, tile, values)
@@ -1086,7 +1094,6 @@ class FBISpawn(Sprite):
             self.values = values[:]
         else:
             self.values = None
-
 
     def spawn(self, game, target_pos):
         if game.agents == game.max_fbi_agents:
