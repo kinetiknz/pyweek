@@ -45,6 +45,14 @@ def initialize_modules():
 
     if errors: sys.exit(1)
 
+def CG(l):
+    sz = len(l)
+    i = 0
+    while True:
+        yield l[i]
+        i += 1
+        i %= sz
+
 def tile_block(g, t, a):
     c = t.config
     if c['top'] == 1 and a._rect.bottom <= t._rect.top \
@@ -156,7 +164,7 @@ cdata = [
     4: (lambda g, t, v: sprite.Farmer(g, t, v),  None),
     5: (lambda g, t, v: sprite.FBISpawn(g, t, v),None),
     6: (lambda g, t, v: sprite.Cow(g, t, v),     None),
-    7: (lambda g, t, v: sprite.CollectableCow(g, t, v), ['lvl1_cow']),
+    7: (lambda g, t, v: sprite.CollectableCow(g, t, v), CG(['lvl1_cow'])),
     8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
     9: (lambda g, t, v: sprite.SUV(g, t, v), None),
     10: (lambda g, t, v: sprite.HayBale(g, t, v), None),
@@ -166,7 +174,7 @@ cdata = [
     1: (lambda g, t, v: sprite.Player(g, t, v),  None),
     2: (lambda g, t, v: sprite.Bush(g, t, v),    None),
     3: (lambda g, t, v: sprite.Tree(g, t, v),    None),
-    4: (lambda g, t, v: sprite.Farmer(g, t, v),  ['lvl2_farmer']),
+    4: (lambda g, t, v: sprite.Farmer(g, t, v),  CG(['lvl2_farmer'])),
     5: (lambda g, t, v: sprite.FBISpawn(g, t, v),None),
     6: (lambda g, t, v: sprite.StationaryCow(g, t, v),  None),
     7: (lambda g, t, v: sprite.CollectableCow(g, t, v), None),
@@ -179,10 +187,10 @@ cdata = [
     1: (lambda g, t, v: sprite.Player(g, t, v),  None),
     2: (lambda g, t, v: sprite.Bush(g, t, v),    None),
     3: (lambda g, t, v: sprite.Tree(g, t, v),    None),
-    4: (lambda g, t, v: sprite.Farmer(g, t, v),  ['lvl3_farmer', 'lvl3_farmer01', 'lvl3_farmer02', 'lvl3_farmer03']),
+    4: (lambda g, t, v: sprite.Farmer(g, t, v),  CG(['lvl3_farmer', 'lvl3_farmer01', 'lvl3_farmer02', 'lvl3_farmer03'])),
     5: (lambda g, t, v: sprite.FBISpawn(g, t, v),None),
     6: (lambda g, t, v: sprite.StationaryCow(g, t, v),  None),
-    7: (lambda g, t, v: sprite.CollectableCow(g, t, v), ['lvl3_cow01', 'lvl3_cow02', 'lvl3_cow03', 'lvl3_cow04', 'lvl3_cow05', 'lvl3_cow06', 'lvl3_cow07', 'lvl3_cow08']),
+    7: (lambda g, t, v: sprite.CollectableCow(g, t, v), CG(['lvl3_cow01', 'lvl3_cow02', 'lvl3_cow03', 'lvl3_cow04', 'lvl3_cow05', 'lvl3_cow06', 'lvl3_cow07', 'lvl3_cow08', 'lvl3_cow01'])),
     8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
     9: (lambda g, t, v: sprite.SUV(g, t, v), None),
     10: (lambda g, t, v: sprite.HayBale(g, t, v), None),
@@ -192,10 +200,10 @@ cdata = [
     1: (lambda g, t, v: sprite.Player(g, t, v),  None),
     2: (lambda g, t, v: sprite.Bush(g, t, v),    None),
     3: (lambda g, t, v: sprite.Tree(g, t, v),    None),
-    4: (lambda g, t, v: sprite.Farmer(g, t, v),  ['lvl4_farmer1','lvl4_farmer2','lvl4_farmer1']),
+    4: (lambda g, t, v: sprite.Farmer(g, t, v),  CG(['lvl4_farmer1','lvl4_farmer2','lvl4_farmer1'])),
     5: (lambda g, t, v: sprite.FBISpawn(g, t, v),None),
     6: (lambda g, t, v: sprite.StationaryCow(g, t, v),  None),
-    7: (lambda g, t, v: sprite.CollectableCow(g, t, v), ['lvl4_cow_path1','lvl4_cow_path2','lvl4_cow_path3']),
+    7: (lambda g, t, v: sprite.CollectableCow(g, t, v), CG(['lvl4_cow_path1','lvl4_cow_path2','lvl4_cow_path3'])),
     8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
     9: (lambda g, t, v: sprite.SUV(g, t, v), None),
     10: (lambda g, t, v: sprite.HayBale(g, t, v), None),
