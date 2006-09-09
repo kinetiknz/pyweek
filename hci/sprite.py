@@ -89,7 +89,7 @@ class Sprite(object):
         if values:
             self.load_path(values[0])
             values = values[1:]
-            
+
         # something to do with PGU?
         if hasattr(tile, 'rect'):
             game.clayer[tile.ty][tile.tx] = 0
@@ -338,7 +338,7 @@ class Player(Sprite):
             self.suck_target = None
             self.state = 'normal'
             self.beam_sound.stop()
-            
+
             lvl_complete = True
             for s in game.sprites:
                 if s.backref.trophy:
@@ -594,22 +594,22 @@ class Human(Sprite):
             self.seeing_alien(game)
         else:
             self.not_seeing_alien()
-            
+
             if self.seen_count > 0:
                 self.seen_count = 0
                 self.lost_alien()
 
         self.move(game)
- 
+
     def lost_alien(self, game):
         pass
-               
+
     def seen_alien(self, game):
         pass
-        
+
     def not_seeing_alien(self):
         pass
-    
+
     def seeing_alien(self, game):
         if self.seen_count > 1:
             relx = self.position[0] - (game.images['warn'][0].get_width()/2)
@@ -622,18 +622,18 @@ class Human(Sprite):
 
     def move_blocked(self):
         pass
-    
+
     def move(self, game):
         got_there = False
-        
+
         if self.target:
             if self.move_toward(self.target, self.speed, 40.0):
                 self.reached_target()
                 got_there = True
-            
+
         if not self.verlet_move() and not got_there:
             self.move_blocked()
-            
+
         self.set_sprite_pos()
 
     def hit(self, game, sprite, other):
@@ -650,15 +650,15 @@ class FBI(Human):
         self.speed = 1.0
         self.top_speed = 2.0
         self.target = None
-        
+
     def seeing_alien(self, game):
         super(FBI, self).seeing_alien(game)
-        self.target = game.player.position 
- 
+        self.target = game.player.position
+
     def not_seeing_alien(self):
         super(FBI, self).not_seeing_alien()
         #self.target = None
-        
+
     def move(self, game):
         if self.target:
             self.move_toward(self.target, self.speed, 40.0)
@@ -666,7 +666,7 @@ class FBI(Human):
         if self.verlet_move():
             self.animate(0.1)
 
-        self.set_sprite_pos()        
+        self.set_sprite_pos()
 
 class Farmer(Human):
     def __init__(self, game, tile, values=None):
@@ -677,15 +677,15 @@ class Farmer(Human):
         self.frames['u'].append(game.images['farmer_u0'])
         self.speed = 0.5
         self.top_speed = 1.0
-        
+
     def step(self, game, sprite):
         super(Farmer, self).step(game, sprite)
 
     def move_blocked(self):
         self.waypoint = (self.waypoint + 1) % len(self.waypoints)
         self.target = self.waypoints[self.waypoint]
-        
-    def reached_target(self):        
+
+    def reached_target(self):
         self.waypoint = (self.waypoint + 1) % len(self.waypoints)
         self.target = self.waypoints[self.waypoint]
 
@@ -696,14 +696,14 @@ class Farmer(Human):
         if len(self.waypoints) > 0:
             self.target = self.waypoints[self.waypoint]
             self.top_speed = 1.0
-            
+
     def seen_alien(self, game):
         super(Farmer, self).seen_alien(game)
         self.sound_spotted_scream.play()
         self.stop()
         self.top_speed = 0.5
         self.target = game.player.position
-    
+
     def seeing_alien(self, game):
         super(Farmer, self).seeing_alien(game)
         self.target = game.player.position
@@ -732,7 +732,7 @@ class Cow(Sprite):
         self.sprite.hit = self.hit
         self.speed = 0.2
         self.top_speed = 0.4
-        
+
         self.sound_one_cow = pygame.mixer.Sound('data/sfx/One-Cow.ogg')
         self.sound_one_cow.set_volume(0.3)
         self.sound_two_cows = pygame.mixer.Sound('data/sfx/Two-Cows-Loop.ogg')
@@ -774,7 +774,7 @@ class CollectableCow(Cow):
     def __init__(self, game, tile, values=None):
         super(CollectableCow, self).__init__(game, tile, values)
         self.trophy = True
-        
+
 class Saucer(Sprite):
     def __init__(self, game, tile, values=None):
         super(Saucer, self).__init__('saucer0', 'Background', game, tile, values)

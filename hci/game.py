@@ -113,7 +113,7 @@ idata = [
     ('chick2', 'data/test/chicksmall02.png', (0, 0, 64, 37)),
     ]
 
-cdata = [ 
+cdata = [
     {
     1: (lambda g, t, v: sprite.Player(g, t, v),  None),
     2: (lambda g, t, v: sprite.Bush(g, t, v),    None),
@@ -124,17 +124,17 @@ cdata = [
     7: (lambda g, t, v: sprite.CollectableCow(g, t, v), ['lvl1_cow']),
     8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
     },
-    
+
     {
     1: (lambda g, t, v: sprite.Player(g, t, v),  None),
     2: (lambda g, t, v: sprite.Bush(g, t, v),    None),
-    3: (lambda g, t, v: sprite.Tree(g, t, v),    None),    
+    3: (lambda g, t, v: sprite.Tree(g, t, v),    None),
     4: (lambda g, t, v: sprite.Farmer(g, t, v),  ['lvl2_farmer']),
     5: (lambda g, t, v: sprite.FBISpawn(g, t, v),None),
     6: (lambda g, t, v: sprite.Cow(g, t, v),     None),
     7: (lambda g, t, v: sprite.CollectableCow(g, t, v), None),
     8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
-    } 
+    }
     ]
 
 tdata = {
@@ -156,7 +156,7 @@ def load_level(lvl_num):
         version = open('_MTN/revision').read().strip()
     except IOError, e:
         version = '?'
-    
+
     game = tilevid.Tilevid()
     game.view.w = 640
     game.view.h = 480
@@ -167,29 +167,29 @@ def load_level(lvl_num):
     game.frame = 0
     game.recording = False
     game.recorded_path = []
-    
+
     game.tga_load_tiles('data/tilesets/testset.png', [game.tile_w, game.tile_h], tdata)
     game.tga_load_level('data/maps/' + map_files[lvl_num], True)
     game.bounds = pygame.Rect(game.tile_w, game.tile_h,
                               (len(game.tlayer[0])-2)*game.tile_w,
                               (len(game.tlayer)-2)*game.tile_h)
-    
+
     game.load_images(idata)
     game.deferred_effects = []
     game.fbi_spawns = []
-    
+
     game.menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
     game.run_codes(cdata[lvl_num], (0, 0, len(game.tlayer[0]), len(game.tlayer)))
     game.music = pygame.mixer.music
     game.music.queue('data/music/' + music_files[lvl_num])
     game.music.set_endevent(USEREVENT)
-    
+
     game.quit = 0
     game.pause = 0
-    
+
     game.player.view_me(game)
-    
-    return game 
+
+    return game
 
 def run():
     initialize_modules()
@@ -236,7 +236,7 @@ def run():
                 if e.key == K_r: game.player.morph()
                 if e.key == K_RETURN: game.pause = not game.pause
                 if e.key == K_BACKQUOTE:
-                    if recording:
+                    if game.recording:
                         file = open('data/paths/path' + str(time.time()), 'wb');
                         cPickle.dump(recorded_path, file, protocol=2)
                         file.close()
@@ -246,7 +246,7 @@ def run():
                         game.recorded_path = []
             if e.type is MOUSEBUTTONDOWN:
                 if e.button == 1:
-                    if recording:
+                    if game.recording:
                         game.recorded_path.append((game.view.x + e.pos[0], game.view.y + e.pos[1]))
             if e.type is USEREVENT:
                 game.music.play()
