@@ -727,7 +727,7 @@ class FBI(Human):
         self.set_sprite_pos()
 
         if (self.position - game.player.position).magnitude() < 50.0:
-            game.player.busted()
+            game.player.busted(game)
 
     def hit(self, game, sprite, other):
         if (other.backref.__class__ is SweatDrop):
