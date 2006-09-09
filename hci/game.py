@@ -249,16 +249,21 @@ def do_menu(screen, width, height, game_running=False):
     return selection
 
 def instructions(screen, width, height):
-    txt = (('Collect all trophies on the level and return to your ship!'),
+    txt = (('Collect all the Earthly trophies on the level and return to your ship!'),
+           ('If you are seen by the locals the FBI will appear on the scene.'),
+           ('Unless you love to be probed, don\'t let them catch you!'),
+           (''),
            ('W, A, S, D or cursor keys', 'Movement'),
            ('Left click', 'Move to selected location'),
            ('Right click', 'Abduct Earthly item'),
            ('Space', 'Morph into an Earthly item'),
            ('Enter', 'Pause game'),
-           ('Escape', 'Main Menu'))
+           ('Escape', 'Main Menu'),
+           (''), (''),
+           ('[Hit any key to continue.]'))
     screen.fill([0, 0, 0])
     font = pygame.font.Font('data/fonts/Another_.ttf', 24)
-    y = 128
+    y = 32
     for i in txt:
         if len(i) == 2:
             l, r = i
@@ -280,7 +285,6 @@ def instructions(screen, width, height):
             tr.x = width / 2 - tr.w / 2
             tr.y = y
             screen.blit(t, tr)
-            y += 32
         y += 32
 
     pygame.display.flip()

@@ -73,9 +73,9 @@ def calc_positions(dispsize, font, menu_items):
 
 def draw_item(i, display, font, hilight, menu_items):
     if hilight:
-        font_surface = font.render(menu_items[i], True, [0,255,0])
+        font_surface = font.render(menu_items[i], 1, [0,255,0])
     else:
-        font_surface = font.render(menu_items[i], True, [100,100,100])
+        font_surface = font.render(menu_items[i], 1, [100,100,100])
 
     display.blit(font_surface, menu_sizes[i])
 
