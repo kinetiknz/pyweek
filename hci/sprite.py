@@ -293,11 +293,12 @@ class Player(Sprite):
         self.recording = False
         self.seen = False
         self.mouse_move = False
-        self.speed = 1.0
-        self.top_speed = 5.0
+        self.speed = 0.2
+        self.top_speed = 3.0
         self.suck_target = None
         self.impersonating = None
         self.last_sweat_drop = None
+        self.going_home = False
 
         self.state = 'landing'
         self.set_image(game.images['none'])
@@ -309,7 +310,7 @@ class Player(Sprite):
         
 
         self.walking_sound = pygame.mixer.Sound('data/sfx/Walking.ogg')
-        self.walking_sound.set_volume(0.5)
+        self.walking_sound.set_volume(0.7)
 
         self.morph_sound   = pygame.mixer.Sound('data/sfx/Morph.ogg')
         self.unmorph_sound = pygame.mixer.Sound('data/sfx/MorphBack.ogg')
@@ -350,7 +351,7 @@ class Player(Sprite):
                 if s.backref.trophy:
                     lvl_complete = False
             if lvl_complete:
-                self.state = 'going-home'
+                self.going_home = True
             return
 
         gun_pos = euclid.Vector2(self.position[0], self.position[1]) + self.gun_pos[self.gun_dir()]
@@ -428,7 +429,7 @@ class Player(Sprite):
             self.speed     = 3.0
         else:
             self.top_speed = 5.0
-            self.speed     = 1.0
+            self.speed     = 2.0
 
         if key[K_f]:
             loc = pygame.mouse.get_pos()
@@ -447,8 +448,8 @@ class Player(Sprite):
             if not self.walking_sound_isplaying:
                  self.walking_sound.play(-1)
                  self.walking_sound_isplaying = True
-
-        if (dx == 0 and dy == 0):
+            
+        if (dx == 0 and dy == 0) and self.mouse_move == False:
             if self.walking_sound_isplaying:
                 self.walking_sound.stop()
                 self.walking_sound_isplaying = False
@@ -491,6 +492,9 @@ class Player(Sprite):
             SelectionTest(game, (click_pos[0], click_pos[1]), None)
 
         if self.mouse_move:
+            if not self.walking_sound_isplaying:
+                self.walking_sound.play(-1)
+                self.walking_sound_isplaying = True
             if self.move_toward(self.target, self.speed, 10.0):
                 self.mouse_move = False
         else:
@@ -562,9 +566,9 @@ class Player(Sprite):
             return
 
         if other.backref.group == 'fbi':
-            game.game_over = True
+            self.busted(game)
 
-        if other.backref.__class__ == Saucer and self.state == 'going-home':
+        if other.backref.__class__ == Saucer and self.going_home:
             self.state = 'take-off'
             self.set_image(game.images['none'])
             other.backref.take_off(game)
@@ -573,6 +577,10 @@ class Player(Sprite):
         self.get_sprite_pos()
         self.view_me(game)
         self.stop()
+
+    def busted(self, game):
+        if self.state != 'take-off' and self.state != 'landing':
+            game.game_over = True
 
 class Bullet(Sprite):
     def __init__(self, name, game, tile, values=None):
@@ -594,7 +602,7 @@ class Bullet(Sprite):
 class Human(Sprite):
     def __init__(self, image, group, game, tile, values=None):
         super(Human, self).__init__(image, group, game, tile, values)
-        self.sprite.agroups = game.string2groups('Background,farmer,animal')
+        self.sprite.agroups = game.string2groups('Background,farmer,fbi,animal')
         self.sprite.hit = self.hit
         self.speed = 0.0
         self.top_speed = 0.0
@@ -667,7 +675,7 @@ class Human(Sprite):
 class FBI(Human):
     def __init__(self, game, tile, values=None):
         super(FBI, self).__init__('fbi_d1', 'fbi', game, tile, values)
-        self.sprite.agroups = game.string2groups('Background,farmer,player,animal,fbi,sweatdrop')
+        self.sprite.agroups = game.string2groups('Background,fbi,sweatdrop')
         self.frames['d'].append(game.images['fbi_d1'])
         self.frames['d'].append(game.images['fbi_d2'])
         self.frames['u'].append(game.images['fbi_u1'])
@@ -688,9 +696,14 @@ class FBI(Human):
         self.speed = 2.0
         self.top_speed = 4.0
         self.target = None
-        self.sound_its_the_fuzz = pygame.mixer.Sound('data/sfx/TheFuzz.ogg')
-        self.sound_its_the_fuzz.set_volume(0.6)
-        self.sound_its_the_fuzz.play()
+        self.sweat_trail = None
+        if FBI.called_the_cops == False:
+            self.sound_its_the_fuzz = pygame.mixer.Sound('data/sfx/TheFuzz.ogg')
+            self.sound_its_the_fuzz.set_volume(0.6)
+            self.sound_its_the_fuzz.play(-1)
+            FBI.called_the_cops = True
+
+    called_the_cops = False
 
     def seeing_alien(self, game):
         super(FBI, self).seeing_alien(game)
@@ -706,7 +719,7 @@ class FBI(Human):
 
     def move(self, game):
         if self.target:
-            self.move_toward(self.target, self.speed, 40.0)
+            self.move_toward(self.target, self.speed, 10.0)
         else:
             if game.player_last_seen:
                 self.target = game.player_last_seen
@@ -720,19 +733,21 @@ class FBI(Human):
         self.set_sprite_pos()
 
         if (self.position - game.player.position).magnitude() < 50.0:
-            game.game_over = True
+            game.player.busted(game)
 
     def hit(self, game, sprite, other):
         if (other.backref.__class__ is SweatDrop):
             if (self.seen_count <= 0):
                 if other.backref.next:
-                    self.target = other.backref.next.position            
+                    if self.sweat_trail == other.backref or self.sweat_trail == None:
+                        self.target = other.backref.next.position
+                        self.sweat_trail = other.backref.next
             other.self_destruct = True
         else:
             super(FBI, self).hit(game, sprite, other)
  
         if (other.backref is game.player):
-            game.game_over = True
+            game.player.busted(game)
 
 class Farmer(Human):
     def __init__(self, game, tile, values=None):
@@ -773,7 +788,7 @@ class Farmer(Human):
         super(Farmer, self).seen_alien(game)
         self.sound_spotted_scream.play()
         self.stop()
-        self.top_speed = 0.5
+        self.top_speed = 0.1
         self.target = game.player.position
         game.player_last_seen = game.player.position
 

@@ -122,7 +122,7 @@ idata = [
     ('cow_r0',  'data/sprites/cow060.png', (10, 10, 90, 50)),
     ('cow_r1',  'data/sprites/cow061.png', (10, 10, 90, 50)),
     ('warn',   'data/sprites/Warning.png', (0, 0, 16, 16)),
-    ('tree', 'data/sprites/treebiggersize.png', (10, 15, 95, 95)),
+    ('tree', 'data/sprites/treebiggersize.png', (8, 8, 72, 78)),
     ('bush', 'data/sprites/treepinkflower.png', (0, 0, 30, 37)),
     ('laser', 'data/sprites/laser.png', (0, 0, 8, 8)),
     ('trophy',  'data/sprites/CollectMe.png', (0, 0, 0, 0)),
@@ -180,6 +180,9 @@ def load_level(lvl_num):
     #Must stop all sounds before starting the level again
     #If resumed from "Game over" you get multiple sounds
     pygame.mixer.stop()
+    
+    #Reset the cops flag
+    sprite.FBI.called_the_cops = False
 
     game = tilevid.Tilevid()
     game.view.w = 640
