@@ -26,6 +26,8 @@ import splashscreen
 import menu
 import sprite
 
+debug = False
+
 def initialize_modules():
     '''Initialize PyGame modules.  If any modules fail, report all failures
     and exit the program.'''
@@ -101,10 +103,22 @@ idata = [
     ('saucer0', 'data/sprites/Saucer0.png', (20, 20, 140, 70)),
     ('saucer1', 'data/sprites/Saucer1.png', (20, 20, 140, 70)),
     ('saucer2', 'data/sprites/Saucer2.png', (20, 20, 140, 70)),
-    ('farmer_u0', 'data/sprites/characters/farmer-up0.png', (1, 1, 30, 53)),
-    ('farmer_d0', 'data/sprites/characters/farmer-dw0.png', (1, 1, 30, 53)),
-    ('farmer_r0', 'data/sprites/characters/farmer-rg0.png', (1, 1, 30, 53)),
-    ('farmer_l0', 'data/sprites/characters/farmer-lf0.png', (1, 1, 30, 53)),
+    ('farmer_u1', 'data/sprites/characters/farmer-u1.png', (1, 1, 30, 53)),
+    ('farmer_u2', 'data/sprites/characters/farmer-u2.png', (1, 1, 30, 53)),
+    ('farmer_u3', 'data/sprites/characters/farmer-u3.png', (1, 1, 30, 53)),
+    ('farmer_u4', 'data/sprites/characters/farmer-u4.png', (1, 1, 30, 53)),
+    ('farmer_d1', 'data/sprites/characters/farmer-d1.png', (1, 1, 30, 53)),
+    ('farmer_d2', 'data/sprites/characters/farmer-d2.png', (1, 1, 30, 53)),
+    ('farmer_d3', 'data/sprites/characters/farmer-d3.png', (1, 1, 30, 53)),
+    ('farmer_d4', 'data/sprites/characters/farmer-d4.png', (1, 1, 30, 53)),
+    ('farmer_r1', 'data/sprites/characters/farmer-r1.png', (1, 1, 30, 53)),
+    ('farmer_r2', 'data/sprites/characters/farmer-r2.png', (1, 1, 30, 53)),
+    ('farmer_r3', 'data/sprites/characters/farmer-r3.png', (1, 1, 30, 53)),
+    ('farmer_r4', 'data/sprites/characters/farmer-r4.png', (1, 1, 30, 53)),
+    ('farmer_l1', 'data/sprites/characters/farmer-l1.png', (1, 1, 30, 53)),
+    ('farmer_l2', 'data/sprites/characters/farmer-l2.png', (1, 1, 30, 53)),
+    ('farmer_l3', 'data/sprites/characters/farmer-l3.png', (1, 1, 30, 53)),
+    ('farmer_l4', 'data/sprites/characters/farmer-l4.png', (1, 1, 30, 53)),
     ('cow_l0',  'data/sprites/cow000.png', (10, 10, 90, 50)),
     ('cow_l1',  'data/sprites/cow001.png', (10, 10, 90, 50)),
     ('cow_ul0',  'data/sprites/cow070.png', (10, 10, 90, 50)),
@@ -129,6 +143,7 @@ idata = [
     ('none',  'data/sprites/EmptyImage.png', (-8, -8, 16, 16)),
     ('chick1', 'data/sprites/chicksmall01.png', (0, 0, 64, 37)),
     ('chick2', 'data/sprites/chicksmall02.png', (0, 0, 64, 37)),
+    ('square', 'data/sprites/square.png', (0, 0, 40, 40)),
     ]
 
 cdata = [
@@ -166,21 +181,22 @@ tdata = {
     0x0B: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     }
 
-map_files  = ['level1.tga', 'level2.tga']
-music_files = ['Track01.ogg', 'Track02.ogg']
+map_files  = ['level4.tga', 'level2.tga','level1.tga']
+music_files = ['Track01.ogg', 'Track02.ogg','Track01.ogg']
 
 def load_level(lvl_num):
-    try:
-        version = open('_MTN/revision').read().strip()
-        if version.startswith('format'):
-            version = os.popen('mtn automate get_base_revision_id').read().strip()
-    except IOError, e:
-        version = '?'
+    if debug:
+        try:
+            version = open('_MTN/revision').read().strip()
+            if version.startswith('format'):
+                version = os.popen('mtn automate get_base_revision_id').read().strip()
+        except IOError, e:
+            version = '?'
 
     #Must stop all sounds before starting the level again
     #If resumed from "Game over" you get multiple sounds
     pygame.mixer.stop()
-    
+
     #Reset the cops flag
     sprite.FBI.called_the_cops = False
 
@@ -190,12 +206,15 @@ def load_level(lvl_num):
     game.tile_w = 32
     game.tile_h = 32
     game.screen = pygame.display.set_mode([game.view.w, game.view.h], pygame.DOUBLEBUF)
-    pygame.display.set_caption("The Extraterrorestrial [rev %.6s...]" % version)
+    if debug:
+        pygame.display.set_caption("The Extraterrorestrial [rev %.6s...]" % version)
+    else:
+        pygame.display.set_caption("The Extraterrorestrial")
     game.frame = 0
     game.recording = False
     game.recorded_path = []
 
-    game.tga_load_tiles('data/tilesets/testset.png', [game.tile_w, game.tile_h], tdata)
+    game.tga_load_tiles('data/tilesets/LakeSet.png', [game.tile_w, game.tile_h], tdata)
     game.tga_load_level('data/maps/' + map_files[lvl_num], True)
     game.bounds = pygame.Rect(game.tile_w, game.tile_h,
                               (len(game.tlayer[0])-2)*game.tile_w,
@@ -207,7 +226,7 @@ def load_level(lvl_num):
 
     game.menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
     game.run_codes(cdata[lvl_num], (0, 0, len(game.tlayer[0]), len(game.tlayer)))
-    
+
     game.music = pygame.mixer.music
     game.music.load('data/music/' + music_files[lvl_num])
     game.music.play(-1)
@@ -219,6 +238,7 @@ def load_level(lvl_num):
     game.game_over = False
 
     game.player.view_me(game)
+    game.player.setup_required_trophies(game)
 
     return game
 
@@ -345,17 +365,12 @@ def run():
                     txt = text.render(caption, 1, [255, 0, 0])
                     game.screen.blit(txt, [dx, 1])
 
-            caption = "FPS %2.2f" % t.get_fps()
-            txt = text.render(caption, 1, [0, 0, 0])
-            game.screen.blit(txt, [1, game.view.w - txt.get_height() + 1])
-            txt = text.render(caption, 1, [255, 255, 255])
-            game.screen.blit(txt, [0, game.view.h - txt.get_height()])
-
-            #caption = "SCORE %05d" % game.player.sprite.score
-            #txt = text.render(caption, 1, [0, 0, 0])
-            #game.screen.blit(txt, [0, 0])
-            #txt = text.render(caption, 1, [255, 255, 255])
-            #game.screen.blit(txt, [1, 1])
+            if debug:
+                caption = "FPS %2.2f" % t.get_fps()
+                txt = text.render(caption, 1, [0, 0, 0])
+                game.screen.blit(txt, [1, game.view.w - txt.get_height() + 1])
+                txt = text.render(caption, 1, [255, 255, 255])
+                game.screen.blit(txt, [0, game.view.h - txt.get_height()])
 
             game.frame += 1
             pygame.display.flip()
