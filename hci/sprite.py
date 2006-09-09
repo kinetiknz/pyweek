@@ -672,6 +672,15 @@ class FBI(Human):
         self.frames['l'].append(game.images['fbi_l2'])
         self.frames['r'].append(game.images['fbi_r1'])
         self.frames['r'].append(game.images['fbi_r2'])
+        self.frames['dl'].append(game.images['fbi_dl1'])
+        self.frames['dl'].append(game.images['fbi_dl2'])
+        self.frames['ul'].append(game.images['fbi_ul1'])
+        self.frames['ul'].append(game.images['fbi_ul2'])
+        self.frames['dr'].append(game.images['fbi_dr1'])
+        self.frames['dr'].append(game.images['fbi_dr2'])
+        self.frames['ur'].append(game.images['fbi_ur1'])
+        self.frames['ur'].append(game.images['fbi_ur2'])
+        self.dir_func = self.direction8
         self.speed = 2.0
         self.top_speed = 4.0
         self.target = None

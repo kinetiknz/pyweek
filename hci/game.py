@@ -12,6 +12,7 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+import os
 import sys
 import cPickle
 import time
@@ -81,14 +82,22 @@ idata = [
     ('player_r2',  'data/test/alien/alien-r2.png', (5, 6, 22, 55)),
     ('player_r3',  'data/test/alien/alien-r3.png', (5, 6, 22, 55)),
     ('player_r4',  'data/test/alien/alien-r4.png', (5, 6, 22, 55)),
-    ('fbi_r1',     'data/test/fbi_E1.png', (4, 4, 48, 72)),
-    ('fbi_r2',     'data/test/fbi_E2.png', (4, 4, 48, 72)),
-    ('fbi_l1',     'data/test/fbi_W1.png', (4, 4, 48, 72)),
-    ('fbi_l2',     'data/test/fbi_W2.png', (4, 4, 48, 72)),
-    ('fbi_u1',     'data/test/fbi_N1.png', (4, 4, 48, 72)),
-    ('fbi_u2',     'data/test/fbi_N2.png', (4, 4, 48, 72)),
     ('fbi_d1',     'data/test/fbi_S1.png', (4, 4, 48, 72)),
     ('fbi_d2',     'data/test/fbi_S2.png', (4, 4, 48, 72)),
+    ('fbi_dl1',    'data/test/fbi_SW1.png', (4, 4, 48, 72)),
+    ('fbi_dl2',    'data/test/fbi_SW2.png', (4, 4, 48, 72)),
+    ('fbi_dr1',    'data/test/fbi_SE1.png', (4, 4, 48, 72)),
+    ('fbi_dr2',    'data/test/fbi_SE2.png', (4, 4, 48, 72)),
+    ('fbi_l1',     'data/test/fbi_W1.png', (4, 4, 48, 72)),
+    ('fbi_l2',     'data/test/fbi_W2.png', (4, 4, 48, 72)),
+    ('fbi_r1',     'data/test/fbi_E1.png', (4, 4, 48, 72)),
+    ('fbi_r2',     'data/test/fbi_E2.png', (4, 4, 48, 72)),
+    ('fbi_u1',     'data/test/fbi_N1.png', (4, 4, 48, 72)),
+    ('fbi_u2',     'data/test/fbi_N2.png', (4, 4, 48, 72)),
+    ('fbi_ul1',    'data/test/fbi_NW1.png', (4, 4, 48, 72)),
+    ('fbi_ul2',    'data/test/fbi_NW2.png', (4, 4, 48, 72)),
+    ('fbi_ur1',    'data/test/fbi_NE1.png', (4, 4, 48, 72)),
+    ('fbi_ur2',    'data/test/fbi_NE2.png', (4, 4, 48, 72)),
     ('saucer0', 'data/test/Saucer0.png', (20, 20, 140, 70)),
     ('saucer1', 'data/test/Saucer1.png', (20, 20, 140, 70)),
     ('saucer2', 'data/test/Saucer2.png', (20, 20, 140, 70)),
@@ -163,6 +172,8 @@ music_files = ['Track01.ogg', 'Track02.ogg']
 def load_level(lvl_num):
     try:
         version = open('_MTN/revision').read().strip()
+        if version.startswith('format'):
+            version = os.popen('mtn automate get_base_revision_id').read().strip()
     except IOError, e:
         version = '?'
 
@@ -306,8 +317,6 @@ def run():
                 game.music.stop()
                 game = load_level(level)
                 game.music.play()
-
-
 
             if game.recording:
                 # draw recorded path
