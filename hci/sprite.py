@@ -298,6 +298,7 @@ class Player(Sprite):
         self.suck_target = None
         self.impersonating = None
         self.last_sweat_drop = None
+        self.going_home = False
 
         self.state = 'landing'
         self.set_image(game.images['none'])
@@ -350,7 +351,7 @@ class Player(Sprite):
                 if s.backref.trophy:
                     lvl_complete = False
             if lvl_complete:
-                self.state = 'going-home'
+                self.going_home = True
             return
 
         gun_pos = euclid.Vector2(self.position[0], self.position[1]) + self.gun_pos[self.gun_dir()]
@@ -427,8 +428,8 @@ class Player(Sprite):
             self.top_speed = 15.0
             self.speed     = 3.0
         else:
-            self.top_speed = 3.0
-            self.speed     = 0.2
+            self.top_speed = 5.0
+            self.speed     = 2.0
 
         if key[K_f]:
             loc = pygame.mouse.get_pos()
@@ -567,7 +568,7 @@ class Player(Sprite):
         if other.backref.group == 'fbi':
             self.busted(game)
 
-        if other.backref.__class__ == Saucer and self.state == 'going-home':
+        if other.backref.__class__ == Saucer and self.going_home:
             self.state = 'take-off'
             self.set_image(game.images['none'])
             other.backref.take_off(game)
@@ -695,6 +696,7 @@ class FBI(Human):
         self.speed = 2.0
         self.top_speed = 4.0
         self.target = None
+        self.sweat_trail = None
         if FBI.called_the_cops == False:
             self.sound_its_the_fuzz = pygame.mixer.Sound('data/sfx/TheFuzz.ogg')
             self.sound_its_the_fuzz.set_volume(0.6)
@@ -717,7 +719,7 @@ class FBI(Human):
 
     def move(self, game):
         if self.target:
-            self.move_toward(self.target, self.speed, 40.0)
+            self.move_toward(self.target, self.speed, 10.0)
         else:
             if game.player_last_seen:
                 self.target = game.player_last_seen
@@ -737,7 +739,9 @@ class FBI(Human):
         if (other.backref.__class__ is SweatDrop):
             if (self.seen_count <= 0):
                 if other.backref.next:
-                    self.target = other.backref.next.position            
+                    if self.sweat_trail == other.backref or self.sweat_trail == None:
+                        self.target = other.backref.next.position
+                        self.sweat_trail = other.backref.next
             other.self_destruct = True
         else:
             super(FBI, self).hit(game, sprite, other)
@@ -784,7 +788,7 @@ class Farmer(Human):
         super(Farmer, self).seen_alien(game)
         self.sound_spotted_scream.play()
         self.stop()
-        self.top_speed = 0.5
+        self.top_speed = 0.1
         self.target = game.player.position
         game.player_last_seen = game.player.position
 
