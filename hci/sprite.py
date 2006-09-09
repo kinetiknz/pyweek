@@ -54,6 +54,7 @@ class Sprite(object):
         self.bounds = pygame.Rect(game.bounds)
         self.bounds.inflate_ip(-self.sprite.rect.w * 2, -self.sprite.rect.h * 2)
         self.trophy = False
+        self.being_sucked = False
 
         # size/rotation
         self.orig_image   = self.sprite.image
@@ -88,7 +89,6 @@ class Sprite(object):
         self.waypoints = []
         if values:
             self.load_path(values.next())
-            print self.waypoints
 
         # something to do with PGU?
         if hasattr(tile, 'rect'):
@@ -254,13 +254,13 @@ class Sprite(object):
             self.set_image(self.frames[dir][int(self.frame)])
 
     def step(self, game, sprite):
-        if self.trophy:
+        if self.trophy and not self.being_sucked:
             relx = self.position[0]  - (game.images['trophy'][0].get_width()/2)
             rely = self.sprite.rect.y  - (game.images['trophy'][0].get_height())
             game.deferred_effects.append(lambda: game.screen.blit(game.images['trophy'][0], (relx- game.view.x, rely-game.view.y, 0, 0)))
 
     def get_sucked(self):
-        return
+        self.being_sucked = True
 
 class Player(Sprite):
     def __init__(self, game, tile, values=None):
@@ -345,7 +345,6 @@ class Player(Sprite):
             self.suck_target.waypoints = []
             self.suck_target.waypoint = 0
             self.suck_target.target = None
-            self.suck_target.trophy = False
             self.suck_target.get_sucked()
 
         if self.suck_progress >= 1.0:
@@ -583,7 +582,7 @@ class Player(Sprite):
         if other.backref.group == 'fbi':
             self.busted(game)
 
-        if other.backref.__class__ == Saucer and self.going_home:
+        if other.backref.__class__ == Saucer and self.going_home and not self.suck_target and not self.impersonating:
             self.state = 'take-off'
             self.set_image(game.images['none'])
             other.backref.take_off(game)
@@ -689,6 +688,7 @@ class Human(Sprite):
         self.get_sprite_pos()
 
     def get_sucked(self):
+        super(Human, self).get_sucked()
         self.sound_sucked_scream.play()
 
 class FBI(Human):
@@ -923,6 +923,7 @@ class Cow(Sprite):
         pass
 
     def get_sucked(self):
+        super(Cow, self).get_sucked()
         self.sound_one_cow.play()
         self.sound_two_cows.stop()
 
@@ -1056,6 +1057,7 @@ class Chicken(Sprite):
             self.sound_triggered = True
 
     def get_sucked(self):
+        super(Chicken, self).get_sucked()
         self.clucking_sound.stop();
         self.sucked_sound.play();
 
