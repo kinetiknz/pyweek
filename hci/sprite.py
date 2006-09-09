@@ -291,7 +291,7 @@ class Player(Sprite):
                         'd': euclid.Vector2(11.0, 20.0),
                         }
         self.recording = False
-        self.seen = False
+        self.seen_by = 0
         self.mouse_move = False
         self.top_speed = 5.0
         self.speed     = 2.0
@@ -406,6 +406,8 @@ class Player(Sprite):
         self.suck_progress += 0.02
 
     def step(self, game, sprite):
+        print(self.seen_by)
+        
         if self.state == 'landing' or self.state == 'take-off':
             self.view_me(game)
             return
@@ -419,9 +421,6 @@ class Player(Sprite):
         game.deferred_effects.append(lambda: self.draw_morph_targets(game))
 
         key = pygame.key.get_pressed()
-
-        if self.seen:
-            self.seen = False
 
         if self.state == 'sucking':
             self.suck(game)
@@ -516,7 +515,7 @@ class Player(Sprite):
             return
         if not self.impersonating:
             self.impersonating = random.choice(self.known_items)
-            if not self.seen: self.state = 'cloaked'
+            if self.seen_by == 0: self.state = 'cloaked'
             self.stop()
             self.known_items.remove(self.impersonating)
             self.morph_sound.play()
@@ -619,7 +618,7 @@ class Human(Sprite):
                 if self.rayresult:
                     alien_visible = True
                     if self.seen_count == 0:
-                        game.player.seen = True
+                        game.player.seen_by += 1
                         self.seen_count = 60
                         self.seen_alien(game)
 
@@ -642,6 +641,7 @@ class Human(Sprite):
             self.not_seeing_alien()
             if self.seen_count > 0:
                 self.seen_count = 0
+                game.player.seen_by -= 1
                 self.lost_alien(game)
 
         self.move(game)
@@ -715,6 +715,7 @@ class FBI(Human):
         self.top_speed = 4.0
         self.wander_count = 0
         self.stuck_count = 0
+        self.trail_age = 0
         self.target = game.player_last_seen
         self.sweat_trail = None
         self.state = 'hunting'
@@ -740,22 +741,20 @@ class FBI(Human):
         self.target = None
 
     def move(self, game):
-        #if self.velocity().magnitude_squared() < 4.0:
-        #    self.stuck_count += 1
-        #    if (self.stuck_count > 200):
-        #        print('STUCK! - move')
-        #        self.target = None
-        #        self.stuck_count = 0
+        self.trail_age += 1
+        if self.velocity().magnitude_squared() < 4.0:
+            self.stuck_count += 1
+            if (self.stuck_count > 100):
+                self.target = None
+                self.stuck_count = 0
                 
         if self.target:
             if self.move_toward(self.target, self.speed, 10.0):
-                self.target = None
-                print('Reached Target!')
+                if self.state == 'wandering': self.target = None
             else:
                 self.wander_count += 1
         else:
             if game.player_last_seen and random.randint(0,99) < 10:
-                print('hunting-move')
                 self.state = 'hunting'
                 self.target = game.player_last_seen     
             elif self.state != 'wandering':       
@@ -764,26 +763,22 @@ class FBI(Human):
                 self.stuck_count = 0
                 self.target = self.position + \
                               euclid.Vector2(random.uniform(-200.0, 200.0), random.uniform(-200.0, 200.0))
-                print('wandering')
 
         if self.verlet_move():
             self.animate(0.1)
         else:
             # stuck!
-            print('Verlet move failed', self.wander_count, self.stuck_count)
             self.stuck_count += 1
-            if (self.stuck_count > 200):
-                print('STUCK! -verlet')
+            if (self.stuck_count > 50):
                 self.target = None
                 self.stuck_count = 0
            
-            if self.state == 'wandering' and self.wander_count > 200:
+            if self.state == 'wandering' and self.wander_count > 100:
                 self.target = None
             elif self.state != 'wandering':
                 self.target = None
         
-        if self.state == 'wandering' and self.wander_count > 300:
-            print('wandering too long')
+        if self.state == 'wandering' and self.wander_count > 150:
             self.target = None
 
         self.set_sprite_pos()
@@ -792,29 +787,27 @@ class FBI(Human):
             if game.player.state == 'cloaked':
                 self.lost_the_trail(game)
 
-        if (self.position - game.player.position).magnitude() < 50.0:
-            if game.player.state == 'cloaked':
-                self.lost_the_trail(game)
-            else:
-                game.player.busted(game)
+        if game.player.state != 'cloaked' and (self.position - game.player.position).magnitude() < 50.0:
+            game.player.busted(game)
 
     def lost_the_trail(self, game):
-        self.sweat_trail = None
-        self.target = None
-        drop = game.player.first_sweat_drop
-        while drop:
-            drop.self_destruct = True
-            drop = drop.next
-        game.player.first_sweat_drop = None
+        if self.state == 'trailing':
+            self.sweat_trail = None
+            self.target = None
+            drop = game.player.first_sweat_drop
+            while drop:
+                drop.self_destruct = True
+                drop = drop.next
+            game.player.first_sweat_drop = None
 
 
     def hit(self, game, sprite, other):
         if (other.backref.__class__ is SweatDrop):
             if (self.seen_count <= 0):
                 if other.backref.next:
-                    if self.sweat_trail == other.backref or self.sweat_trail == None:
+                    if self.sweat_trail == other.backref or self.sweat_trail == None or self.trail_age > 100:
                         self.state = 'trailing'
-                        print('trailing')
+                        self.trail_age = 0
                         self.target = other.backref.next.position
                         self.sweat_trail = other.backref.next
             other.backref.self_destruct = True
@@ -1126,7 +1119,7 @@ class FBISpawn(Sprite):
 
 class SweatDrop(Sprite):
     def __init__(self, game, tile, values=None):
-        super(SweatDrop, self).__init__('none', 'sweatdrop', game, tile, values)
+        super(SweatDrop, self).__init__('laser', 'sweatdrop', game, tile, values)
         self.sprite.agroups = 0
         self.next = None
         self.self_destruct = False
