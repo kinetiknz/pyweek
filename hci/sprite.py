@@ -663,7 +663,7 @@ class Human(Sprite):
 class FBI(Human):
     def __init__(self, game, tile, values=None):
         super(FBI, self).__init__('fbi_d1', 'fbi', game, tile, values)
-        self.sprite.agroups = game.string2groups('Background,farmer,player,animal,sweatdrop')
+        self.sprite.agroups = game.string2groups('Background,farmer,player,animal,fbi,sweatdrop')
         self.frames['d'].append(game.images['fbi_d1'])
         self.frames['d'].append(game.images['fbi_d2'])
         self.frames['u'].append(game.images['fbi_u1'])
@@ -684,11 +684,19 @@ class FBI(Human):
         super(FBI, self).not_seeing_alien()
         #self.target = None
 
+    def move_blocked(self):
+        self.target = self.position + \
+                      euclid.Vector2([random.uniform(-100.0, 100.0), random.uniform(-100.0, 100.0)])
+
     def move(self, game):
         if self.target:
             self.move_toward(self.target, self.speed, 40.0)
         else:
-            self.target = game.player_last_seen
+            if game.player_last_seen:
+                self.target = game.player_last_seen
+            else:
+                self.target = self.position + \
+                              euclid.Vector2([random.uniform(-100.0, 100.0), random.uniform(-100.0, 100.0)])
 
         if self.verlet_move():
             self.animate(0.1)
@@ -699,12 +707,13 @@ class FBI(Human):
             game.game_over = True
 
     def hit(self, game, sprite, other):
-        super(FBI, self).hit(game, sprite, other)
-
         if (other.backref.__class__ is SweatDrop):
             if (self.seen_count <= 0):
-                self.target = other.backref.next.position            
-            game.sprites.remove(other)
+                if other.backref.next:
+                    self.target = other.backref.next.position            
+            other.self_destruct = True
+        else:
+            super(FBI, self).hit(game, sprite, other)
  
         if (other.backref is game.player):
             game.game_over = True
@@ -832,6 +841,7 @@ class StationaryCow(Cow):
         super(StationaryCow, self).__init__(game, tile, values)
         facing = random.choice([y for x in self.frames.values() for y in x])
         self.set_image(facing)
+        self.suckable = True
 
 class Saucer(Sprite):
     def __init__(self, game, tile, values=None):
@@ -932,6 +942,13 @@ class SweatDrop(Sprite):
         super(SweatDrop, self).__init__('laser', 'sweatdrop', game, tile, values)
         self.sprite.agroups = 0
         self.next = None
+        self.self_destruct = False
+        self.age = 0;
+
+    def step(self, game, sprite):
+        self.age += 1
+        if self.self_destruct or self.age > 3000:
+            game.sprites.remove(sprite)
 
 class VisionTest(Sprite):
     def __init__(self, game, tile, values=None):
