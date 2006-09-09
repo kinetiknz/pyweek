@@ -301,6 +301,8 @@ class Player(Sprite):
         self.last_sweat_drop = None
         self.going_home = False
 
+        self.required_trophies = []
+
         self.state = 'landing'
         self.set_image(game.images['none'])
         Saucer(game, tile, values)
@@ -317,6 +319,12 @@ class Player(Sprite):
         self.unmorph_sound = pygame.mixer.Sound('data/sfx/MorphBack.ogg')
         self.beam_sound    = pygame.mixer.Sound('data/sfx/Beam.ogg')
         self.walking_sound_isplaying = False
+
+    def setup_required_trophies(self, game):
+        self.required_trophies = []
+        for s in game.sprites:
+            if s.backref.trophy:
+                self.required_trophies.append(s.backref)
 
     def landed(self, game):
         self.state = 'normal'
@@ -511,6 +519,8 @@ class Player(Sprite):
 
     def learn(self, target):
         self.known_items.append(target)
+        if target in self.required_trophies:
+            self.required_trophies.remove(target)
 
     def morph(self):
         if not self.impersonating and len(self.known_items) == 0:
@@ -536,6 +546,16 @@ class Player(Sprite):
     def draw_morph_targets(self, game):
         scale_to = 40.0
         x, y = game.view.w - scale_to, 0
+        font = pygame.font.Font('data/fonts/Another_.ttf', 24)
+        if len(self.required_trophies) == 0:
+            text = font.render("Return to your ship!", 1, [255, 255, 255])
+        else:
+            text = font.render("Trophies to collect: % 2d" % len(self.required_trophies),
+                               1, [255, 255, 255])
+        textrect = text.get_rect()
+        textrect.x = game.view.w / 2 - textrect.w /2
+        textrect.y = game.view.h - textrect.h
+        game.deferred_effects.append(lambda: game.screen.blit(text, textrect))
         for t in self.known_items:
             def draw():
                 dx = x
@@ -992,7 +1012,7 @@ class Chicken(Sprite):
         self.clucking_sound.stop();
         self.sucked_sound.play();
 
-class CollectibleChicken(Chicken):
+class CollectableChicken(Chicken):
     def __init__(self, game, tile, values=None):
         super(CollectableChicken, self).__init__(game, tile, values)
         self.trophy = True

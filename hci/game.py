@@ -26,6 +26,8 @@ import splashscreen
 import menu
 import sprite
 
+debug = False
+
 def initialize_modules():
     '''Initialize PyGame modules.  If any modules fail, report all failures
     and exit the program.'''
@@ -183,12 +185,13 @@ map_files  = ['level4.tga', 'level2.tga','level1.tga']
 music_files = ['Track01.ogg', 'Track02.ogg','Track01.ogg']
 
 def load_level(lvl_num):
-    try:
-        version = open('_MTN/revision').read().strip()
-        if version.startswith('format'):
-            version = os.popen('mtn automate get_base_revision_id').read().strip()
-    except IOError, e:
-        version = '?'
+    if debug:
+        try:
+            version = open('_MTN/revision').read().strip()
+            if version.startswith('format'):
+                version = os.popen('mtn automate get_base_revision_id').read().strip()
+        except IOError, e:
+            version = '?'
 
     #Must stop all sounds before starting the level again
     #If resumed from "Game over" you get multiple sounds
@@ -203,7 +206,10 @@ def load_level(lvl_num):
     game.tile_w = 32
     game.tile_h = 32
     game.screen = pygame.display.set_mode([game.view.w, game.view.h], pygame.DOUBLEBUF)
-    pygame.display.set_caption("The Extraterrorestrial [rev %.6s...]" % version)
+    if debug:
+        pygame.display.set_caption("The Extraterrorestrial [rev %.6s...]" % version)
+    else:
+        pygame.display.set_caption("The Extraterrorestrial")
     game.frame = 0
     game.recording = False
     game.recorded_path = []
@@ -232,6 +238,7 @@ def load_level(lvl_num):
     game.game_over = False
 
     game.player.view_me(game)
+    game.player.setup_required_trophies(game)
 
     return game
 
@@ -358,17 +365,12 @@ def run():
                     txt = text.render(caption, 1, [255, 0, 0])
                     game.screen.blit(txt, [dx, 1])
 
-            caption = "FPS %2.2f" % t.get_fps()
-            txt = text.render(caption, 1, [0, 0, 0])
-            game.screen.blit(txt, [1, game.view.w - txt.get_height() + 1])
-            txt = text.render(caption, 1, [255, 255, 255])
-            game.screen.blit(txt, [0, game.view.h - txt.get_height()])
-
-            #caption = "SCORE %05d" % game.player.sprite.score
-            #txt = text.render(caption, 1, [0, 0, 0])
-            #game.screen.blit(txt, [0, 0])
-            #txt = text.render(caption, 1, [255, 255, 255])
-            #game.screen.blit(txt, [1, 1])
+            if debug:
+                caption = "FPS %2.2f" % t.get_fps()
+                txt = text.render(caption, 1, [0, 0, 0])
+                game.screen.blit(txt, [1, game.view.w - txt.get_height() + 1])
+                txt = text.render(caption, 1, [255, 255, 255])
+                game.screen.blit(txt, [0, game.view.h - txt.get_height()])
 
             game.frame += 1
             pygame.display.flip()
