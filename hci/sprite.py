@@ -598,7 +598,7 @@ class Bullet(Sprite):
 class Human(Sprite):
     def __init__(self, image, group, game, tile, values=None):
         super(Human, self).__init__(image, group, game, tile, values)
-        self.sprite.agroups = game.string2groups('Background,farmer,animal')
+        self.sprite.agroups = game.string2groups('Background,farmer,fbi,animal')
         self.sprite.hit = self.hit
         self.speed = 0.0
         self.top_speed = 0.0
@@ -671,7 +671,7 @@ class Human(Sprite):
 class FBI(Human):
     def __init__(self, game, tile, values=None):
         super(FBI, self).__init__('fbi_d1', 'fbi', game, tile, values)
-        self.sprite.agroups = game.string2groups('Background,farmer,player,animal,fbi,sweatdrop')
+        self.sprite.agroups = game.string2groups('Background,fbi,sweatdrop')
         self.frames['d'].append(game.images['fbi_d1'])
         self.frames['d'].append(game.images['fbi_d2'])
         self.frames['u'].append(game.images['fbi_u1'])
@@ -724,7 +724,7 @@ class FBI(Human):
         self.set_sprite_pos()
 
         if (self.position - game.player.position).magnitude() < 50.0:
-            game.game_over = True
+            game.player.busted()
 
     def hit(self, game, sprite, other):
         if (other.backref.__class__ is SweatDrop):
