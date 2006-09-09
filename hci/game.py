@@ -60,7 +60,7 @@ def tile_block(g, t, a):
     # craziness
     if hasattr(a.backref, 'tile_blocked'):
         a.backref.tile_blocked()
-        
+
     a.backref.get_sprite_pos()
     a.backref.stop()
 
@@ -81,8 +81,14 @@ idata = [
     ('player_r2',  'data/test/alien/alien-r2.png', (5, 6, 22, 55)),
     ('player_r3',  'data/test/alien/alien-r3.png', (5, 6, 22, 55)),
     ('player_r4',  'data/test/alien/alien-r4.png', (5, 6, 22, 55)),
-    ('man_d0',     'data/test/man010.png', (4, 4, 48, 72)),
-    ('man_d1',     'data/test/man011.png', (4, 4, 48, 72)),
+    ('fbi_r1',     'data/test/fbi_E1.png', (4, 4, 48, 72)),
+    ('fbi_r2',     'data/test/fbi_E2.png', (4, 4, 48, 72)),
+    ('fbi_l1',     'data/test/fbi_W1.png', (4, 4, 48, 72)),
+    ('fbi_l2',     'data/test/fbi_W2.png', (4, 4, 48, 72)),
+    ('fbi_u1',     'data/test/fbi_N1.png', (4, 4, 48, 72)),
+    ('fbi_u2',     'data/test/fbi_N2.png', (4, 4, 48, 72)),
+    ('fbi_d1',     'data/test/fbi_S1.png', (4, 4, 48, 72)),
+    ('fbi_d2',     'data/test/fbi_S2.png', (4, 4, 48, 72)),
     ('saucer0', 'data/test/Saucer0.png', (20, 20, 140, 70)),
     ('saucer1', 'data/test/Saucer1.png', (20, 20, 140, 70)),
     ('saucer2', 'data/test/Saucer2.png', (20, 20, 140, 70)),
@@ -273,7 +279,7 @@ def run():
             pygame.display.flip()
         elif game.game_over:
             game.player.walking_sound.stop()
-            game.music.stop()            
+            game.music.stop()
             game.screen.fill([0, 0, 0])
             game.screen.blit(death_image, [0,0])
             pygame.display.flip()

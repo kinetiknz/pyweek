@@ -653,9 +653,16 @@ class Human(Sprite):
 
 class FBI(Human):
     def __init__(self, game, tile, values=None):
-        super(FBI, self).__init__('man_d0', 'fbi', game, tile, values)
+        super(FBI, self).__init__('fbi_d1', 'fbi', game, tile, values)
         self.sprite.agroups = game.string2groups('Background,farmer,player,animal')
-        self.frames[' '].append(game.images['man_d1'])
+        self.frames['d'].append(game.images['fbi_d1'])
+        self.frames['d'].append(game.images['fbi_d2'])
+        self.frames['u'].append(game.images['fbi_u1'])
+        self.frames['u'].append(game.images['fbi_u2'])
+        self.frames['l'].append(game.images['fbi_l1'])
+        self.frames['l'].append(game.images['fbi_l2'])
+        self.frames['r'].append(game.images['fbi_r1'])
+        self.frames['r'].append(game.images['fbi_r2'])
         self.speed = 3.0
         self.top_speed = 5.0
         self.target = None
@@ -679,13 +686,13 @@ class FBI(Human):
 
         if (self.position - game.player.position).magnitude() < 50.0:
             game.game_over = True
-            
+
     def hit(self, game, sprite, other):
         super(FBI, self).hit(game, sprite, other)
-        
+
         if (other.backref is game.player):
             game.game_over = True
-        
+
 class Farmer(Human):
     def __init__(self, game, tile, values=None):
         super(Farmer, self).__init__('farmer_d0', 'farmer', game, tile, values)
@@ -727,11 +734,11 @@ class Farmer(Human):
         self.stop()
         self.top_speed = 0.5
         self.target = game.player.position
-        
+
         # spawn an FBI agent!
         if len(game.fbi_spawns) > 0:
             random.choice(game.fbi_spawns).spawn(game.player.position.copy())
-    
+
     def seeing_alien(self, game):
         super(Farmer, self).seeing_alien(game)
         self.target = game.player.position
@@ -770,7 +777,7 @@ class Cow(Sprite):
     def step(self, game, sprite):
         super(Cow, self).step(game, sprite)
         self.move(game)
-        
+
     def move(self, game):
         if len(self.waypoints) == 0: return
 
@@ -882,13 +889,13 @@ class FBISpawn(Sprite):
         self.tile.agroups = tile.agroups
         self.tile.rect    = tile.rect.inflate(0,0)
         self.game = game
-        
+
         if values:
             self.values = values[:]
         else:
             self.values = None
-            
-    
+
+
     def spawn(self, target_pos):
         agent = FBI(self.game, self.tile, self.values)
         agent.target = target_pos
@@ -899,20 +906,20 @@ class VisionTest(Sprite):
         self.sprite.agroups = game.string2groups('animal,Background,farmer,fbi,player')
         self.sprite.hit = self.hit
         self.lived_once = False
-        
+
     def step(self, game, sprite):
         if self.lived_once == False:
             self.lived_once = True
             return
         game.sprites.remove(sprite)
-        
+
     def tile_blocked(self):
         pass
-    
+
     def hit(self, game, sprite, other):
         pass
-        
-            
+
+
 class SelectionTest(Sprite):
     def __init__(self, game, tile, values=None):
         super(SelectionTest, self).__init__('none', 'shot', game, tile, values)
