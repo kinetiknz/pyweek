@@ -317,6 +317,8 @@ def load_level(lvl_num, screen, wide, high, load_image):
 
     #Reset the cops flag
     sprite.FBI.called_the_cops = False
+    
+
 
     game = tilevid.Tilevid()
     game.view.w = wide
