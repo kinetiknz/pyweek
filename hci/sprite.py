@@ -87,8 +87,7 @@ class Sprite(object):
         self.waypoint = 0
         self.waypoints = []
         if values:
-            self.load_path(values[0])
-            values = values[1:]
+            self.load_path(values.pop(0))
 
         # something to do with PGU?
         if hasattr(tile, 'rect'):
