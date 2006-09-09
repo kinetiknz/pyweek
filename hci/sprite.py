@@ -303,7 +303,6 @@ class Player(Sprite):
         self.going_home = False
 
         self.required_trophies = []
-        self.render_text = True
 
         self.state = 'landing'
         self.set_image(game.images['none'])
@@ -352,7 +351,6 @@ class Player(Sprite):
         if self.suck_progress >= 1.0:
             if self.suck_target:
                 self.learn(self.suck_target)
-                game.sprites.remove(self.suck_target.sprite)
             self.suck_target = None
             self.state = 'normal'
             self.beam_sound.stop()
@@ -519,6 +517,7 @@ class Player(Sprite):
 
     def learn(self, target):
         self.known_items.append(target)
+        game.sprites.remove(self.suck_target.sprite)
         if target in self.required_trophies:
             self.required_trophies.remove(target)
 
@@ -551,9 +550,7 @@ class Player(Sprite):
         font = pygame.font.Font('data/fonts/Another_.ttf', 24)
         text = None
         if len(self.required_trophies) == 0:
-            if game.frame % 30 == 0:
-                self.render_text = not self.render_text
-            if self.render_text:
+            if (game.frame / 30) % 2 == 0:
                 text = font.render("Return to your ship!", 1, [255, 255, 255])
         else:
             text = font.render("Trophies to collect: % 2d" % len(self.required_trophies),
@@ -636,7 +633,6 @@ class Human(Sprite):
                     if self.seen_count == 0:
                         game.player.seen = True
                         self.seen_count = 60
-                        print(self.seen_count)
                         self.seen_alien(game)
 
             # do a ray test....
@@ -658,7 +654,6 @@ class Human(Sprite):
             self.not_seeing_alien()
             if self.seen_count > 0:
                 self.seen_count = 0
-                print(self.seen_count, self.target, self.raytest, self.rayresult)
                 self.lost_alien(game)
 
         self.move(game)
@@ -680,8 +675,6 @@ class Human(Sprite):
             rely = self.sprite.rect.y  - (game.images['warn'][0].get_height()) - 5
             game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx - game.view.x, rely - game.view.y, 0, 0)))
             self.seen_count -= 1
-            print(self.seen_count)
-
 
     def reached_target(self):
         pass
@@ -1037,6 +1030,14 @@ class Bush(Sprite):
     def __init__(self, game, tile, values=None):
         super(Bush, self).__init__('bush', 'Background', game, tile, values)
 
+class HayBale(Sprite):
+    def __init__(self, game, tile, values=None):
+        super(HayBale, self).__init__('hay1', 'Background', game, tile, values)
+
+class SUV(Sprite):
+    def __init__(self, game, tile, values=None):
+        super(SUV, self).__init__('suv', 'Background', game, tile, values)
+
 class Chicken(Sprite):
     def __init__(self, game, tile, values=None):
         super(Chicken, self).__init__('chick1', 'Background', game, tile, values)
@@ -1089,7 +1090,6 @@ class FBISpawn(Sprite):
             self.values = values[:]
         else:
             self.values = None
-
 
     def spawn(self, game, target_pos):
         if game.agents == game.max_fbi_agents:
@@ -1203,16 +1203,13 @@ def collide(o1, o2):
     while True:
         if hm1[x + x1][y + y1]:
             if hm2[x + x2][y + y2]:
-                print 'collision', x, y, x1, y1, x2, y2
                 return True
         if hm1[x1 - x][y1 - y]:
             if hm2[x2 - x][y2 - y]:
-                print 'collision', x, y, x1, y1, x2, y2
                 return True
         x += 1
         if x >= r.width:
             x = 0
             y += 1
             if y >= r.height/2:
-                print 'no collision', x, y, x1, y1, x2, y2
                 return False

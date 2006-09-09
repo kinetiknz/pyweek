@@ -144,6 +144,8 @@ idata = [
     ('chick1', 'data/sprites/chicksmall01.png', (0, 0, 64, 37)),
     ('chick2', 'data/sprites/chicksmall02.png', (0, 0, 64, 37)),
     ('square', 'data/sprites/square.png', (0, 0, 40, 40)),
+    ('suv', 'data/sprites/Car.png', (0, 0, 160, 122)),
+    ('hay1', 'data/sprites/hay02.png', (0, 0, 58, 45)),
     ]
 
 cdata = [
@@ -156,6 +158,8 @@ cdata = [
     6: (lambda g, t, v: sprite.Cow(g, t, v),     None),
     7: (lambda g, t, v: sprite.CollectableCow(g, t, v), ['lvl1_cow']),
     8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
+    9: (lambda g, t, v: sprite.SUV(g, t, v), None),
+    10: (lambda g, t, v: sprite.HayBale(g, t, v), None),
     },
 
     {
@@ -167,8 +171,23 @@ cdata = [
     6: (lambda g, t, v: sprite.StationaryCow(g, t, v),  None),
     7: (lambda g, t, v: sprite.CollectableCow(g, t, v), None),
     8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
+    9: (lambda g, t, v: sprite.SUV(g, t, v), None),
+    10: (lambda g, t, v: sprite.HayBale(g, t, v), None),
     },
-    
+
+    {
+    1: (lambda g, t, v: sprite.Player(g, t, v),  None),
+    2: (lambda g, t, v: sprite.Bush(g, t, v),    None),
+    3: (lambda g, t, v: sprite.Tree(g, t, v),    None),
+    4: (lambda g, t, v: sprite.Farmer(g, t, v),  ['lvl2_farmer']),
+    5: (lambda g, t, v: sprite.FBISpawn(g, t, v),None),
+    6: (lambda g, t, v: sprite.StationaryCow(g, t, v),  None),
+    7: (lambda g, t, v: sprite.CollectableCow(g, t, v), None),
+    8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
+    9: (lambda g, t, v: sprite.SUV(g, t, v), None),
+    10: (lambda g, t, v: sprite.HayBale(g, t, v), None),
+    },
+
     {
     1: (lambda g, t, v: sprite.Player(g, t, v),  None),
     2: (lambda g, t, v: sprite.Bush(g, t, v),    None),
@@ -178,11 +197,14 @@ cdata = [
     6: (lambda g, t, v: sprite.StationaryCow(g, t, v),  None), 
     7: (lambda g, t, v: sprite.CollectableCow(g, t, v), ['lvl4_cow_path1','lvl4_cow_path2',]),
     8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
-    }
+    9: (lambda g, t, v: sprite.SUV(g, t, v), None),
+    10: (lambda g, t, v: sprite.HayBale(g, t, v), None),
+    },
     ]
 
 tdata = {
     0x02: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x04: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x05: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x06: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x07: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
@@ -190,10 +212,24 @@ tdata = {
     0x09: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x0A: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x0B: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x0C: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x0D: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x0E: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x0F: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x10: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x11: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x12: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x13: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x14: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x15: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x16: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x17: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x18: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x19: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     }
 
-map_files  = ['level1.tga', 'level2.tga','level4.tga']
-music_files = ['Track01.ogg', 'Track02.ogg','Track01.ogg']
+map_files  = ['level1.tga', 'level2.tga', 'level3.tga', 'level4.tga']
+music_files = ['Track01.ogg', 'Track02.ogg', 'Track01.ogg', 'Track02.ogg']
 
 def load_level(lvl_num):
     if debug:
@@ -280,8 +316,8 @@ def run():
 
     if selection == -1: game.quit = 1
 
-    text = pygame.font.Font(None, 36)
-    text_sm = pygame.font.Font(None, 16)
+    text = pygame.font.Font('data/fonts/Another_.ttf', 36)
+    text_sm = pygame.font.Font('data/fonts/Another_.ttf', 16)
 
     game.player.view_me(game)
 
@@ -334,6 +370,16 @@ def run():
             game.music.stop()
             game.screen.fill([0, 0, 0])
             game.screen.blit(death_image, [0,0])
+            caption = 'Press enter to try again!'
+            txt = text.render(caption, 1, [0, 0, 0])
+            txtrect = txt.get_rect()
+            txtrect.x = game.view.w / 2 - txtrect.w / 2
+            txtrect.y = game.view.h / 2 - txtrect.h / 2
+            game.screen.blit(txt, txtrect)
+            txt = text.render(caption, 1, [255, 255, 255])
+            txtrect.x += 2
+            txtrect.y += 2
+            game.screen.blit(txt, txtrect)
             pygame.display.flip()
         else:
             game.music.unpause()
