@@ -41,8 +41,6 @@ class Sprite(object):
     MIN_MOVEMENT_SQ = 0.1
 
     def __init__(self, name, group, game, tile, values=None):
-        self.game = game
-        
         self.name = name
         self.group = group
         rect = tile
@@ -51,7 +49,7 @@ class Sprite(object):
         self.sprite = tilevid.Sprite(game.images[self.name], rect)
         self.sprite.loop = self.step
         self.sprite.groups = game.string2groups(self.group)
-        self.sprite.hitmask = pygame.surfarray.array_alpha(self.sprite.image)
+        #self.sprite.hitmask = pygame.surfarray.array_alpha(self.sprite.image)
         self.sprite.backref = self
         self.bounds = pygame.Rect(game.bounds)
         self.bounds.inflate_ip(-self.sprite.rect.w * 2, -self.sprite.rect.h * 2)
@@ -136,7 +134,7 @@ class Sprite(object):
 
         self.orig_image = self.sprite.image
         self.orig_shape = self.sprite.shape
-        self.sprite.hitmask = pygame.surfarray.array_alpha(self.sprite.image)
+        #self.sprite.hitmask = pygame.surfarray.array_alpha(self.sprite.image)
         self.reimage()
 
     def get_image(self):
@@ -974,14 +972,13 @@ class Chicken(Sprite):
                 self.frames[' '].append(game.images['chick1'])
                 self.frames[' '].append(game.images['chick2'])
 
-            self.clucking_sound = pygame.mixer.Sound('data/sfx/Chicken-Loop.ogg')
-            self.clucking_sound.set_volume(0.7)
-            self.sucked_sound = pygame.mixer.Sound('data/sfx/Chicken-Snatch.ogg')
+        self.clucking_sound = pygame.mixer.Sound('data/sfx/Chicken-Loop.ogg')
+        self.clucking_sound.set_volume(0.7)
+        self.sucked_sound = pygame.mixer.Sound('data/sfx/Chicken-Snatch.ogg')
 
-            self.sound_offset = (random.randint(1,600))
-            self.framecount = 0
-            self.sound_triggered = False
-
+        self.sound_offset = (random.randint(1,600))
+        self.framecount = 0
+        self.sound_triggered = False
 
     def step(self, game, sprite):
         self.animate(0.2)
@@ -993,7 +990,6 @@ class Chicken(Sprite):
     def get_sucked(self):
         self.clucking_sound.stop();
         self.sucked_sound.play();
-
 
 class FBISpawn(Sprite):
     def __init__(self, game, tile, values=None):
