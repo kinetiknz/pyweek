@@ -141,6 +141,7 @@ idata = [
     ('none',  'data/sprites/EmptyImage.png', (0, 0, 0, 0)),
     ('chick1', 'data/sprites/chicksmall01.png', (0, 0, 64, 37)),
     ('chick2', 'data/sprites/chicksmall02.png', (0, 0, 64, 37)),
+    ('square', 'data/sprites/square.png', (0, 0, 40, 40)),
     ]
 
 cdata = [

@@ -557,6 +557,7 @@ class Player(Sprite):
                 sy = int(sy * scale_to)
                 img = pygame.transform.scale(t.get_image(), (sx, sy))
                 def proc():
+                    game.screen.blit(game.images['square'][0], (dx, dy, scale_to, scale_to))
                     game.screen.blit(img, (dx, dy, scale_to, scale_to))
                 return proc
             game.deferred_effects.append(draw())
