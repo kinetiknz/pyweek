@@ -126,7 +126,7 @@ idata = [
     ('bush', 'data/sprites/treepinkflower.png', (0, 0, 30, 37)),
     ('laser', 'data/sprites/laser.png', (0, 0, 8, 8)),
     ('trophy',  'data/sprites/CollectMe.png', (0, 0, 0, 0)),
-    ('none',  'data/sprites/EmptyImage.png', (0, 0, 0, 0)),
+    ('none',  'data/sprites/EmptyImage.png', (-8, -8, 16, 16)),
     ('chick1', 'data/sprites/chicksmall01.png', (0, 0, 64, 37)),
     ('chick2', 'data/sprites/chicksmall02.png', (0, 0, 64, 37)),
     ]
@@ -322,7 +322,7 @@ def run():
                 game.deferred_effects.remove(e)
 
             if game.player.state == "done":
-                level = (level + 1) % 2
+                level = (level + 1) % len(map_files)
                 game.music.stop()
                 game = load_level(level)
                 game.music.play()

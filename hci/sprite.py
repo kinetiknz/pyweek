@@ -297,6 +297,7 @@ class Player(Sprite):
         self.top_speed = 3.0
         self.suck_target = None
         self.impersonating = None
+        self.first_sweat_drop = None
         self.last_sweat_drop = None
         self.going_home = False
 
@@ -401,8 +402,9 @@ class Player(Sprite):
             self.view_me(game)
             return
         
-        if not self.last_sweat_drop or (self.position - self.last_sweat_drop.position).magnitude() > 50.0:
+        if not self.first_sweat_drop or (self.position - self.last_sweat_drop.position).magnitude() > 50.0:
             drop = SweatDrop(game, (self.position[0], self.position[1]))
+            if not self.first_sweat_drop: self.first_sweat_drop = drop
             if self.last_sweat_drop: self.last_sweat_drop.next = drop
             self.last_sweat_drop = drop
 
@@ -411,9 +413,6 @@ class Player(Sprite):
         key = pygame.key.get_pressed()
 
         if self.seen:
-            # relx = self.position[0] - game.view.x - (game.images['warn'][0].get_width()/2)
-            # rely = self.position[1] - game.view.y - (game.images['warn'][0].get_height()/2)
-            # game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx, rely, 0, 0)))
             self.seen = False
 
         if self.state == 'sucking':
@@ -512,11 +511,13 @@ class Player(Sprite):
         self.known_items.append(target)
 
     def morph(self):
+        if self.state == 'sucking': return
+        
         if not self.impersonating and len(self.known_items) == 0:
             return
         if not self.impersonating:
             self.impersonating = random.choice(self.known_items)
-            self.state = 'cloaked'
+            if not self.seen: self.state = 'cloaked'
             self.stop()
             self.known_items.remove(self.impersonating)
             self.morph_sound.play()
@@ -579,7 +580,7 @@ class Player(Sprite):
         self.stop()
 
     def busted(self, game):
-        if self.state != 'take-off' and self.state != 'landing':
+        if self.state != 'take-off' and self.state != 'landing' and self.state != 'cloaked':
             game.game_over = True
 
 class Bullet(Sprite):
@@ -608,26 +609,49 @@ class Human(Sprite):
         self.top_speed = 0.0
         self.seen_count = 0
         self.target = None
+        self.raytest = False
         self.sound_sucked_scream = pygame.mixer.Sound('data/sfx/Wilhelm-Long.ogg')
         self.sound_spotted_scream = pygame.mixer.Sound('data/sfx/Wilhelm.ogg')
         self.sound_spotted_scream.set_volume(0.25)
 
     def step(self, game, sprite):
+        alien_visible = False
+        
         if not game.player.cloaked() and self.target and \
-               visibility.can_be_seen(game.player.position, self.position, self.target):
-            if self.seen_count == 0:
-                game.player.seen = True
-                self.seen_count = 60
-                self.seen_alien(game)
+            visibility.can_be_seen(game.player.position, self.position, self.target):
+            if self.raytest:
+                if self.rayresult:
+                    alien_visible = True
+                    if self.seen_count == 0:
+                        game.player.seen = True
+                        self.seen_count = 60
+                        print(self.seen_count)
+                        self.seen_alien(game)
+            
+            # do a ray test.... 
+            me_to_them = (game.player.position - self.position)
+            magnitude  = me_to_them.magnitude()
+            me_to_them.normalize()
+            me_to_them *= 16.0
+            pt = self.position.copy()
+            for i in xrange(int(magnitude / 16.0)-1):
+                pt += me_to_them
+                VisionTest(game, (pt[0], pt[1]), self, [self.sprite, game.player.sprite])            
+            self.raytest = True
+            self.rayresult = True
+
+                
+        if alien_visible:
             self.seeing_alien(game)
         else:
-            self.not_seeing_alien()
-
+            self.not_seeing_alien()            
             if self.seen_count > 0:
                 self.seen_count = 0
+                print(self.seen_count, self.target, self.raytest, self.rayresult)
                 self.lost_alien(game)
 
         self.move(game)
+
 
     def lost_alien(self, game):
         pass
@@ -645,6 +669,8 @@ class Human(Sprite):
             rely = self.sprite.rect.y  - (game.images['warn'][0].get_height()) - 5
             game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx - game.view.x, rely - game.view.y, 0, 0)))
             self.seen_count -= 1
+            print(self.seen_count)
+            
 
     def reached_target(self):
         pass
@@ -695,6 +721,7 @@ class FBI(Human):
         self.dir_func = self.direction8
         self.speed = 2.0
         self.top_speed = 4.0
+        self.stuck_count = 0
         self.target = None
         self.sweat_trail = None
         if FBI.called_the_cops == False:
@@ -714,9 +741,8 @@ class FBI(Human):
         #self.target = None
 
     def move_blocked(self):
-        self.target = self.position + \
-                      euclid.Vector2([random.uniform(-100.0, 100.0), random.uniform(-100.0, 100.0)])
-
+        self.target = None
+        
     def move(self, game):
         if self.target:
             self.move_toward(self.target, self.speed, 10.0)
@@ -725,15 +751,36 @@ class FBI(Human):
                 self.target = game.player_last_seen
             else:
                 self.target = self.position + \
-                              euclid.Vector2([random.uniform(-100.0, 100.0), random.uniform(-100.0, 100.0)])
+                              euclid.Vector2([random.uniform(-200.0, 200.0), random.uniform(-200.0, 200.0)])
 
         if self.verlet_move():
             self.animate(0.1)
+        else:
+            self.stuck_count += 1
+            if self.stuck_count > 2:
+                self.target = None
 
         self.set_sprite_pos()
 
+        if (self.position - game.player.position).magnitude() < 100.0:
+            if game.player.state == 'cloaked':
+                self.lost_the_trail(game)
+            
         if (self.position - game.player.position).magnitude() < 50.0:
-            game.player.busted(game)
+            if game.player.state == 'cloaked':
+                self.lost_the_trail(game)
+            else:
+                game.player.busted(game)
+                
+    def lost_the_trail(self, game):
+        self.sweat_trail = None
+        self.target = None
+        drop = game.player.first_sweat_drop
+        while drop:
+            drop.self_destruct = True
+            drop = drop.next
+        game.player.first_sweat_drop = None
+ 
 
     def hit(self, game, sprite, other):
         if (other.backref.__class__ is SweatDrop):
@@ -742,12 +789,15 @@ class FBI(Human):
                     if self.sweat_trail == other.backref or self.sweat_trail == None:
                         self.target = other.backref.next.position
                         self.sweat_trail = other.backref.next
-            other.self_destruct = True
+            other.backref.self_destruct = True
         else:
             super(FBI, self).hit(game, sprite, other)
  
         if (other.backref is game.player):
-            game.player.busted(game)
+            if game.player.state == 'cloaked':
+                self.move_blocked()
+            else:
+                game.player.busted(game)
 
 class Farmer(Human):
     def __init__(self, game, tile, values=None):
@@ -756,7 +806,7 @@ class Farmer(Human):
         self.frames['r'].append(game.images['farmer_r0'])
         self.frames['d'].append(game.images['farmer_d0'])
         self.frames['u'].append(game.images['farmer_u0'])
-        self.speed = 0.5
+        self.speed = 0.7
         self.top_speed = 1.0
 
     def step(self, game, sprite):
@@ -788,7 +838,7 @@ class Farmer(Human):
         super(Farmer, self).seen_alien(game)
         self.sound_spotted_scream.play()
         self.stop()
-        self.top_speed = 0.1
+        self.top_speed = 0.5
         self.target = game.player.position
         game.player_last_seen = game.player.position
 
@@ -1026,7 +1076,7 @@ class FBISpawn(Sprite):
 
 class SweatDrop(Sprite):
     def __init__(self, game, tile, values=None):
-        super(SweatDrop, self).__init__('laser', 'sweatdrop', game, tile, values)
+        super(SweatDrop, self).__init__('none', 'sweatdrop', game, tile, values)
         self.sprite.agroups = 0
         self.next = None
         self.self_destruct = False
@@ -1038,23 +1088,26 @@ class SweatDrop(Sprite):
             game.sprites.remove(sprite)
 
 class VisionTest(Sprite):
-    def __init__(self, game, tile, values=None):
-        super(VisionTest, self).__init__('laser', 'hidden', game, tile, values)
+    def __init__(self, game, tile, who_to_tell, ignore_list):
+        super(VisionTest, self).__init__('none', 'hidden', game, tile, None)
         self.sprite.agroups = game.string2groups('animal,Background,farmer,fbi,player')
         self.sprite.hit = self.hit
         self.lived_once = False
+        self.who_to_tell = who_to_tell
+        self.ignore_list = ignore_list
 
     def step(self, game, sprite):
         if self.lived_once == False:
             self.lived_once = True
             return
-        # game.sprites.remove(sprite)
+        game.sprites.remove(sprite)
 
     def tile_blocked(self):
-        pass
+        self.who_to_tell.rayresult = False
 
     def hit(self, game, sprite, other):
-        pass
+        if other not in self.ignore_list:
+            self.who_to_tell.rayresult = False
 
 class SelectionTest(Sprite):
     def __init__(self, game, tile, values=None):
