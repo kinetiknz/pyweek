@@ -294,8 +294,8 @@ class Player(Sprite):
         self.recording = False
         self.seen = False
         self.mouse_move = False
-        self.speed = 0.0
-        self.top_speed = 0.0
+        self.top_speed = 5.0
+        self.speed     = 2.0
         self.suck_target = None
         self.impersonating = None
         self.first_sweat_drop = None
@@ -432,12 +432,6 @@ class Player(Sprite):
         if key[K_s] or key[K_DOWN]: dy += 1
         if key[K_a] or key[K_LEFT]: dx -= 1
         if key[K_d] or key[K_RIGHT]: dx += 1
-        if key[K_LSHIFT]:
-            self.top_speed = 15.0
-            self.speed     = 3.0
-        else:
-            self.top_speed = 5.0
-            self.speed     = 2.0
 
         if key[K_f]:
             loc = pygame.mouse.get_pos()
