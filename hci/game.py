@@ -229,7 +229,7 @@ tdata = {
     }
 
 map_files  = ['level1.tga', 'level2.tga', 'level3.tga', 'level4.tga']
-music_files = ['Track01.ogg', 'Track02.ogg', 'Track01.ogg', 'Track02.ogg']
+music_files = ['Track01.ogg', 'Track02.ogg']
 
 def load_level(lvl_num):
     if debug:
