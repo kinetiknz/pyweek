@@ -999,7 +999,6 @@ class Chicken(Sprite):
             self.framecount = 0
             self.sound_triggered = False
             
-
     def step(self, game, sprite):
         self.animate(0.2)
         self.framecount += 1
@@ -1011,6 +1010,10 @@ class Chicken(Sprite):
         self.clucking_sound.stop();
         self.sucked_sound.play();
         
+class CollectibleChicken(Chicken):
+    def __init__(self, game, tile, values=None):
+        super(CollectableChicken, self).__init__(game, tile, values)
+        self.trophy = True
 
 class FBISpawn(Sprite):
     def __init__(self, game, tile, values=None):
