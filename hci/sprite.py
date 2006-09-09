@@ -449,7 +449,7 @@ class Player(Sprite):
             if not self.walking_sound_isplaying:
                  self.walking_sound.play(-1)
                  self.walking_sound_isplaying = True
-            
+
         if (dx == 0 and dy == 0) and self.mouse_move == False:
             if self.walking_sound_isplaying:
                 self.walking_sound.stop()
@@ -460,7 +460,7 @@ class Player(Sprite):
             self.mouse_move = True
             if self.recording: self.recorded_path.append(self.target)
 
-        if buttons[2] and not self.state == 'sucking':
+        if buttons[2] and not self.state == 'sucking' and len(self.known_items) < 8:
             loc       = pygame.mouse.get_pos()
             click_pos = euclid.Vector2(loc[0]+game.view.x, loc[1]+game.view.y)
             gun_pos   = self.position + self.gun_pos[self.gun_dir()]
@@ -534,7 +534,7 @@ class Player(Sprite):
         return False
 
     def draw_morph_targets(self, game):
-        scale_to = 32.0
+        scale_to = 40.0
         x, y = game.view.w - scale_to, 0
         for t in self.known_items:
             def draw():
@@ -737,13 +737,13 @@ class Farmer(Human):
     def __init__(self, game, tile, values=None):
         super(Farmer, self).__init__('farmer_d1', 'farmer', game, tile, values)
         self.frames['l'].append(game.images['farmer_l1'])
-        self.frames['l'].append(game.images['farmer_l2'])        
+        self.frames['l'].append(game.images['farmer_l2'])
         self.frames['l'].append(game.images['farmer_l3'])
         self.frames['l'].append(game.images['farmer_l4'])
         self.frames['r'].append(game.images['farmer_r1'])
         self.frames['r'].append(game.images['farmer_r2'])
         self.frames['r'].append(game.images['farmer_r3'])
-        self.frames['r'].append(game.images['farmer_r4'])        
+        self.frames['r'].append(game.images['farmer_r4'])
         self.frames['d'].append(game.images['farmer_d1'])
         self.frames['d'].append(game.images['farmer_d2'])
         self.frames['d'].append(game.images['farmer_d3'])
@@ -751,7 +751,7 @@ class Farmer(Human):
         self.frames['u'].append(game.images['farmer_u1'])
         self.frames['u'].append(game.images['farmer_u2'])
         self.frames['u'].append(game.images['farmer_u3'])
-        self.frames['u'].append(game.images['farmer_u4'])                        
+        self.frames['u'].append(game.images['farmer_u4'])
         self.speed = 0.5
         self.top_speed = 1.0
 

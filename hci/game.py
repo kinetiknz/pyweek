@@ -111,12 +111,12 @@ idata = [
     ('farmer_d4', 'data/sprites/characters/farmer-d4.png', (1, 1, 30, 53)),
     ('farmer_r1', 'data/sprites/characters/farmer-r1.png', (1, 1, 30, 53)),
     ('farmer_r2', 'data/sprites/characters/farmer-r2.png', (1, 1, 30, 53)),
-    ('farmer_r3', 'data/sprites/characters/farmer-r3.png', (1, 1, 30, 53)),    
-    ('farmer_r4', 'data/sprites/characters/farmer-r4.png', (1, 1, 30, 53)),    
+    ('farmer_r3', 'data/sprites/characters/farmer-r3.png', (1, 1, 30, 53)),
+    ('farmer_r4', 'data/sprites/characters/farmer-r4.png', (1, 1, 30, 53)),
     ('farmer_l1', 'data/sprites/characters/farmer-l1.png', (1, 1, 30, 53)),
-    ('farmer_l2', 'data/sprites/characters/farmer-l2.png', (1, 1, 30, 53)),    
-    ('farmer_l3', 'data/sprites/characters/farmer-l3.png', (1, 1, 30, 53)),    
-    ('farmer_l4', 'data/sprites/characters/farmer-l4.png', (1, 1, 30, 53)),        
+    ('farmer_l2', 'data/sprites/characters/farmer-l2.png', (1, 1, 30, 53)),
+    ('farmer_l3', 'data/sprites/characters/farmer-l3.png', (1, 1, 30, 53)),
+    ('farmer_l4', 'data/sprites/characters/farmer-l4.png', (1, 1, 30, 53)),
     ('cow_l0',  'data/sprites/cow000.png', (10, 10, 90, 50)),
     ('cow_l1',  'data/sprites/cow001.png', (10, 10, 90, 50)),
     ('cow_ul0',  'data/sprites/cow070.png', (10, 10, 90, 50)),
@@ -192,7 +192,7 @@ def load_level(lvl_num):
     #Must stop all sounds before starting the level again
     #If resumed from "Game over" you get multiple sounds
     pygame.mixer.stop()
-    
+
     #Reset the cops flag
     sprite.FBI.called_the_cops = False
 
