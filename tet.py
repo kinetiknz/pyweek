@@ -18,8 +18,10 @@
 import sys
 try:
     import pygame
+    import pygame.surfarray
 except ImportError, e:
     print >> sys.stderr, "fatal: %s. " % e
+    print >> sys.stderr, "pygame and numeric must be installed."
     sys.exit(1)
 
 sys.path.append('thirdparty')

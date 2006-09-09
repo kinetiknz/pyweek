@@ -149,6 +149,7 @@ def run():
     game.view.h = 480
     game.tile_w = 32
     game.tile_h = 32
+    game.fullscreen = False
     game.screen = pygame.display.set_mode([game.view.w, game.view.h], pygame.DOUBLEBUF)
     pygame.display.set_caption("PyWeek 3: The Disappearing Act [rev %.6s...]" % version)
     game.frame = 0
@@ -201,7 +202,12 @@ def run():
             if e.type is QUIT: game.quit = 1
             if e.type is KEYDOWN:
                 if e.key == K_ESCAPE: game.quit = 1
-                if e.key == K_F10: pygame.display.toggle_fullscreen()
+                if e.key == K_F10:
+                    flags = pygame.DOUBLEBUF
+                    if not game.fullscreen:
+                        flags |= pygame.FULLSCREEN
+                        game.fullscreen = True
+                    pygame.display.set_mode([game.view.w, game.view.h], flags)
                 if e.key == K_r: game.player.morph()
                 if e.key == K_RETURN: game.pause = not game.pause
                 if e.key == K_BACKQUOTE:
