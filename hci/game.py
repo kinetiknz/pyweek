@@ -149,7 +149,7 @@ cdata = [
     3: (lambda g, t, v: sprite.Tree(g, t, v),    None),
     4: (lambda g, t, v: sprite.Farmer(g, t, v),  ['lvl2_farmer']),
     5: (lambda g, t, v: sprite.FBISpawn(g, t, v),None),
-    6: (lambda g, t, v: sprite.StationaryCow(g, t, v),     None),
+    6: (lambda g, t, v: sprite.StationaryCow(g, t, v),  None),
     7: (lambda g, t, v: sprite.CollectableCow(g, t, v), None),
     8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
     }
