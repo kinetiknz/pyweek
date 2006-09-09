@@ -639,9 +639,9 @@ class Human(Sprite):
             me_to_them = (game.player.position - self.position)
             magnitude  = me_to_them.magnitude()
             me_to_them.normalize()
-            me_to_them *= 16.0
+            me_to_them *= 20.0
             pt = self.position.copy()
-            for i in xrange(int(magnitude / 16.0)-1):
+            for i in xrange(int(magnitude / 20.0)-1):
                 pt += me_to_them
                 VisionTest(game, (pt[0], pt[1]), self, [self.sprite, game.player.sprite])
             self.raytest = True
@@ -669,12 +669,12 @@ class Human(Sprite):
         pass
 
     def seeing_alien(self, game):
-        game.player_last_seen = game.player.position
         if self.seen_count > 1:
             relx = self.position[0] - (game.images['warn'][0].get_width()/2)
             rely = self.sprite.rect.y  - (game.images['warn'][0].get_height()) - 5
             game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx - game.view.x, rely - game.view.y, 0, 0)))
             self.seen_count -= 1
+        
 
     def reached_target(self):
         pass
@@ -725,9 +725,11 @@ class FBI(Human):
         self.dir_func = self.direction8
         self.speed = 2.0
         self.top_speed = 4.0
+        self.wander_count = 0
         self.stuck_count = 0
-        self.target = None
+        self.target = game.player_last_seen
         self.sweat_trail = None
+        self.state = 'hunting'
         if FBI.called_the_cops == False:
             self.sound_its_the_fuzz = pygame.mixer.Sound('data/sfx/TheFuzz.ogg')
             self.sound_its_the_fuzz.set_volume(0.6)
@@ -739,6 +741,9 @@ class FBI(Human):
     def seeing_alien(self, game):
         super(FBI, self).seeing_alien(game)
         self.target = game.player.position
+        game.player_last_seen = game.player.position
+        self.state = 'hunting'
+        print('hunting-seen')
 
     def not_seeing_alien(self):
         super(FBI, self).not_seeing_alien()
@@ -749,20 +754,38 @@ class FBI(Human):
 
     def move(self, game):
         if self.target:
-            self.move_toward(self.target, self.speed, 10.0)
+            if self.move_toward(self.target, self.speed, 10.0):
+                self.target = None
         else:
-            if game.player_last_seen:
-                self.target = game.player_last_seen
-            else:
+            if game.player_last_seen and random.randint(0,99) < 10:
+                print('hunting-move')
+                self.state = 'hunting'
+                self.target = game.player_last_seen     
+            else:       
+                print('wandering')
+                self.state = 'wandering'
+                self.wander_count = 0
+                self.stuck_count = 0
                 self.target = self.position + \
-                              euclid.Vector2([random.uniform(-200.0, 200.0), random.uniform(-200.0, 200.0)])
+                              euclid.Vector2(random.uniform(-200.0, 200.0), random.uniform(-200.0, 200.0))
 
         if self.verlet_move():
             self.animate(0.1)
         else:
-            self.stuck_count += 1
-            if self.stuck_count > 2:
+            # stuck!
+            if self.state == 'wandering' and self.wander_count > 200:
                 self.target = None
+            else:
+                self.target = None
+        
+        if self.velocity().magnitude_squared() < 36.0:
+            self.stuck_count += 1
+            if (self.stuck_count > 200):
+                self.target = None
+                self.stuck_count = 0
+        
+        if self.state == 'wandering' and self.wander_count > 300:
+            self.target = None
 
         self.set_sprite_pos()
 
@@ -791,6 +814,8 @@ class FBI(Human):
             if (self.seen_count <= 0):
                 if other.backref.next:
                     if self.sweat_trail == other.backref or self.sweat_trail == None:
+                        self.state = 'trailing'
+                        print('trailing')
                         self.target = other.backref.next.position
                         self.sweat_trail = other.backref.next
             other.backref.self_destruct = True
@@ -1040,7 +1065,7 @@ class SUV(Sprite):
 
 class Chicken(Sprite):
     def __init__(self, game, tile, values=None):
-        super(Chicken, self).__init__('chick1', 'Background', game, tile, values)
+        super(Chicken, self).__init__('chick1', 'animal', game, tile, values)
         for x in xrange(10):
             idle = random.randint(0, 60)
             for y in xrange(idle):

@@ -35,7 +35,7 @@ def show(dispsize, display, bg_image, font, menu_items):
             if e.type is KEYDOWN:
                 if e.key == K_ESCAPE: return -1
                 if e.key == K_F10: pygame.display.toggle_fullscreen()
-                if e.key == K_RETURN:
+                if e.key == K_RETURN or e.key == K_SPACE:
                     return selected
                 if e.key == K_UP:
                     selected -= 1
