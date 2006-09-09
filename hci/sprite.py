@@ -297,7 +297,6 @@ class Player(Sprite):
         self.top_speed = 5.0
         self.suck_target = None
         self.impersonating = None
-        self.lvl_complete = False
         self.last_sweat_drop = None
 
         self.state = 'landing'
@@ -351,7 +350,7 @@ class Player(Sprite):
                 if s.backref.trophy:
                     lvl_complete = False
             if lvl_complete:
-                self.lvl_complete = True
+                self.state = 'going-home'
             return
 
         gun_pos = euclid.Vector2(self.position[0], self.position[1]) + self.gun_pos[self.gun_dir()]
@@ -564,6 +563,10 @@ class Player(Sprite):
 
         if other.backref.group == 'fbi':
             game.game_over = True
+
+        if other.backref.__class__ == Saucer and self.state == 'going-home':
+            self.state = 'take-off'
+            self.set_image(game.images['none'])
 
         push(sprite, other)
         self.get_sprite_pos()
@@ -903,6 +906,24 @@ class Saucer(Sprite):
             self.animate(1.0 - (0.9 * percent))
             self.set_scale(3.0 - (2.0 * (math.pow(percent, 1.5))))
             self.set_rotation(math.sin(percent*math.pi*6.0)*1.0)
+        elif game.player.state == 'take-off':
+            percent = 1.0 - ((self.land_pos - self.position).magnitude() / self.land_distance)
+            self.move_toward(self.land_pos, self.speed * (1.0 - percent), 10.0)
+
+            if not self.verlet_move(False):
+                game.player.state = 'done'
+                self.stop()
+                self.speed = 0.0
+                self.top_speed = 0.0
+                self.set_scale(1.0)
+                self.set_rotation(0.0)
+                self.set_sprite_pos()
+                return
+
+            self.set_sprite_pos()
+            self.animate(1.0 - (0.9 * percent))
+            self.set_scale(3.0 - (2.0 * (math.pow(percent, 1.5))))
+            self.set_rotation(math.sin(percent*math.pi*6.0)*1.0)            
         else:
             self.animate(0.1)
 

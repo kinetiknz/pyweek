@@ -314,7 +314,7 @@ def run():
                 e()
                 game.deferred_effects.remove(e)
 
-            if game.player.lvl_complete:
+            if game.player.state == "done":
                 level = (level + 1) % 2
                 game.music.stop()
                 game = load_level(level)
