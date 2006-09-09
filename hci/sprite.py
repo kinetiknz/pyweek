@@ -565,7 +565,7 @@ class Player(Sprite):
             return
 
         if other.backref.group == 'fbi':
-            game.game_over = True
+            self.busted(game)
 
         if other.backref.__class__ == Saucer and self.state == 'going-home':
             self.state = 'take-off'
@@ -576,6 +576,10 @@ class Player(Sprite):
         self.get_sprite_pos()
         self.view_me(game)
         self.stop()
+
+    def busted(self, game):
+        if self.state != 'take-off' and self.state != 'landing':
+            game.game_over = True
 
 class Bullet(Sprite):
     def __init__(self, name, game, tile, values=None):
@@ -597,7 +601,7 @@ class Bullet(Sprite):
 class Human(Sprite):
     def __init__(self, image, group, game, tile, values=None):
         super(Human, self).__init__(image, group, game, tile, values)
-        self.sprite.agroups = game.string2groups('Background,farmer,animal')
+        self.sprite.agroups = game.string2groups('Background,farmer,fbi,animal')
         self.sprite.hit = self.hit
         self.speed = 0.0
         self.top_speed = 0.0
@@ -670,7 +674,7 @@ class Human(Sprite):
 class FBI(Human):
     def __init__(self, game, tile, values=None):
         super(FBI, self).__init__('fbi_d1', 'fbi', game, tile, values)
-        self.sprite.agroups = game.string2groups('Background,farmer,player,animal,fbi,sweatdrop')
+        self.sprite.agroups = game.string2groups('Background,fbi,sweatdrop')
         self.frames['d'].append(game.images['fbi_d1'])
         self.frames['d'].append(game.images['fbi_d2'])
         self.frames['u'].append(game.images['fbi_u1'])
@@ -727,7 +731,7 @@ class FBI(Human):
         self.set_sprite_pos()
 
         if (self.position - game.player.position).magnitude() < 50.0:
-            game.game_over = True
+            game.player.busted(game)
 
     def hit(self, game, sprite, other):
         if (other.backref.__class__ is SweatDrop):
@@ -739,7 +743,7 @@ class FBI(Human):
             super(FBI, self).hit(game, sprite, other)
  
         if (other.backref is game.player):
-            game.game_over = True
+            game.player.busted(game)
 
 class Farmer(Human):
     def __init__(self, game, tile, values=None):
