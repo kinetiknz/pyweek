@@ -812,7 +812,7 @@ class Cow(Sprite):
         self.sound_two_cows = pygame.mixer.Sound('data/sfx/Two-Cows-Loop.ogg')
         self.sound_two_cows.set_volume(0.3)
 
-        self.sound_offset = (random.randint(1,300))
+        self.sound_offset = (random.randint(1,600))
         self.framecount = 0
         
 
@@ -931,7 +931,7 @@ class Chicken(Sprite):
             self.clucking_sound.set_volume(0.7)
             self.sucked_sound = pygame.mixer.Sound('data/sfx/Chicken-Snatched.ogg')
             
-            self.sound_offset = (random.randint(1,300))
+            self.sound_offset = (random.randint(1,600))
             self.framecount = 0
             
 
