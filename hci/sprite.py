@@ -772,7 +772,7 @@ class Farmer(Human):
 
         # spawn an FBI agent!
         if len(game.fbi_spawns) > 0:
-            random.choice(game.fbi_spawns).spawn(game.player.position.copy())
+            random.choice(game.fbi_spawns).spawn(game, game.player.position.copy())
 
     def seeing_alien(self, game):
         super(Farmer, self).seeing_alien(game)
@@ -964,7 +964,11 @@ class FBISpawn(Sprite):
             self.values = None
 
 
-    def spawn(self, target_pos):
+    def spawn(self, game, target_pos):
+        if game.agents == game.max_fbi_agents:
+            return
+        
+        game.agents += 1
         agent = FBI(self.game, self.tile, self.values)
         agent.target = target_pos
 

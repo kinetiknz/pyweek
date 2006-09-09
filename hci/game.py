@@ -204,6 +204,8 @@ def load_level(lvl_num):
     game.music.queue('data/music/' + music_files[lvl_num])
     game.music.set_endevent(USEREVENT)
 
+    game.agents = 0
+    game.max_fbi_agents = lvl_num * 2
     game.quit = 0
     game.pause = 0
     game.game_over = False
