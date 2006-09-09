@@ -294,8 +294,8 @@ class Player(Sprite):
         self.recording = False
         self.seen_by = 0
         self.mouse_move = False
-        self.top_speed = 5.0
-        self.speed     = 2.0
+        self.top_speed = 3.0
+        self.speed     = 1.0
         self.suck_target = None
         self.impersonating = None
         self.first_sweat_drop = None
