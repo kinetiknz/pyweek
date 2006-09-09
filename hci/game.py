@@ -117,7 +117,7 @@ cdata = [
     {
     1: (lambda g, t, v: sprite.Player(g, t, v),  None),
     2: (lambda g, t, v: sprite.Bush(g, t, v),    None),
-    3: (lambda g, t, v: sprite.Tree(g, t, v),    None),    
+    3: (lambda g, t, v: sprite.Tree(g, t, v),    None),
     4: (lambda g, t, v: sprite.Farmer(g, t, v),  None),
     5: (lambda g, t, v: sprite.FBISpawn(g, t, v),None),
     6: (lambda g, t, v: sprite.Cow(g, t, v),     None),
@@ -163,7 +163,7 @@ def load_level(lvl_num):
     game.tile_w = 32
     game.tile_h = 32
     game.screen = pygame.display.set_mode([game.view.w, game.view.h], pygame.DOUBLEBUF)
-    pygame.display.set_caption("PyWeek 3: The Disappearing Act [rev %.6s...]" % version)
+    pygame.display.set_caption("The Extraterrorestrial [rev %.6s...]" % version)
     game.frame = 0
     game.recording = False
     game.recorded_path = []
@@ -232,7 +232,7 @@ def run():
                     if not game.fullscreen:
                         flags |= pygame.FULLSCREEN
                         game.fullscreen = True
-                    pygame.display.set_mode([game.view.w, game.view.h], flags)
+                    game.screen = pygame.display.set_mode([game.view.w, game.view.h], flags)
                 if e.key == K_r: game.player.morph()
                 if e.key == K_RETURN: game.pause = not game.pause
                 if e.key == K_BACKQUOTE:
@@ -284,6 +284,8 @@ def run():
                 game.music.stop()
                 game = load_level(level)
                 game.music.play()
+
+
 
             if game.recording:
                 # draw recorded path
