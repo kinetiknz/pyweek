@@ -192,7 +192,7 @@ tdata = {
     0x0B: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     }
 
-map_files  = ['level2.tga', 'level2.tga','level4.tga']
+map_files  = ['level4.tga', 'level2.tga','level1.tga']
 music_files = ['Track01.ogg', 'Track02.ogg','Track01.ogg']
 
 def load_level(lvl_num):
