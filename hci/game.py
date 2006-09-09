@@ -280,8 +280,8 @@ def run():
 
     if selection == -1: game.quit = 1
 
-    text = pygame.font.Font(None, 36)
-    text_sm = pygame.font.Font(None, 16)
+    text = pygame.font.Font('data/fonts/Another_.ttf', 36)
+    text_sm = pygame.font.Font('data/fonts/Another_.ttf', 16)
 
     game.player.view_me(game)
 
@@ -334,6 +334,16 @@ def run():
             game.music.stop()
             game.screen.fill([0, 0, 0])
             game.screen.blit(death_image, [0,0])
+            caption = 'Press enter to try again!'
+            txt = text.render(caption, 1, [0, 0, 0])
+            txtrect = txt.get_rect()
+            txtrect.x = game.view.w / 2 - txtrect.w / 2
+            txtrect.y = game.view.h / 2 - txtrect.h / 2
+            game.screen.blit(txt, txtrect)
+            txt = text.render(caption, 1, [255, 255, 255])
+            txtrect.x += 2
+            txtrect.y += 2
+            game.screen.blit(txt, txtrect)
             pygame.display.flip()
         else:
             game.music.unpause()

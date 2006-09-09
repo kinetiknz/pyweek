@@ -303,7 +303,6 @@ class Player(Sprite):
         self.going_home = False
 
         self.required_trophies = []
-        self.render_text = True
 
         self.state = 'landing'
         self.set_image(game.images['none'])
@@ -551,9 +550,7 @@ class Player(Sprite):
         font = pygame.font.Font('data/fonts/Another_.ttf', 24)
         text = None
         if len(self.required_trophies) == 0:
-            if game.frame % 30 == 0:
-                self.render_text = not self.render_text
-            if self.render_text:
+            if (game.frame / 30) % 2 == 0:
                 text = font.render("Return to your ship!", 1, [255, 255, 255])
         else:
             text = font.render("Trophies to collect: % 2d" % len(self.required_trophies),
