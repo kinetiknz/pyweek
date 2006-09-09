@@ -587,7 +587,7 @@ class Human(Sprite):
     def step(self, game, sprite):
         if not game.player.cloaked() and self.target and \
                visibility.can_be_seen(game.player.position, self.position, self.target):
-            if not game.player.seen:
+            if self.seen_count == 0:
                 game.player.seen = True
                 self.seen_count = 60
                 self.seen_alien(game)
@@ -627,7 +627,7 @@ class Human(Sprite):
         got_there = False
         
         if self.target:
-            if self.move_toward(self.target, self.speed, 10.0):
+            if self.move_toward(self.target, self.speed, 40.0):
                 self.reached_target()
                 got_there = True
             
@@ -702,6 +702,10 @@ class Farmer(Human):
         self.sound_spotted_scream.play()
         self.stop()
         self.top_speed = 0.5
+        self.target = game.player.position
+    
+    def seeing_alien(self, game):
+        super(Farmer, self).seeing_alien(game)
         self.target = game.player.position
 
 class Cow(Sprite):
@@ -847,6 +851,7 @@ class FBISpawn(Sprite):
     def __init__(self, game, tile, values=None):
         super(FBISpawn, self).__init__('none', 'shot', game, tile, values)
         self.sprite.agroups = game.string2groups('fbi_spawn')
+        game.fbi_spawns.append(self)
 
 class SelectionTest(Sprite):
     def __init__(self, game, tile, values=None):

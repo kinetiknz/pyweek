@@ -176,9 +176,10 @@ def load_level(lvl_num):
     
     game.load_images(idata)
     game.deferred_effects = []
+    game.fbi_spawns = []
     
     game.menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
-    game.run_codes(cdata[1], (0, 0, len(game.tlayer[0]), len(game.tlayer)))
+    game.run_codes(cdata[lvl_num], (0, 0, len(game.tlayer[0]), len(game.tlayer)))
     game.music = pygame.mixer.music
     game.music.queue('data/music/' + music_files[lvl_num])
     game.music.set_endevent(USEREVENT)
