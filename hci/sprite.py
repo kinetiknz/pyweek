@@ -19,7 +19,7 @@ import cPickle
 
 from pygame.locals import *
 import pygame
-from pgu import tilevid, algo
+from pgu import tilevid, algo, vid
 import euclid
 import movement
 import sprite_eater
@@ -552,6 +552,7 @@ class Player(Sprite):
         push(sprite, other)
         self.get_sprite_pos()
         self.view_me(game)
+        self.stop()
 
 class Bullet(Sprite):
     def __init__(self, name, game, tile, values=None):
@@ -586,7 +587,7 @@ class Human(Sprite):
     def step(self, game, sprite):
         if not game.player.cloaked() and self.target and \
                visibility.can_be_seen(game.player.position, self.position, self.target):
-            if not game.player.seen:
+            if self.seen_count == 0:
                 game.player.seen = True
                 self.seen_count = 60
                 self.seen_alien(game)
@@ -596,7 +597,7 @@ class Human(Sprite):
             
             if self.seen_count > 0:
                 self.seen_count = 0
-                self.lost_alien()
+                self.lost_alien(game)
 
         self.move(game)
  
@@ -626,7 +627,7 @@ class Human(Sprite):
         got_there = False
         
         if self.target:
-            if self.move_toward(self.target, self.speed, 10.0):
+            if self.move_toward(self.target, self.speed, 40.0):
                 self.reached_target()
                 got_there = True
             
@@ -646,8 +647,8 @@ class FBI(Human):
     def __init__(self, game, tile, values=None):
         super(FBI, self).__init__('man_d0', 'fbi', game, tile, values)
         self.frames[' '].append(game.images['man_d1'])
-        self.speed = 1.0
-        self.top_speed = 2.0
+        self.speed = 3.0
+        self.top_speed = 5.0
         self.target = None
         
     def seeing_alien(self, game):
@@ -684,14 +685,20 @@ class Farmer(Human):
         self.waypoint = (self.waypoint + 1) % len(self.waypoints)
         self.target = self.waypoints[self.waypoint]
         
-    def reached_target(self):        
-        self.waypoint = (self.waypoint + 1) % len(self.waypoints)
-        self.target = self.waypoints[self.waypoint]
+    def reached_target(self):
+        if self.seen_count > 0:
+            # we reached the alien.. do nothing
+            pass
+        else:
+            # goto my next waypoint
+            self.waypoint = (self.waypoint + 1) % len(self.waypoints)
+            self.target = self.waypoints[self.waypoint]
 
     def hit(self, game, sprite, other):
         super(Farmer, self).hit(game, sprite, other)
 
-    def lost_alien(self):
+    def lost_alien(self, game):
+        super(Farmer, self).lost_alien(game)
         if len(self.waypoints) > 0:
             self.target = self.waypoints[self.waypoint]
             self.top_speed = 1.0
@@ -701,6 +708,14 @@ class Farmer(Human):
         self.sound_spotted_scream.play()
         self.stop()
         self.top_speed = 0.5
+        self.target = game.player.position
+        
+        # spawn an FBI agent!
+        if len(game.fbi_spawns) > 0:
+            random.choice(game.fbi_spawns).spawn(game.player.position.copy())
+    
+    def seeing_alien(self, game):
+        super(Farmer, self).seeing_alien(game)
         self.target = game.player.position
 
 class Cow(Sprite):
@@ -736,7 +751,7 @@ class Cow(Sprite):
 
     def step(self, game, sprite):
         self.move(game)
-
+        
         if self.trophy:
             relx = self.position[0]  - (game.images['trophy'][0].get_width()/2)
             rely = self.sprite.rect.y  - (game.images['trophy'][0].get_height())
@@ -846,6 +861,23 @@ class FBISpawn(Sprite):
     def __init__(self, game, tile, values=None):
         super(FBISpawn, self).__init__('none', 'shot', game, tile, values)
         self.sprite.agroups = game.string2groups('fbi_spawn')
+        game.fbi_spawns.append(self)
+        self.tile = vid.Tile(tile.image)
+        self.tile.tx = tile.tx
+        self.tile.ty = tile.ty
+        self.tile.agroups = tile.agroups
+        self.tile.rect    = tile.rect.inflate(0,0)
+        self.game = game
+        
+        if values:
+            self.values = values[:]
+        else:
+            self.values = None
+            
+    
+    def spawn(self, target_pos):
+        agent = FBI(self.game, self.tile, self.values)
+        agent.target = target_pos
 
 class SelectionTest(Sprite):
     def __init__(self, game, tile, values=None):

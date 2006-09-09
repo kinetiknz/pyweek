@@ -83,10 +83,10 @@ idata = [
     ('saucer0', 'data/test/Saucer0.png', (20, 20, 140, 70)),
     ('saucer1', 'data/test/Saucer1.png', (20, 20, 140, 70)),
     ('saucer2', 'data/test/Saucer2.png', (20, 20, 140, 70)),
-    ('farmer_u0', 'data/test/characters/farmer-up0.png', (4, 4, 24, 24)),
-    ('farmer_d0', 'data/test/characters/farmer-dw0.png', (4, 4, 24, 24)),
-    ('farmer_r0', 'data/test/characters/farmer-rg0.png', (4, 4, 24, 24)),
-    ('farmer_l0', 'data/test/characters/farmer-lf0.png', (4, 4, 24, 24)),
+    ('farmer_u0', 'data/test/characters/farmer-up0.png', (1, 1, 30, 53)),
+    ('farmer_d0', 'data/test/characters/farmer-dw0.png', (1, 1, 30, 53)),
+    ('farmer_r0', 'data/test/characters/farmer-rg0.png', (1, 1, 30, 53)),
+    ('farmer_l0', 'data/test/characters/farmer-lf0.png', (1, 1, 30, 53)),
     ('cow_l0',  'data/test/cow000.png', (10, 10, 90, 50)),
     ('cow_l1',  'data/test/cow001.png', (10, 10, 90, 50)),
     ('cow_ul0',  'data/test/cow070.png', (10, 10, 90, 50)),
@@ -138,14 +138,14 @@ cdata = [
     ]
 
 tdata = {
-    0x02: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
-    0x05: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
-    0x06: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
-    0x07: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
-    0x08: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
-    0x09: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
-    0x0A: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
-    0x0B: ('enemy,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x02: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x05: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x06: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x07: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x08: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x09: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x0A: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x0B: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     }
 
 map_files  = ['level1.tga', 'level2.tga']
@@ -176,9 +176,10 @@ def load_level(lvl_num):
     
     game.load_images(idata)
     game.deferred_effects = []
+    game.fbi_spawns = []
     
     game.menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
-    game.run_codes(cdata[1], (0, 0, len(game.tlayer[0]), len(game.tlayer)))
+    game.run_codes(cdata[lvl_num], (0, 0, len(game.tlayer[0]), len(game.tlayer)))
     game.music = pygame.mixer.music
     game.music.queue('data/music/' + music_files[lvl_num])
     game.music.set_endevent(USEREVENT)
@@ -235,9 +236,9 @@ def run():
                 if e.key == K_r: game.player.morph()
                 if e.key == K_RETURN: game.pause = not game.pause
                 if e.key == K_BACKQUOTE:
-                    if recording:
+                    if game.recording:
                         file = open('data/paths/path' + str(time.time()), 'wb');
-                        cPickle.dump(recorded_path, file, protocol=2)
+                        cPickle.dump(game.recorded_path, file, protocol=2)
                         file.close()
                         game.recording = False
                     else:
@@ -245,7 +246,7 @@ def run():
                         game.recorded_path = []
             if e.type is MOUSEBUTTONDOWN:
                 if e.button == 1:
-                    if recording:
+                    if game.recording:
                         game.recorded_path.append((game.view.x + e.pos[0], game.view.y + e.pos[1]))
             if e.type is USEREVENT:
                 game.music.play()
