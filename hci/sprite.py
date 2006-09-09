@@ -237,7 +237,7 @@ class Sprite(object):
         game.view.y = gy
 
     def load_path(self, pathname):
-        file = open('data/paths/' + pathname, 'r')
+        file = open('data/paths/' + pathname, 'rb')
         path = cPickle.load(file)
         for x, y in path:
             self.waypoints.append(euclid.Vector2(x, y))
