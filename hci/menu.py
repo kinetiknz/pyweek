@@ -20,7 +20,6 @@ from pygame.locals import *
 menu_sizes   = []
 font_y_space = 10
 
-    
 def show(dispsize, display, bg_image, font, menu_items):
     splashscreen.fade_in(display, bg_image, 10)
     selected     = 0
@@ -34,43 +33,42 @@ def show(dispsize, display, bg_image, font, menu_items):
             if e.type is QUIT: return -1
             if e.type is KEYDOWN:
                 if e.key == K_ESCAPE: return -1
-                if e.key == K_F10: pygame.display.toggle_fullscreen()
                 if e.key == K_RETURN:
                     return selected
                 if e.key == K_UP:
                     selected -= 1
                 if e.key == K_DOWN:
                     selected += 1
-        
+
         if selected == len(menu_items):
             selected = 0
         elif selected == -1:
             selected = len(menu_items)-1
 
         draw_all(display, font, selected, menu_items)
-        pygame.display.flip()        
-        
-    
+        pygame.display.flip()
+
+
 def calc_positions(dispsize, font, menu_items):
     totalh = 0
-    
+
     for item in menu_items:
         the_size = font.size(item)
         the_rect = pygame.Rect(0,0,the_size[0],the_size[1])
         menu_sizes.append(the_rect)
         totalh += the_rect.height
         totalh += font_y_space
-        
+
     if (totalh > dispsize[1]): return False
-    
+
     y_pos = (dispsize[1] - totalh)/2.0
-    
+
     for i in xrange(len(menu_items)):
         menu_sizes[i].x = (dispsize[0]-menu_sizes[i].width)/2.0
         menu_sizes[i].y = y_pos
         y_pos += menu_sizes[i].height
         y_pos += font_y_space
-        
+
     return True
 
 def draw_item(i, display, font, hilight, menu_items):
@@ -78,21 +76,9 @@ def draw_item(i, display, font, hilight, menu_items):
         font_surface = font.render(menu_items[i], True, [0,255,0])
     else:
         font_surface = font.render(menu_items[i], True, [100,100,100])
-        
+
     display.blit(font_surface, menu_sizes[i])
-    
+
 def draw_all(display, font, selected, menu_items):
     for i in xrange(len(menu_items)):
         draw_item(i, display, font, i == selected, menu_items)
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    

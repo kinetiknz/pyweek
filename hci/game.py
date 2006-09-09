@@ -231,6 +231,65 @@ tdata = {
 map_files  = ['level1.tga', 'level2.tga', 'level3.tga', 'level4.tga']
 music_files = ['Track01.ogg', 'Track02.ogg']
 
+def do_menu(screen, width, height, game_running=False):
+    menu_image   = pygame.image.load('data/screens/menu.png')
+    menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
+
+    options = ['Start Game', 'Instructions', 'Quit']
+    if game_running:
+        options[0] = 'Resume Game'
+    selection = menu.show([width, height], screen, menu_image, menu_font, options)
+
+    if selection == -1 or selection == 2:
+        sys.exit()
+
+    if selection == 1:
+        instructions(screen, width, height)
+
+    return selection
+
+def instructions(screen, width, height):
+    txt = (('Collect all trophies on the level and return to your ship!'),
+           ('W, A, S, D or cursor keys', 'Movement'),
+           ('Left click', 'Move to selected location'),
+           ('Right click', 'Abduct Earthly item'),
+           ('Space', 'Morph into an Earthly item'),
+           ('Enter', 'Pause game'),
+           ('Escape', 'Main Menu'))
+    screen.fill([0, 0, 0])
+    font = pygame.font.Font('data/fonts/Another_.ttf', 24)
+    y = 128
+    for i in txt:
+        if len(i) == 2:
+            l, r = i
+
+            t = font.render(l, 1, [255, 255, 255])
+            tr = t.get_rect()
+            tr.x = 32
+            tr.y = y
+            screen.blit(t, tr)
+
+            t = font.render(r, 1, [255, 255, 255])
+            tr = t.get_rect()
+            tr.x = width - tr.w - 32
+            tr.y = y
+            screen.blit(t, tr)
+        else:
+            t = font.render(i, 1, [255, 255, 255])
+            tr = t.get_rect()
+            tr.x = width / 2 - tr.w / 2
+            tr.y = y
+            screen.blit(t, tr)
+            y += 32
+        y += 32
+
+    pygame.display.flip()
+
+    while True:
+        e = pygame.event.wait()
+        if e.type is KEYDOWN:
+            return
+
 def load_level(lvl_num, screen, wide, high, load_image):
     if debug:
         try:
@@ -296,7 +355,6 @@ def run():
     pygame.mixer.set_num_channels(16)
 
     splash_image = pygame.image.load('data/screens/splash.png')
-    menu_image   = pygame.image.load('data/screens/menu.png')
     death_image  = pygame.image.load('data/screens/GameOverMan.png')
     load_image   = pygame.image.load('data/screens/Loading.png')
 
@@ -304,16 +362,13 @@ def run():
     height = 480
 
     screen    = pygame.display.set_mode([width, height], pygame.DOUBLEBUF)
-    menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
 
     splashscreen.fade_in(screen, splash_image)
     pygame.time.wait(500)
     splashscreen.fade_out(screen, splash_image)
 
-    selection = menu.show([width, height], screen, menu_image, menu_font, [ 'Start Game', 'Instructions', 'Quit'])
-
-    if selection == -1 or selection == 2:
-        sys.exit()
+    while do_menu(screen, width, height) != 0:
+        pass
 
     level = 0
     game  = load_level(level, screen, width, height, load_image)
@@ -337,9 +392,8 @@ def run():
             if e.type is QUIT: game.quit = 1
             if e.type is KEYDOWN:
                 if e.key == K_ESCAPE:
-                    selection = menu.show([width, height], screen, menu_image, menu_font, [ 'Resume Game', 'Instructions', 'Quit'])
-                    if selection == -1 or selection == 2:
-                        sys.exit() 
+                    while do_menu(screen, width, height, True) != 0:
+                        pass
                 if e.key == K_F10:
                     flags = pygame.DOUBLEBUF
                     if not game.fullscreen:
