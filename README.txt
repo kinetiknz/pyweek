@@ -16,6 +16,4 @@ initial idea was devised by Marcel.  Joff created the sound effects and music.
 Dale, Elizabeth, and Marcel drew and painted the graphics.  Marcel and Matthew
 wrote the code.
 
-To run the game on Windows, double click on ``tet.exe'' in the current
-directory.  To run the game on any other platform, execute ``tet.py'' in the
-current directory.
+To run the game run ``tet.py'' in the current directory.
