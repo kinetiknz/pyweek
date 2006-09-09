@@ -180,6 +180,9 @@ def load_level(lvl_num):
     #Must stop all sounds before starting the level again
     #If resumed from "Game over" you get multiple sounds
     pygame.mixer.stop()
+    
+    #Reset the cops flag
+    sprite.FBI.called_the_cops = False
 
     game = tilevid.Tilevid()
     game.view.w = 640

@@ -695,9 +695,13 @@ class FBI(Human):
         self.speed = 2.0
         self.top_speed = 4.0
         self.target = None
-        self.sound_its_the_fuzz = pygame.mixer.Sound('data/sfx/TheFuzz.ogg')
-        self.sound_its_the_fuzz.set_volume(0.6)
-        self.sound_its_the_fuzz.play()
+        if FBI.called_the_cops == False:
+            self.sound_its_the_fuzz = pygame.mixer.Sound('data/sfx/TheFuzz.ogg')
+            self.sound_its_the_fuzz.set_volume(0.6)
+            self.sound_its_the_fuzz.play(-1)
+            FBI.called_the_cops = True
+
+    called_the_cops = False
 
     def seeing_alien(self, game):
         super(FBI, self).seeing_alien(game)
