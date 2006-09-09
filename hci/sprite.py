@@ -309,7 +309,7 @@ class Player(Sprite):
         
 
         self.walking_sound = pygame.mixer.Sound('data/sfx/Walking.ogg')
-        self.walking_sound.set_volume(0.5)
+        self.walking_sound.set_volume(0.7)
 
         self.morph_sound   = pygame.mixer.Sound('data/sfx/Morph.ogg')
         self.unmorph_sound = pygame.mixer.Sound('data/sfx/MorphBack.ogg')
@@ -447,8 +447,8 @@ class Player(Sprite):
             if not self.walking_sound_isplaying:
                  self.walking_sound.play(-1)
                  self.walking_sound_isplaying = True
-
-        if (dx == 0 and dy == 0):
+            
+        if (dx == 0 and dy == 0) and self.mouse_move == False:
             if self.walking_sound_isplaying:
                 self.walking_sound.stop()
                 self.walking_sound_isplaying = False
@@ -491,6 +491,9 @@ class Player(Sprite):
             SelectionTest(game, (click_pos[0], click_pos[1]), None)
 
         if self.mouse_move:
+            if not self.walking_sound_isplaying:
+                self.walking_sound.play(-1)
+                self.walking_sound_isplaying = True
             if self.move_toward(self.target, self.speed, 10.0):
                 self.mouse_move = False
         else:
