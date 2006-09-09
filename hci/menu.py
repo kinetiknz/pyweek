@@ -17,18 +17,16 @@ import pygame
 import splashscreen
 from pygame.locals import *
 
-menu_items   = [ 'Press ENTER to continue']
 menu_sizes   = []
-selected     = 0
 font_y_space = 10
 
-def show(dispsize, display, bg_image, font):
-    return 0
-
+    
+def show(dispsize, display, bg_image, font, menu_items):
     splashscreen.fade_in(display, bg_image, 10)
+    selected     = 0
 
-    if (not calc_positions(dispsize, font)): return -1
-    draw_all(display, font)
+    if (not calc_positions(dispsize, font, menu_items)): return -1
+    draw_all(display, font, selected, menu_items)
     pygame.display.flip()
 
     while 1:
@@ -39,8 +37,21 @@ def show(dispsize, display, bg_image, font):
                 if e.key == K_F10: pygame.display.toggle_fullscreen()
                 if e.key == K_RETURN:
                     return selected
+                if e.key == K_UP:
+                    selected -= 1
+                if e.key == K_DOWN:
+                    selected += 1
+        
+        if selected == len(menu_items):
+            selected = 0
+        elif selected == -1:
+            selected = len(menu_items)-1
+
+        draw_all(display, font, selected, menu_items)
+        pygame.display.flip()        
+        
     
-def calc_positions(dispsize, font):
+def calc_positions(dispsize, font, menu_items):
     totalh = 0
     
     for item in menu_items:
@@ -62,13 +73,17 @@ def calc_positions(dispsize, font):
         
     return True
 
-def draw_item(i, display, font):
-    font_surface = font.render(menu_items[i], True, [0,0,100])
+def draw_item(i, display, font, hilight, menu_items):
+    if hilight:
+        font_surface = font.render(menu_items[i], True, [0,255,0])
+    else:
+        font_surface = font.render(menu_items[i], True, [100,100,100])
+        
     display.blit(font_surface, menu_sizes[i])
     
-def draw_all(display, font):
+def draw_all(display, font, selected, menu_items):
     for i in xrange(len(menu_items)):
-        draw_item(i, display, font)
+        draw_item(i, display, font, i == selected, menu_items)
     
     
     
