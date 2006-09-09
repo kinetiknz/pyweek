@@ -168,7 +168,7 @@ cdata = [
     7: (lambda g, t, v: sprite.CollectableCow(g, t, v), None),
     8: (lambda g, t, v: sprite.Chicken(g, t, v), None),
     },
-    
+ 
     {
     1: (lambda g, t, v: sprite.Player(g, t, v),  None),
     2: (lambda g, t, v: sprite.Bush(g, t, v),    None),
@@ -183,6 +183,7 @@ cdata = [
 
 tdata = {
     0x02: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x04: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x05: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x06: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x07: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
@@ -190,10 +191,24 @@ tdata = {
     0x09: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x0A: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     0x0B: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x0C: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x0D: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x0E: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x0F: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x10: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x11: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x12: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x13: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x14: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x15: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x16: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x17: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x18: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
+    0x19: ('fbi,farmer,player', tile_block, {'top': 1, 'bottom': 1, 'left': 1, 'right': 1}),
     }
 
-map_files  = ['level1.tga', 'level2.tga','level4.tga']
-music_files = ['Track01.ogg', 'Track02.ogg','Track01.ogg']
+map_files  = ['level1.tga', 'level2.tga', 'level3.tga', 'level4.tga']
+music_files = ['Track01.ogg', 'Track02.ogg', 'Track01.ogg', 'Track02.ogg']
 
 def load_level(lvl_num):
     if debug:
