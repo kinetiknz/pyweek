@@ -351,7 +351,6 @@ class Player(Sprite):
         if self.suck_progress >= 1.0:
             if self.suck_target:
                 self.learn(self.suck_target)
-                game.sprites.remove(self.suck_target.sprite)
             self.suck_target = None
             self.state = 'normal'
             self.beam_sound.stop()
@@ -518,6 +517,7 @@ class Player(Sprite):
 
     def learn(self, target):
         self.known_items.append(target)
+        game.sprites.remove(self.suck_target.sprite)
         if target in self.required_trophies:
             self.required_trophies.remove(target)
 
@@ -633,7 +633,6 @@ class Human(Sprite):
                     if self.seen_count == 0:
                         game.player.seen = True
                         self.seen_count = 60
-                        print(self.seen_count)
                         self.seen_alien(game)
 
             # do a ray test....
@@ -655,7 +654,6 @@ class Human(Sprite):
             self.not_seeing_alien()
             if self.seen_count > 0:
                 self.seen_count = 0
-                print(self.seen_count, self.target, self.raytest, self.rayresult)
                 self.lost_alien(game)
 
         self.move(game)
@@ -677,8 +675,6 @@ class Human(Sprite):
             rely = self.sprite.rect.y  - (game.images['warn'][0].get_height()) - 5
             game.deferred_effects.append(lambda: game.screen.blit(game.images['warn'][0], (relx - game.view.x, rely - game.view.y, 0, 0)))
             self.seen_count -= 1
-            print(self.seen_count)
-
 
     def reached_target(self):
         pass
@@ -1207,16 +1203,13 @@ def collide(o1, o2):
     while True:
         if hm1[x + x1][y + y1]:
             if hm2[x + x2][y + y2]:
-                print 'collision', x, y, x1, y1, x2, y2
                 return True
         if hm1[x1 - x][y1 - y]:
             if hm2[x2 - x][y2 - y]:
-                print 'collision', x, y, x1, y1, x2, y2
                 return True
         x += 1
         if x >= r.width:
             x = 0
             y += 1
             if y >= r.height/2:
-                print 'no collision', x, y, x1, y1, x2, y2
                 return False
