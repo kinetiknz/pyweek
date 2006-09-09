@@ -323,6 +323,9 @@ class Player(Sprite):
             self.suck_target.stop()
             self.suck_target.speed = 0.0
             self.suck_target.top_speed = 0.0
+            self.suck_target.waypoints = []
+            self.suck_target.waypoint = 0
+            self.suck_target.target = None
             self.suck_target.get_sucked()
 
         if self.suck_progress >= 1.0:
