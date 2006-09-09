@@ -1062,7 +1062,7 @@ class Chicken(Sprite):
         self.clucking_sound.stop();
         self.sucked_sound.play();
 
-class CollectableChicken(Chicken):
+class CollectibleChicken(Chicken):
     def __init__(self, game, tile, values=None):
         super(CollectableChicken, self).__init__(game, tile, values)
         self.trophy = True
