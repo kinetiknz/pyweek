@@ -258,7 +258,6 @@ class Sprite(object):
             rely = self.sprite.rect.y  - (game.images['trophy'][0].get_height())
             game.deferred_effects.append(lambda: game.screen.blit(game.images['trophy'][0], (relx- game.view.x, rely-game.view.y, 0, 0)))
 
-
     def get_sucked(self):
         return
 
@@ -427,7 +426,7 @@ class Player(Sprite):
         if key[K_f]:
             loc = pygame.mouse.get_pos()
             click_pos = euclid.Vector2(loc[0] + game.view.x, loc[1] + game.view.y)
-            Chicken(game, (click_pos[0], click_pos[1]), None)
+            StationaryCow(game, (click_pos[0], click_pos[1]), None)
 
         if self.impersonating:
             self.set_image(self.impersonating.get_image())
@@ -806,6 +805,12 @@ class CollectableCow(Cow):
         super(CollectableCow, self).__init__(game, tile, values)
         self.trophy = True
 
+class StationaryCow(Cow):
+    def __init__(self, game, tile, values=None):
+        super(StationaryCow, self).__init__(game, tile, values)
+        facing = random.choice([y for x in self.frames.values() for y in x])
+        self.set_image(facing)
+
 class Saucer(Sprite):
     def __init__(self, game, tile, values=None):
         super(Saucer, self).__init__('saucer0', 'Background', game, tile, values)
@@ -918,7 +923,6 @@ class VisionTest(Sprite):
 
     def hit(self, game, sprite, other):
         pass
-
 
 class SelectionTest(Sprite):
     def __init__(self, game, tile, values=None):
