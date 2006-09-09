@@ -229,7 +229,7 @@ tdata = {
     }
 
 map_files  = ['level1.tga', 'level2.tga', 'level3.tga', 'level4.tga']
-music_files = ['Track01.ogg', 'Track02.ogg']
+music_files = ['Track01.ogg', 'Track02.ogg', 'Track03.ogg']
 
 def do_menu(screen, width, height, game_running=False):
     menu_image   = pygame.image.load('data/screens/menu.png')
@@ -339,7 +339,7 @@ def load_level(lvl_num, screen, wide, high, load_image):
     game.run_codes(cdata[lvl_num], (0, 0, len(game.tlayer[0]), len(game.tlayer)))
 
     game.music = pygame.mixer.music
-    music_to_play = lvl_num % 2
+    music_to_play = lvl_num % len(music_files)
     game.music.load('data/music/' + music_files[music_to_play])
     game.music.play(-1)
 
