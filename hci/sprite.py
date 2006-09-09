@@ -689,9 +689,6 @@ class FBI(Human):
         self.target = None
         self.sound_its_the_fuzz = pygame.mixer.Sound('data/sfx/TheFuzz.ogg')
         self.sound_its_the_fuzz.set_volume(0.6)
-
-    def seen_alien(self,game):
-        super(FBI, self).seen_alien(game)
         self.sound_its_the_fuzz.play()
 
     def seeing_alien(self, game):
@@ -817,21 +814,23 @@ class Cow(Sprite):
                                           random.uniform(-10.0, 10.0) ] )
             
         self.sound_one_cow = pygame.mixer.Sound('data/sfx/One-Cow.ogg')
-        self.sound_one_cow.set_volume(0.3)
+        self.sound_one_cow.set_volume(0.2)
         self.sound_two_cows = pygame.mixer.Sound('data/sfx/Two-Cows-Loop.ogg')
         self.sound_two_cows.set_volume(0.3)
 
         self.sound_offset = (random.randint(1,600))
         self.framecount = 0
+        self.sound_triggered = False
         
 
     def step(self, game, sprite):
         super(Cow, self).step(game, sprite)
         self.move(game)
         self.framecount += 1
-        #if self.framecount > self.sound_offset:
+        if self.framecount > self.sound_offset and self.sound_triggered == False:
             #now we can start playing the sound loop
-            #self.sound_two_cows.play(-1)
+            self.sound_two_cows.play(-1)
+            self.sound_triggered = True
 
     def move(self, game):
         if len(self.waypoints) == 0: return
@@ -880,8 +879,8 @@ class Saucer(Sprite):
         self.position[1]   = game.view.y
         self.land_distance = (self.land_pos - self.position).magnitude()
         self.stop()
-        pygame.mixer.music.load('data/sfx/SaucerLand.ogg')
-        pygame.mixer.music.play(0, 0.0)
+        self.landing_sound = pygame.mixer.Sound('data/sfx/SaucerLand.ogg')
+        self.landing_sound.play()
 
         #d = time.time()
         #self.test = sprite_eater.SpriteEater(self.sprite.image)
@@ -960,13 +959,15 @@ class Chicken(Sprite):
             
             self.sound_offset = (random.randint(1,600))
             self.framecount = 0
+            self.sound_triggered = False
             
 
     def step(self, game, sprite):
         self.animate(0.2)
         self.framecount += 1
-        if self.framecount > self.sound_offset:
+        if self.framecount > self.sound_offset and self.sound_triggered == False:
             self.clucking_sound.play(-1)
+            self.sound_triggered = True
         
     def get_sucked(self):
         self.clucking_sound.stop();

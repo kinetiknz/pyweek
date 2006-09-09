@@ -177,6 +177,10 @@ def load_level(lvl_num):
     except IOError, e:
         version = '?'
 
+    #Must stop all sounds before starting the level again
+    #If resumed from "Game over" you get multiple sounds
+    pygame.mixer.stop()
+
     game = tilevid.Tilevid()
     game.view.w = 640
     game.view.h = 480
@@ -200,9 +204,10 @@ def load_level(lvl_num):
 
     game.menu_font = pygame.font.Font('data/fonts/Another_.ttf', 36)
     game.run_codes(cdata[lvl_num], (0, 0, len(game.tlayer[0]), len(game.tlayer)))
+    
     game.music = pygame.mixer.music
-    game.music.queue('data/music/' + music_files[lvl_num])
-    game.music.set_endevent(USEREVENT)
+    game.music.load('data/music/' + music_files[lvl_num])
+    game.music.play(-1)
 
     game.agents = 0
     game.max_fbi_agents = lvl_num * 2
@@ -216,6 +221,7 @@ def load_level(lvl_num):
 
 def run():
     initialize_modules()
+    pygame.mixer.set_num_channels(16)
 
     level = 0
     game  = load_level(level)
@@ -277,8 +283,6 @@ def run():
                 if e.button == 1:
                     if game.recording:
                         game.recorded_path.append((game.view.x + e.pos[0], game.view.y + e.pos[1]))
-            if e.type is USEREVENT:
-                game.music.play()
 
         if game.pause:
             caption = "GAME PAUSED"
