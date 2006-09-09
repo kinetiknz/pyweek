@@ -552,6 +552,7 @@ class Player(Sprite):
         push(sprite, other)
         self.get_sprite_pos()
         self.view_me(game)
+        self.stop()
 
 class Bullet(Sprite):
     def __init__(self, name, game, tile, values=None):
