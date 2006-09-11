@@ -26,7 +26,7 @@ import splashscreen
 import menu
 import sprite
 
-debug = False
+debug = True
 
 def initialize_modules():
     '''Initialize PyGame modules.  If any modules fail, report all failures
@@ -144,11 +144,12 @@ idata = [
     ('cow_r0',  'data/sprites/cow060.png', (10, 10, 90, 50)),
     ('cow_r1',  'data/sprites/cow061.png', (10, 10, 90, 50)),
     ('warn',   'data/sprites/Warning.png', (0, 0, 16, 16)),
+    ('player_warn',   'data/sprites/player_warn.png', (0, 0, 4, 8)),
     ('tree', 'data/sprites/treebiggersize.png', (8, 8, 72, 78)),
     ('bush', 'data/sprites/treepinkflower.png', (0, 0, 30, 37)),
     ('laser', 'data/sprites/laser.png', (0, 0, 8, 8)),
     ('trophy',  'data/sprites/CollectMe.png', (0, 0, 0, 0)),
-    ('none',  'data/sprites/EmptyImage.png', (-8, -8, 16, 16)),
+    ('none',  'data/sprites/EmptyImage.png', (-10, -10, 20, 20)),
     ('chick1', 'data/sprites/chicksmall01.png', (0, 0, 64, 37)),
     ('chick2', 'data/sprites/chicksmall02.png', (0, 0, 64, 37)),
     ('square', 'data/sprites/square.png', (0, 0, 40, 40)),
@@ -358,6 +359,7 @@ def load_level(lvl_num, screen, wide, high, load_image):
     game.quit = 0
     game.pause = 0
     game.game_over = False
+    game.debug = debug
 
     game.player.view_me(game)
     game.player.setup_required_trophies(game)
@@ -377,14 +379,18 @@ def run():
 
     screen    = pygame.display.set_mode([width, height], pygame.DOUBLEBUF)
 
-    splashscreen.fade_in(screen, splash_image)
-    pygame.time.wait(500)
-    splashscreen.fade_out(screen, splash_image)
-
-    while do_menu(screen, width, height) != 0:
-        pass
-
-    level = 0
+    if not debug:
+        splashscreen.fade_in(screen, splash_image)
+        pygame.time.wait(500)
+        splashscreen.fade_out(screen, splash_image)
+    
+        while do_menu(screen, width, height) != 0:
+            pass
+        
+        level = 0
+    else:
+        level = 1
+        
     game  = load_level(level, screen, width, height, load_image)
 
     t = pygame.time.Clock()

@@ -16,6 +16,7 @@ import random
 import time
 import math
 import cPickle
+from sets import Set
 
 from pygame.locals import *
 import pygame
@@ -262,6 +263,7 @@ class Sprite(object):
 
     def get_sucked(self):
         self.being_sucked = True
+        
 
 class Player(Sprite):
     def __init__(self, game, tile, values=None):
@@ -293,7 +295,7 @@ class Player(Sprite):
                         'd': euclid.Vector2(11.0, 20.0),
                         }
         self.recording = False
-        self.seen_by = 0
+        self.seen_by = Set()
         self.mouse_move = False
         self.top_speed = 3.0
         self.speed     = 1.0
@@ -406,7 +408,7 @@ class Player(Sprite):
             game.deferred_effects.append(lambda: game.screen.blit(game.images['laser'][0], ( rsx - game.view.x, rsy - game.view.y, 0, 0)))
         self.suck_progress += 0.02
 
-    def step(self, game, sprite):        
+    def step(self, game, sprite):       
         if self.state == 'landing' or self.state == 'take-off':
             self.view_me(game)
             return
@@ -418,6 +420,11 @@ class Player(Sprite):
             self.last_sweat_drop = drop
 
         game.deferred_effects.append(lambda: self.draw_morph_targets(game))
+        
+        if self.seen_by:
+            relx = self.position[0] - (game.images['player_warn'][0].get_width()/2)
+            rely = self.sprite.rect.y  - (game.images['player_warn'][0].get_height()) - 5
+            game.deferred_effects.append(lambda: game.screen.blit(game.images['player_warn'][0], (relx - game.view.x, rely - game.view.y, 0, 0)))
 
         key = pygame.key.get_pressed()
 
@@ -457,15 +464,6 @@ class Player(Sprite):
             loc       = pygame.mouse.get_pos()
             click_pos = euclid.Vector2(loc[0]+game.view.x, loc[1]+game.view.y)
             gun_pos   = self.position + self.gun_pos[self.gun_dir()]
-
-            #def s2t(x, y):
-            #    stx = x / game.tile_w
-            #    sty = y / game.tile_h
-            #    return stx, sty
-
-            # find selected tile
-            # tx, ty = s2t(game.view.x + loc[0], game.view.y + loc[1])
-            #game.set([tx, ty], 2)
 
             me_to_click       = click_pos - gun_pos
             distance_to_click = me_to_click.magnitude()
@@ -514,7 +512,7 @@ class Player(Sprite):
             return
         if not self.impersonating:
             self.impersonating = random.choice(self.known_items)
-            if self.seen_by == 0: self.state = 'cloaked'
+            if len(self.seen_by) == 0: self.state = 'cloaked'
             self.stop()
             self.known_items.remove(self.impersonating)
             self.morph_sound.play()
@@ -617,7 +615,7 @@ class Human(Sprite):
                 if self.rayresult:
                     alien_visible = True
                     if self.seen_count == 0:
-                        game.player.seen_by += 1
+                        game.player.seen_by.add(self)
                         self.seen_count = 60
                         self.seen_alien(game)
 
@@ -640,7 +638,7 @@ class Human(Sprite):
             self.not_seeing_alien()
             if self.seen_count > 0:
                 self.seen_count = 0
-                game.player.seen_by -= 1
+                game.player.seen_by.discard(self)
                 self.lost_alien(game)
 
         self.move(game)
@@ -794,12 +792,6 @@ class FBI(Human):
         if self.state == 'trailing':
             self.sweat_trail = None
             self.target = None
-            drop = game.player.first_sweat_drop
-            while drop:
-                drop.self_destruct = True
-                drop = drop.next
-            game.player.first_sweat_drop = None
-
 
     def hit(self, game, sprite, other):
         if (other.backref.__class__ is SweatDrop):
@@ -903,7 +895,7 @@ class Cow(Sprite):
         self.frames['dr'].append(game.images['cow_dr0'])
         self.frames['dr'].append(game.images['cow_dr1'])
         self.dir_func = self.direction8
-        self.sprite.agroups = game.string2groups('')
+        self.sprite.agroups = game.string2groups('player')
         self.sprite.hit = self.hit
         self.speed = 0.2
         self.top_speed = 0.4
@@ -946,8 +938,8 @@ class Cow(Sprite):
         self.set_sprite_pos()
 
     def hit(self, game, sprite, other):
-        # push(sprite, other)
-        # self.get_sprite_pos()
+        #push(sprite, other)
+        #self.get_sprite_pos()
         pass
 
     def get_sucked(self):
@@ -1121,7 +1113,11 @@ class FBISpawn(Sprite):
 
 class SweatDrop(Sprite):
     def __init__(self, game, tile, values=None):
-        super(SweatDrop, self).__init__('none', 'sweatdrop', game, tile, values)
+        if game.debug:
+            super(SweatDrop, self).__init__('laser', 'sweatdrop', game, tile, values)
+        else:
+            super(SweatDrop, self).__init__('none', 'sweatdrop', game, tile, values)
+ 
         self.sprite.agroups = 0
         self.next = None
         self.self_destruct = False
@@ -1134,6 +1130,11 @@ class SweatDrop(Sprite):
 
 class VisionTest(Sprite):
     def __init__(self, game, tile, who_to_tell, ignore_list):
+        if game.debug:
+            super(VisionTest, self).__init__('laser', 'hidden', game, tile, None)
+        else:
+            super(VisionTest, self).__init__('none', 'hidden', game, tile, None)
+         
         super(VisionTest, self).__init__('none', 'hidden', game, tile, None)
         self.sprite.agroups = game.string2groups('animal,Background,farmer,fbi,player')
         self.sprite.hit = self.hit
