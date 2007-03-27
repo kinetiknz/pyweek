@@ -35,5 +35,6 @@ Press the left mouse button to fire the ducks.
 
 LICENSE:
 
-This game skellington is placed in the Public Domain.
+This game is placed under the ISC license.  See LICENSE.txt for the complete
+license text.
 
