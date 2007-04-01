@@ -7,6 +7,7 @@ directory.
 '''
 
 import data
+import sprite
 
 def main():
     print "Hello from your game's main()"
