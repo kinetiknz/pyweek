@@ -21,4 +21,3 @@ def load(filename, mode='rb'):
     "mode" is passed as the second arg to open().
     '''
     return open(os.path.join(data_dir, filename), mode)
-
