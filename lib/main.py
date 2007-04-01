@@ -6,9 +6,15 @@ Feel free to put all your game code here, or in other modules in this "lib"
 directory.
 '''
 
+import sys
+sys.path.append('thirdparty')
+
+from pygame.locals import *
+import pygame
 import data
 import sprite
 
+
 def main():
     print "Hello from your game's main()"
-    print data.load('sample.txt').read()
+    # print data.load('sample.txt').read()
