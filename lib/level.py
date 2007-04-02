@@ -58,8 +58,22 @@ class Level(object):
             self.name, self.solid, self.background,
             self.spawn[0], self.spawn[1])
 
+    def view_player(self):
+        """Return a rect with the view centered on the player."""
+        return [self.spawn[0], self.spawn[1], 600, 480]
+
+def bound_view(level, view):
+    y = view[1]
+    top = 0
+    bottom = -(level.bg_rect.h - 480)
+    if y < bottom:
+        y = bottom
+    if y > top:
+        y = top
+    view[1] = y
+
 '''Some silly code for development and testing.'''
-if __name__ == "__main__":
+if __name__ == "no__main__":
     import sys
     import pygame
     pygame.init()
@@ -68,19 +82,83 @@ if __name__ == "__main__":
     lvl = load_level("t001")
     print lvl
 
-    view = [20, 0, 600, 480]
+    view = lvl.view_player()
 
-    dir = -1
+    move = 0
 
     while 1:
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 sys.exit(0)
-            if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
-                sys.exit(0)
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_ESCAPE:
+                    sys.exit(0)
+                if e.key in (pygame.K_UP, pygame.K_DOWN):
+                    if e.key == pygame.K_UP:
+                        move = 5
+                    else:
+                        move = -5
+            if e.type == pygame.KEYUP:
+                if e.key in (pygame.K_UP, pygame.K_DOWN):
+                    move = 0
+        view[1] += move
+        bound_view(lvl, view)
         screen.fill(0)
         screen.blit(lvl.bg, view)
         pygame.display.flip()
-        view[1] += dir
-        if view[1] == -(lvl.bg_rect.h - 480) or view[1] == 0:
-            dir = -dir
+
+# while 1:
+#  for events:
+#    all.event(e)
+# all.logic()
+# all.render()
+
+class Entity(object):
+    def __init__(self, logic_priority=50, render_priority=50):
+        self.logic_priority = logic_priority
+        self.render_priority = render_priority
+    @staticmethod
+    def cmp_by_logic(lhs, rhs):
+        return cmp(lhs.logic_priority, rhs.logic_priority)
+    @staticmethod
+    def cmp_by_render(lhs, rhs):
+        return cmp(lhs.render_priority, rhs.render_priority)
+    def __str__(self):
+        return "%s(%d, %d)" % (
+            self.__class__.__name__, self.logic_priority,
+            self.render_priority)
+    def event(self, event):
+        print self, "event"
+        pass
+    def logic(self):
+        print self, "logic"
+        pass
+    def render(self, surface):
+        print self, "render"
+        pass
+
+class EntityManager(object):
+    def __init__(self):
+        self.entities = []
+    def register(self, entity):
+        self.entities.append(entity)
+    def unregister(self, entity):
+        self.entities.remove(entity)
+    def _dispatch(self, event, cmp, *args):
+        for entity in sorted(self.entities, cmp=cmp):
+            if hasattr(entity, event):
+                getattr(entity, event)(*args)
+    def handle_events(self, event):
+        self._dispatch("event", Entity.cmp_by_logic, event)
+    def execute_logic(self):
+        self._dispatch("logic", Entity.cmp_by_logic)
+    def render(self, surface):
+        self._dispatch("render", Entity.cmp_by_render, surface)
+
+em = EntityManager()
+em.register(Entity(20, 5))
+em.register(Entity(15, 20))
+em.register(Entity(1, 2))
+
+em.handle_events(None)
+em.render(None)
