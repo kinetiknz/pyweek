@@ -3,10 +3,12 @@
 import sys
 import os
 try:
-    libdir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'lib'))
+    basename = os.path.dirname(__file__)
+    libdir = os.path.abspath(os.path.join(basename, 'lib'))
+    thirddiry = os.path.abspath(os.path.join(basename, 'thirdparty'))
     sys.path.insert(0, libdir)
+    sys.path.insert(0, thirddir)
 except:
-    # probably running inside py2exe which doesn't set __file__
     pass
 
 import main
