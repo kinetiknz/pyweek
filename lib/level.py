@@ -63,6 +63,12 @@ class Level(object):
             self.spawn[0], self.spawn[1])
         
     def area_is_bg(self, rect_to_check):
+        if (   rect_to_check.left < 0 
+            or rect_to_check.right > self.bg.get_width()
+            or rect_to_check.top < 0 
+            or rect_to_check.bottom > self.bg.get_height() ):
+            return False
+        
         for x in xrange(rect_to_check.left, rect_to_check.right):
             for y in xrange(rect_to_check.top, rect_to_check.bottom):
                 if self.bg_array[x][y] != self.background:

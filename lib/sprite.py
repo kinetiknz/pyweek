@@ -11,6 +11,8 @@ class Sprite(pygame.sprite.Sprite):
         self.position      = euclid.Vector2(0.0, 0.0)
         self.velocity      = euclid.Vector2(0.0, 0.0)
         self.accel         = euclid.Vector2(0.0, 0.0)
+        self.top_speed     = euclid.Vector2(0.0, 0.0)
+        self.drag_factor   = 0.0
 
     def set_anim_list(self, anim_list):
         self.anim_list = anim_list
@@ -52,11 +54,17 @@ class Sprite(pygame.sprite.Sprite):
         self.accel    = euclid.Vector2(0.0, 0.0)
         
     def move(self, elapsed_time):
+        self.velocity += (self.accel * elapsed_time)
+        
         old_velocity = self.velocity.copy()
         old_position = self.position.copy()
         
         # move x first
-        self.velocity[0] += (self.accel[0] * elapsed_time)
+        if self.velocity[0] > self.top_speed[0]:
+            self.velocity[0] = self.top_speed[0]
+        elif self.velocity[0] < -self.top_speed[0]:
+            self.velocity[0] = -self.top_speed[0]
+        
         self.position[0] += (self.velocity[0] * elapsed_time)
         
         if self.check_collision():
@@ -64,15 +72,28 @@ class Sprite(pygame.sprite.Sprite):
             self.position[0] = old_position[0]
         
         # move y now
-        self.velocity[1] += (self.accel[1] * elapsed_time)
+        if self.velocity[1] > self.top_speed[1]:
+            self.velocity[1] = self.top_speed[1]
+        elif self.velocity[1] < -self.top_speed[1]:
+            self.velocity[1] = -self.top_speed[1]
+                
         self.position[1] += (self.velocity[1] * elapsed_time)
         
         if self.check_collision():
             self.velocity[1] = old_velocity[1]
             self.position[1] = old_position[1]
-            
-    def accelerate(self, move_vec):
-        self.accel += move_vec
+        
+        self.apply_drag(self.velocity, elapsed_time)
+    
+    def apply_drag(self, reference, elapsed_time):
+        drag = self.drag_factor * elapsed_time
+        
+        if reference[0] < drag and reference[0] > -drag:
+            reference[0] = 0.0
+        elif reference[0] < 0.0:
+            reference[0] += drag
+        else:
+            reference[0] -= drag 
 
     def set_position(self, new_pos):
         self.position[0] = new_pos[0]
@@ -90,8 +111,20 @@ class Player(Sprite):
         self.left = Sprite.load_images(self, data.filepath("player_l"))
         self.right = Sprite.load_images(self, data.filepath("player_r"))
         self.set_anim_list(self.right)
+        self.top_speed    = euclid.Vector2(100.0, 200.0)
+        self.drag_factor  = 200.0
         
     def check_collision(self):
        return not self.level.area_is_bg(self.get_rect())
         
-    
+
+    def move(self, elapsed_time):
+        Sprite.move(self, elapsed_time)
+        
+        if (self.velocity[0] == 0.0):
+            self.anim_frame = 0.0
+        elif (self.velocity[0] < 0.0):
+            self.anim_list = self.left
+        else:
+            self.anim_list = self.right
+            

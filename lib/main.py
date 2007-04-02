@@ -6,8 +6,9 @@ Feel free to put all your game code here, or in other modules in this "lib"
 directory.
 '''
 
-import sprite
 import pygame
+from pygame.locals import *
+import sprite
 import level
 import euclid
 import sys
@@ -22,7 +23,7 @@ def main():
     view = [20, -(lvl.bg_rect.h - 480), 600, 480]
 
     player = sprite.Player(lvl)
-    player.accel = euclid.Vector2(10.0, 60.0) # gravity
+    player.accel = euclid.Vector2(0.0, 600.0) # gravity
     
     timer = pygame.time.Clock()
 
@@ -31,7 +32,17 @@ def main():
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 sys.exit(0)
-           
+        
+        keys = pygame.key.get_pressed()
+        
+        player.accel[0] = 0.0
+        
+        if (keys[K_LEFT]):
+            player.accel[0] = -400.0
+
+        if (keys[K_RIGHT]):
+            player.accel[0] = 400.0
+                      
         screen.fill(0)
         screen.blit(lvl.bg, view)
 
