@@ -5,7 +5,7 @@ import os
 try:
     basename = os.path.dirname(__file__)
     libdir = os.path.abspath(os.path.join(basename, 'lib'))
-    thirddiry = os.path.abspath(os.path.join(basename, 'thirdparty'))
+    thirddir = os.path.abspath(os.path.join(basename, 'thirdparty'))
     sys.path.insert(0, libdir)
     sys.path.insert(0, thirddir)
 except:

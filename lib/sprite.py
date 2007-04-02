@@ -1,5 +1,4 @@
 import pygame
-
 import euclid
 import data
 import os
@@ -9,7 +8,9 @@ class Sprite(pygame.sprite.Sprite):
     def __init__(self):
         self.anim_list = []
         self.anim_frame = -1
-        self.position = euclid.vector2(0,0)
+        self.position      = euclid.Vector2(0.0, 0.0)
+        self.velocity      = euclid.Vector2(0.0, 0.0)
+        self.accel         = euclid.Vector2(0.0, 0.0)
 
     def set_anim_list(self, anim_list):
         self.anim_list = anim_list
@@ -17,6 +18,9 @@ class Sprite(pygame.sprite.Sprite):
 
     def construct_filename(self, image_basename, frame_number):
         return image_basename + ("_%02d" % frame_number) + ".png"
+    
+    def check_collision(self):
+        return False
 
     def load_images(self, image_basename):
         list_to_return = []
@@ -43,56 +47,51 @@ class Sprite(pygame.sprite.Sprite):
     def animate(self, amount):
         self.anim_frame = (self.anim_frame + amount) % len(self.anim_list)
         
+    def stop(self):
+        self.velocity = euclid.Vector2(0.0, 0.0)
+        self.accel    = euclid.Vector2(0.0, 0.0)
+        
+    def move(self, elapsed_time):
+        old_velocity = self.velocity.copy()
+        old_position = self.position.copy()
+        
+        # move x first
+        self.velocity[0] += (self.accel[0] * elapsed_time)
+        self.position[0] += (self.velocity[0] * elapsed_time)
+        
+        if self.check_collision():
+            self.velocity[0] = old_velocity[0]
+            self.position[0] = old_position[0]
+        
+        # move y now
+        self.velocity[1] += (self.accel[1] * elapsed_time)
+        self.position[1] += (self.velocity[1] * elapsed_time)
+        
+        if self.check_collision():
+            self.velocity[1] = old_velocity[1]
+            self.position[1] = old_position[1]
+            
+    def accelerate(self, move_vec):
+        self.accel += move_vec
+
+    def set_position(self, new_pos):
+        self.position[0] = new_pos[0]
+        self.position[1] = new_pos[1]
+        
 class Balloon(Sprite):
     pass
 
 class Player(Sprite):
     
     def __init__(self, level):
+        Sprite.__init__(self)
         self.level = level
+        self.set_position(level.spawn)     
         self.left = Sprite.load_images(self, data.filepath("player_l"))
         self.right = Sprite.load_images(self, data.filepath("player_r"))
         self.set_anim_list(self.right)
         
-    def move_by(self, move_vector):
-        self.position += move_vector
-        
-        if not (self.level.area_is_bg(self.get_rect())):
-            self.position -= move_vector
+    def check_collision(self):
+       return not self.level.area_is_bg(self.get_rect())
         
     
-
-'''Some silly code for development and testing.'''
-if __name__ == "__main__":
-    import sys
-    import pygame
-    import level
-    pygame.init()
-    screen = pygame.display.set_mode([640, 480])
-
-    lvl = level.load_level("t001")
-    print lvl
-
-    view = [20, -(lvl.bg_rect.h - 480), 600, 480]
-
-    player = Player(lvl)
-    player.position = lvl.spawn
-    
-    timer = pygame.time.Clock()
-
-    while 1:
-        
-        for e in pygame.event.get():
-            if e.type == pygame.QUIT:
-                sys.exit(0)
-           
-        screen.fill(0)
-        screen.blit(lvl.bg, view)
-
-        elapsed = timer.tick()
-
-        player.animate(elapsed / 100.0)
-        player.move_by(euclid.Vector2(0.0, elapsed / 10.0))
-        player.render(screen, view)     
-        pygame.display.flip()
-
