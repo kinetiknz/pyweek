@@ -62,7 +62,6 @@ class Level(object):
 if __name__ == "__main__":
     import sys
     import pygame
-    from pygame.locals import *
     pygame.init()
     screen = pygame.display.set_mode([640, 480])
 
@@ -76,6 +75,8 @@ if __name__ == "__main__":
     while 1:
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
+                sys.exit(0)
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
                 sys.exit(0)
         screen.fill(0)
         screen.blit(lvl.bg, view)

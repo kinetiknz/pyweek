@@ -1,5 +1,4 @@
 import pygame
-from pygame.locals import *
 
 import euclid
 import data
@@ -38,7 +37,6 @@ if __name__ == "__main__":
     import sys
     import pygame
     import level
-    from pygame.locals import *
     pygame.init()
     screen = pygame.display.set_mode([640, 480])
 
