@@ -4,9 +4,6 @@
 Loads level files (a bitmap image and associated description file).
 '''
 
-# TODO: Check for existence of numeric for surfarray
-
-import pygame.surfarray as surfarray
 import pygame.image as img
 import pygame.surface as srf
 import data
@@ -47,7 +44,6 @@ class Level(object):
         self.bg_path = data.filepath(name) + ".png"
         self.bg = img.load(self.bg_path)
         self.bg = srf.Surface.convert(self.bg)
-        self.bg_array = surfarray.array2d(self.bg)
         self.bg_rect = self.bg.get_rect()
 
         self.fg_path = data.filepath(name) + ".dsc"
@@ -64,14 +60,16 @@ class Level(object):
         
     def area_is_bg(self, rect_to_check):
         if (   rect_to_check.left < 0 
-            or rect_to_check.right > self.bg.get_width()
+            or rect_to_check.right > self.bg_rect.width
             or rect_to_check.top < 0 
-            or rect_to_check.bottom > self.bg.get_height() ):
+            or rect_to_check.bottom > self.bg_rect.height ):
             return False
         
         for x in xrange(rect_to_check.left, rect_to_check.right):
             for y in xrange(rect_to_check.top, rect_to_check.bottom):
-                if self.bg_array[x][y] != self.background:
+                col = self.bg.get_at((x,y))
+                col_as_int = (col[0] * 256 * 256) + (col[1] * 256) + col[2]
+                if (col_as_int == self.solid):
                     return False
         return True
 
