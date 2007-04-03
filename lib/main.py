@@ -7,7 +7,6 @@ directory.
 '''
 
 import pygame
-from pygame.locals import *
 import player
 import sprite
 import level
@@ -37,17 +36,17 @@ def main():
                 sys.exit(0)
                 
             if e.type == pygame.KEYUP:
-                if e.key == K_UP:
+                if e.key == pygame.K_UP:
                     stick_guy.add_balloon()
-                if e.key == K_DOWN:
+                if e.key == pygame.K_DOWN:
                     stick_guy.rem_balloon()
                            
         keys = pygame.key.get_pressed()
         
-        if (keys[K_LEFT]):
+        if (keys[pygame.K_LEFT]):
             stick_guy.move_left()
 
-        if (keys[K_RIGHT]):
+        if (keys[pygame.K_RIGHT]):
             stick_guy.move_right()
 
         elapsed = timer.tick() / 1000.0

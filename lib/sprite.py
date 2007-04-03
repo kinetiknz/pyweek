@@ -13,6 +13,7 @@ class Sprite(pygame.sprite.Sprite):
         self.accel         = euclid.Vector2(0.0, 0.0)
         self.top_speed     = euclid.Vector2(0.0, 0.0)
         self.drag_factor   = 0.0
+        self.collide_speed = 1.0
 
     def set_anim_list(self, anim_list):
         self.anim_list = anim_list
@@ -54,8 +55,6 @@ class Sprite(pygame.sprite.Sprite):
         self.accel    = euclid.Vector2(0.0, 0.0)
         
     def move(self, elapsed_time):
-        self.velocity += (self.accel * elapsed_time)
-        
         old_velocity = self.velocity.copy()
         old_position = self.position.copy()
         
@@ -68,8 +67,10 @@ class Sprite(pygame.sprite.Sprite):
         self.position[0] += (self.velocity[0] * elapsed_time)
         
         if self.check_collision():
-            self.velocity[0] = old_velocity[0]
+            self.velocity[0] = old_velocity[0] * self.collide_speed
             self.position[0] = old_position[0]
+        else:
+            self.velocity[0] += (self.accel[0] * elapsed_time)
         
         # move y now
         if self.velocity[1] > self.top_speed[1]:
@@ -80,9 +81,11 @@ class Sprite(pygame.sprite.Sprite):
         self.position[1] += (self.velocity[1] * elapsed_time)
         
         if self.check_collision():
-            self.velocity[1] = old_velocity[1]
+            self.velocity[1] = old_velocity[1] * self.collide_speed
             self.position[1] = old_position[1]
-        
+        else:
+            self.velocity[1] += (self.accel[1] * elapsed_time)
+                    
         self.apply_drag(self.velocity, elapsed_time)
     
     def apply_drag(self, reference, elapsed_time):
