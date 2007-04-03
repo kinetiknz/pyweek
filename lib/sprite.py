@@ -98,61 +98,23 @@ class Sprite(pygame.sprite.Sprite):
     def set_position(self, new_pos):
         self.position[0] = new_pos[0]
         self.position[1] = new_pos[1]
-        
-class Balloon(Sprite):
-    pass
 
-class Player(Sprite):
+
+
+class Balloon(Sprite):
+    frames = None
     
     def __init__(self, level):
         Sprite.__init__(self)
+
+        if not Balloon.frames:
+            Balloon.frames = Sprite.load_images(self, data.filepath("balloon"))
+            self.set_anim_list(Balloon.frames)
+
         self.level = level
-        self.set_position(level.spawn)     
-        self.left = Sprite.load_images(self, data.filepath("player_l"))
-        self.right = Sprite.load_images(self, data.filepath("player_r"))
-        self.set_anim_list(self.right)
-        self.top_speed     = euclid.Vector2(100.0, 300.0)
-        self.drag_factor   = 200.0
-        self.balloon_count = 0
-        
+        self.velocity[1] = -70.0
+        self.top_speed = euclid.Vector2(100.0, 100.0)
+
     def check_collision(self):
        return not self.level.area_is_bg(self.get_rect())
-    
-    def apply_balloon_force(self):
-        if (self.balloon_count == 0):
-            self.accel[1] = 600.0 # gravity for freefall
-        elif (self.balloon_count == 1):
-            self.accel[1]    =   0.0 # no gravity
-            self.velocity[1] =  20.0 # controlled fall
-        elif (self.balloon_count == 2):
-            self.accel[1]    = 0.0 # no gravity
-            self.velocity[1] = 0.0 # floating
-        else:
-            self.accel[1]    = 0.0 # don't do gravity here either
-            self.velocity[1] = self.balloon_count * -20.0
-              
-    def add_balloon(self):
-        self.balloon_count = (self.balloon_count + 1) % 5
-        
-    def move_left(self):
-        self.accel[0] = -400.0
-        
-    def move_right(self):
-        self.accel[0] = 400.0
-
-    def move(self, elapsed_time):
-        self.apply_balloon_force()
-        Sprite.move(self, elapsed_time)
-        
-        if (self.accel[0] == 0.0):
-            self.anim_frame = 0.0
-        elif (self.accel[0] < 0.0):
-            self.anim_list = self.left
-        else:
-            self.anim_list = self.right
-        
-        # null out any horizontal acceleration from keypress
-        # now that we've moved the player.
-        self.accel[0] = 0.0
-            
-            
+          

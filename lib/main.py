@@ -8,6 +8,7 @@ directory.
 
 import pygame
 from pygame.locals import *
+import player
 import sprite
 import level
 import euclid
@@ -22,7 +23,10 @@ def main():
 
     view = [20, -(lvl.bg_rect.h - 480), 600, 480]
 
-    player = sprite.Player(lvl)
+    stick_guy  = player.Player(lvl)
+    
+    balloon = sprite.Balloon(lvl)
+    balloon.position = stick_guy.position + euclid.Vector2(400.0, 150.0)
    
     timer = pygame.time.Clock()
 
@@ -33,27 +37,32 @@ def main():
                 sys.exit(0)
                 
             if e.type == pygame.KEYUP:
-                if e.key == K_SPACE:
-                    player.add_balloon()
-        
+                if e.key == K_UP:
+                    stick_guy.add_balloon()
+                if e.key == K_DOWN:
+                    stick_guy.rem_balloon()
+                           
         keys = pygame.key.get_pressed()
         
         if (keys[K_LEFT]):
-            player.move_left()
+            stick_guy.move_left()
 
         if (keys[K_RIGHT]):
-            player.move_right()
-                      
+            stick_guy.move_right()
+
+        elapsed = timer.tick() / 1000.0
+        
+        balloon.move(elapsed)
+        stick_guy.move(elapsed)
+        stick_guy.animate(elapsed * 10.0)
+        view[1] = -stick_guy.position[1] + 300        
+                                      
         screen.fill(0)
         screen.blit(lvl.bg, view)
-
-        elapsed = timer.tick()
-        
-        player.move(elapsed / 1000.0)
-        player.animate(elapsed / 100.0)
-        player.render(screen, view)
+        stick_guy.render(screen, view)
+        balloon.render(screen, view)
         pygame.display.flip()
-        view[1] = -player.position[1] + 300
+
 
 
 
