@@ -58,18 +58,33 @@ class Level(object):
             self.name, self.solid, self.background,
             self.spawn[0], self.spawn[1])
         
+    def point_is_bg(self, x,y):
+        col = self.bg.get_at((x,y))
+        col_as_int = (col[0] * 256 * 256) + (col[1] * 256) + col[2]
+        if (col_as_int == self.background):
+            return True
+        else:
+            return False
+                    
     def area_is_bg(self, rect_to_check):
         if (   rect_to_check.left < 0 
             or rect_to_check.right > self.bg_rect.width
             or rect_to_check.top < 0 
             or rect_to_check.bottom > self.bg_rect.height ):
             return False
+    
+        # Just check the four corners for speed
+        if not self.point_is_bg(rect_to_check.left,  rect_to_check.top): return False
+        if not self.point_is_bg(rect_to_check.right, rect_to_check.top): return False
+        if not self.point_is_bg(rect_to_check.left,  rect_to_check.bottom): return False
+        if not self.point_is_bg(rect_to_check.right, rect_to_check.bottom): return False
         
+        return True
+    
+        # Complete rect check follows below. Very slow...
         for x in xrange(rect_to_check.left, rect_to_check.right):
             for y in xrange(rect_to_check.top, rect_to_check.bottom):
-                col = self.bg.get_at((x,y))
-                col_as_int = (col[0] * 256 * 256) + (col[1] * 256) + col[2]
-                if (col_as_int == self.solid):
+                if not self.point_is_bg(x,y):
                     return False
         return True
 

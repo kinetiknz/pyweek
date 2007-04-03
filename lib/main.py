@@ -17,7 +17,7 @@ import sys
 
 def add_a_balloon(guy, lvl):
     new = sprite.Balloon(lvl)
-    new.position = guy.position + euclid.Vector2(random.randrange(350.0, 450.0), random.randrange(50.0, 150.0))
+    new.position = guy.position + euclid.Vector2(random.randrange(250.0, 450.0), random.randrange(0.0, 150.0))
     display.sprite_list.append(new)
 
 def main():
@@ -30,7 +30,7 @@ def main():
     
     display.sprite_list.append(stick_guy)
    
-    for i in xrange(0,5):
+    for i in xrange(0,20):
         add_a_balloon(stick_guy, lvl)
 
     
