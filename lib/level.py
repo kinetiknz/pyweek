@@ -43,7 +43,9 @@ class Level(object):
     def __init__(self, name):
         self.bg_path = data.filepath(name) + ".png"
         self.bg = img.load(self.bg_path)
+        self.fg = img.load(data.filepath(name) + "_skin.png")
         self.bg = srf.Surface.convert(self.bg)
+        self.fg = srf.Surface.convert(self.fg)
         self.bg_rect = self.bg.get_rect()
 
         self.fg_path = data.filepath(name) + ".dsc"
