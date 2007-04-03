@@ -2,12 +2,13 @@ import pygame
 import euclid
 import data
 import os
+import random
 
 class Sprite(pygame.sprite.Sprite):
 
     def __init__(self):
-        self.anim_list = []
-        self.anim_frame = -1
+        self.anim_list     = []
+        self.anim_frame    = -1
         self.position      = euclid.Vector2(0.0, 0.0)
         self.velocity      = euclid.Vector2(0.0, 0.0)
         self.accel         = euclid.Vector2(0.0, 0.0)
@@ -112,11 +113,12 @@ class Balloon(Sprite):
 
         if not Balloon.frames:
             Balloon.frames = Sprite.load_images(self, data.filepath("balloon"))
-            self.set_anim_list(Balloon.frames)
-
-        self.level = level
-        self.velocity[1] = -70.0
-        self.top_speed = euclid.Vector2(100.0, 100.0)
+            
+        self.set_anim_list(Balloon.frames)
+        self.anim_frame  = 0
+        self.level       = level
+        self.velocity[1] = random.randrange(-75.0, -65.0)
+        self.top_speed   = euclid.Vector2(100.0, 100.0)
 
     def check_collision(self):
        return not self.level.area_is_bg(self.get_rect())

@@ -6,31 +6,37 @@ Feel free to put all your game code here, or in other modules in this "lib"
 directory.
 '''
 
+import random
 import pygame
+import display
 import player
 import sprite
 import level
 import euclid
 import sys
 
-def main():
-    pygame.init()
-    screen = pygame.display.set_mode([640, 480])
+def add_a_balloon(guy, lvl):
+    new = sprite.Balloon(lvl)
+    new.position = guy.position + euclid.Vector2(random.randrange(350.0, 450.0), random.randrange(50.0, 150.0))
+    display.sprite_list.append(new)
 
+def main():
     lvl = level.load_level("t001")
     print lvl
 
-    view = [20, -(lvl.bg_rect.h - 480), 600, 480]
-
-    stick_guy  = player.Player(lvl)
+    stick_guy      = player.Player(lvl)
+    display.player = stick_guy
+    display.level  = lvl
     
-    balloon = sprite.Balloon(lvl)
-    balloon.position = stick_guy.position + euclid.Vector2(400.0, 150.0)
+    display.sprite_list.append(stick_guy)
    
+    for i in xrange(0,5):
+        add_a_balloon(stick_guy, lvl)
+
+    
     timer = pygame.time.Clock()
 
     while 1:
-        
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 sys.exit(0)
@@ -51,17 +57,5 @@ def main():
 
         elapsed = timer.tick() / 1000.0
         
-        balloon.move(elapsed)
-        stick_guy.move(elapsed)
-        stick_guy.animate(elapsed * 10.0)
-        view[1] = -stick_guy.position[1] + 300        
-                                      
-        screen.fill(0)
-        screen.blit(lvl.bg, view)
-        stick_guy.render(screen, view)
-        balloon.render(screen, view)
-        pygame.display.flip()
-
-
-
+        display.update(elapsed)
 

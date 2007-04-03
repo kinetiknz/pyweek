@@ -56,5 +56,7 @@ class Player(Sprite):
         # null out any horizontal acceleration from keypress
         # now that we've moved the player.
         self.accel[0] = 0.0
+        
+        Sprite.animate(self, elapsed_time * 10.0)
             
             
