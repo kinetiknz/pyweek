@@ -3,4 +3,4 @@ version = 1
 name = Test Level
 solid = #000000
 background = #ffffff
-player = 50, 2100
+player = 60, 2150

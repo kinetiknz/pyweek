@@ -20,7 +20,7 @@ def update(seconds_elapsed):
     for s in sprite_list:
         s.move(seconds_elapsed)
     
-    view[1] = -player.position[1] + 300        
+    view[1] = -player.position[1] + 400        
                                       
     screen.fill(0)
     screen.blit(level.bg, view)

@@ -3,6 +3,7 @@ import euclid
 import data
 import os
 import random
+import display
 
 class Sprite(pygame.sprite.Sprite):
 
@@ -15,6 +16,7 @@ class Sprite(pygame.sprite.Sprite):
         self.top_speed     = euclid.Vector2(0.0, 0.0)
         self.drag_factor   = 0.0
         self.collide_speed = 1.0
+        self.on_ground     = False
 
     def set_anim_list(self, anim_list):
         self.anim_list = anim_list
@@ -41,12 +43,18 @@ class Sprite(pygame.sprite.Sprite):
             
     def get_rect(self):
         rect = self.anim_list[int(self.anim_frame)].get_rect()
-        rect.move_ip(self.position[0], self.position[1])
+        rect.move_ip(self.position[0] - (rect.width/2), self.position[1]-(rect.height))
         return rect
     
     def render(self, dest_surface, view):
-        dest_surface.blit( self.anim_list[int(self.anim_frame)],
-                           pygame.Rect(self.position[0] + view[0], self.position[1] + view[1], 0, 0) )
+        img  = self.anim_list[int(self.anim_frame)]
+        rect = self.get_rect()
+        rect.move_ip(view[0], view[1])
+        
+        if rect.right < 0 or rect.left > display.width or rect.bottom < 0 or rect.top > 480:
+            return
+        
+        dest_surface.blit( img, rect )
 
     def animate(self, amount):
         self.anim_frame = (self.anim_frame + amount) % len(self.anim_list)
@@ -88,6 +96,12 @@ class Sprite(pygame.sprite.Sprite):
             self.velocity[1] += (self.accel[1] * elapsed_time)
                     
         self.apply_drag(self.velocity, elapsed_time)
+        ychange = self.position[1] - old_position[1]
+        if (ychange < 1.0 and ychange > -1.0):
+            self.on_ground = True
+        else:
+            self.on_ground = False
+        
     
     def apply_drag(self, reference, elapsed_time):
         drag = self.drag_factor * elapsed_time
