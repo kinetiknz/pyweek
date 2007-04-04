@@ -172,3 +172,38 @@ class Balloon(Sprite):
        else:
            return False
           
+
+class Emitter(Sprite):
+    frames = None
+    
+    def __init__(self, level, balloon_list):
+        Sprite.__init__(self)
+
+        if not Emitter.frames:
+            Emitter.frames = Sprite.load_images(self, data.filepath("emitter"))
+             
+        self.set_anim_list(Emitter.frames)
+        self.level         = level
+        self.balloon_list  = balloon_list
+        self.emit_interval = 5.0
+        self.emit_timer    = self.emit_interval
+        self.emitting      = False
+
+    def emit(self):
+       new = Balloon(self.level)
+       new.position = self.position + euclid.Vector2(30.0, -20.0)
+       self.balloon_list.append(new)
+       self.emit_timer = self.emit_interval
+       self.emitting = False
+
+    def move(self, elapsed_time):
+        if (self.emitting):
+            Sprite.animate(self, elapsed_time * 10.0)
+            if (int(self.anim_frame) == 0.0):
+                self.emit()
+        else:
+            self.emit_timer -= elapsed_time
+            if (self.emit_timer < 0.0):
+                self.emitting   = True
+                self.anim_frame = 0
+

@@ -30,6 +30,10 @@ def main():
     
     display.sprite_list.append(stick_guy)
    
+    emit = sprite.Emitter(lvl, display.sprite_list)
+    emit.position = stick_guy.position + euclid.Vector2(300.0, 200.0)
+    display.sprite_list.append(emit)
+   
     for i in xrange(0,20):
         add_a_balloon(stick_guy, lvl)
 
