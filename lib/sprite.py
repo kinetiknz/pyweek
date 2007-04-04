@@ -9,7 +9,7 @@ class Sprite(pygame.sprite.Sprite):
 
     def __init__(self):
         self.anim_list     = []
-        self.anim_frame    = -1
+        self.anim_frame    = 0
         self.position      = euclid.Vector2(0.0, 0.0)
         self.velocity      = euclid.Vector2(0.0, 0.0)
         self.accel         = euclid.Vector2(0.0, 0.0)
@@ -17,6 +17,7 @@ class Sprite(pygame.sprite.Sprite):
         self.drag_factor   = 0.0
         self.collide_speed = 1.0
         self.on_ground     = False
+        self.dead          = False
 
     def set_anim_list(self, anim_list):
         self.anim_list = anim_list
@@ -47,6 +48,9 @@ class Sprite(pygame.sprite.Sprite):
         return rect
     
     def render(self, dest_surface, view):
+        if self.dead:
+            return
+        
         img  = self.anim_list[int(self.anim_frame)]
         rect = self.get_rect()
         rect.move_ip(view[0], view[1])
@@ -64,6 +68,9 @@ class Sprite(pygame.sprite.Sprite):
         self.accel    = euclid.Vector2(0.0, 0.0)
         
     def move(self, elapsed_time):
+        if self.dead:
+            return
+        
         old_velocity = self.velocity.copy()
         old_position = self.position.copy()
         
@@ -121,19 +128,47 @@ class Sprite(pygame.sprite.Sprite):
 
 class Balloon(Sprite):
     frames = None
+    pop_frames = None
     
     def __init__(self, level):
         Sprite.__init__(self)
 
         if not Balloon.frames:
             Balloon.frames = Sprite.load_images(self, data.filepath("balloon"))
+            Balloon.pop_frames = Sprite.load_images(self, data.filepath("balloon_pop"))
             
         self.set_anim_list(Balloon.frames)
-        self.anim_frame  = 0
         self.level       = level
         self.velocity[1] = random.randrange(-75.0, -65.0)
         self.top_speed   = euclid.Vector2(100.0, 100.0)
+        self.pop_timer   = 0.0
+        self.popped      = False
+
+    def move(self, elapsed_time):
+        if not self.popped:
+            Sprite.move(self, elapsed_time)
+        else:
+            self.pop_timer -= elapsed_time
+            if (self.pop_timer <= 0.0):
+                self.dead = True
+                self.pop_timer = 0.0
+            else:
+                self.animate(elapsed_time * 20.0)
+            
+   
+    def pop(self):
+        if not self.dead and not self.popped:
+            self.pop_timer = 0.05 * len(Balloon.pop_frames)
+            self.set_anim_list(Balloon.pop_frames)        
+            self.popped = True
 
     def check_collision(self):
-       return not self.level.area_is_bg(self.get_rect())
+       hit = self.level.check_area(self.get_rect())
+       if hit == self.level.spike:
+           self.pop()
+           return True
+       elif hit == self.level.solid:
+           return True
+       else:
+           return False
           

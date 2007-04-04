@@ -53,6 +53,7 @@ class Level(object):
         self.name = kv["name"]
         self.solid = hex_val(kv["solid"])
         self.background = hex_val(kv["background"])
+        self.spike = hex_val(kv["spike"])
         self.spawn = coord_val(kv["player"])
 
     def __str__(self):
@@ -60,35 +61,37 @@ class Level(object):
             self.name, self.solid, self.background,
             self.spawn[0], self.spawn[1])
         
-    def point_is_bg(self, x,y):
+    def check_point(self, x,y, contents):
+        if contents == self.spike:
+            return contents
+
         col = self.bg.get_at((x,y))
         col_as_int = (col[0] * 256 * 256) + (col[1] * 256) + col[2]
-        if (col_as_int == self.background):
-            return True
+        if (col_as_int == self.solid) and (contents != self.spike):
+            return self.solid
+        elif (col_as_int == self.spike):
+            return self.spike
         else:
-            return False
-                    
-    def area_is_bg(self, rect_to_check):
-        if (   rect_to_check.left < 0 
-            or rect_to_check.right > self.bg_rect.width
-            or rect_to_check.top < 0 
-            or rect_to_check.bottom > self.bg_rect.height ):
-            return False
+            return contents
+      
+    def check_area(self, rect):
+        contents = self.background
+        
+        if (   rect.left < 0 
+             or rect.right >= self.bg_rect.width
+             or rect.top < 0 
+             or rect.bottom >= self.bg_rect.height ):
+            return self.solid
     
         # Just check the four corners for speed
-        if not self.point_is_bg(rect_to_check.left,  rect_to_check.top): return False
-        if not self.point_is_bg(rect_to_check.right, rect_to_check.top): return False
-        if not self.point_is_bg(rect_to_check.left,  rect_to_check.bottom): return False
-        if not self.point_is_bg(rect_to_check.right, rect_to_check.bottom): return False
+        contents = self.check_point(rect.left,  rect.top,    contents)
+        contents = self.check_point(rect.right, rect.top,    contents)
+        contents = self.check_point(rect.left,  rect.bottom, contents)
+        contents = self.check_point(rect.right, rect.bottom, contents)
         
-        return True
+        return contents
     
-        # Complete rect check follows below. Very slow...
-        for x in xrange(rect_to_check.left, rect_to_check.right):
-            for y in xrange(rect_to_check.top, rect_to_check.bottom):
-                if not self.point_is_bg(x,y):
-                    return False
-        return True
+                    
 
 '''Some silly code for development and testing.'''
 if __name__ == "__main__":

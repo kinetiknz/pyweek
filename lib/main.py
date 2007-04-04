@@ -46,6 +46,8 @@ def main():
                     stick_guy.add_balloon()
                 if e.key == pygame.K_DOWN:
                     stick_guy.rem_balloon()
+                        
+        elapsed = timer.tick() / 1000.0
                            
         keys = pygame.key.get_pressed()
         
@@ -55,7 +57,7 @@ def main():
         if (keys[pygame.K_RIGHT]):
             stick_guy.move_right()
 
-        elapsed = timer.tick() / 1000.0
+        
         
         display.update(elapsed)
 

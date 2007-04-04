@@ -32,7 +32,12 @@ class Player(Sprite):
     def check_collision(self):
         rect = self.collision_rect.move( self.position[0] - (self.collision_rect.width/2),
                                          self.position[1] - (self.collision_rect.height) )
-        return not self.level.area_is_bg(rect)
+        bunch_rect = self.get_bunch_rect(self.get_bunch_img())
+        if (bunch_rect):
+            if self.level.check_area(bunch_rect) == self.level.solid:
+                return True
+            
+        return self.level.check_area(rect) == self.level.solid
     
     def apply_balloon_force(self):
         if (self.balloon_count == 0):
@@ -42,19 +47,35 @@ class Player(Sprite):
             self.velocity[1] = (self.balloon_count - 2) * -60.0
 
     def render(self, dest_surface, view):
-        if (self.balloon_count > 0):
-             bunch_index = self.balloon_count-1
-             if (bunch_index >= len(self.balloon_bunch)):
-                 bunch_index = -1
-             img    = self.balloon_bunch[bunch_index][0]
-             my_img = self.anim_list[int(self.anim_frame)]
-             rect   = img.get_rect()
-             rect.move_ip(self.position[0], self.position[1])
-             rect.move_ip(view[0], view[1])
-             rect.move_ip(-(rect.width/2), -rect.height-my_img.get_rect().height)
-             dest_surface.blit( img, rect )
-            
+        self.draw_balloon_bunch(dest_surface, view)
         Sprite.render(self, dest_surface, view)
+
+    def draw_balloon_bunch(self, dest_surface, view):
+        if (self.balloon_count > 0):
+            img = self.get_bunch_img()
+            rect = self.get_bunch_rect(img)
+            rect.move_ip(view[0], view[1])
+            dest_surface.blit( img, rect )        
+
+    def get_bunch_img(self):
+        if (self.balloon_count <= 0):
+            return None
+        
+        bunch_index = self.balloon_count-1
+        if (bunch_index >= len(self.balloon_bunch)):
+                 bunch_index = -1
+        return self.balloon_bunch[bunch_index][0]
+
+    def get_bunch_rect(self, bunch_img):
+        if (self.balloon_count <= 0):
+            return None
+        
+        my_img = self.anim_list[int(self.anim_frame)]
+        rect   = bunch_img.get_rect()
+        rect.move_ip(self.position[0], self.position[1])
+        rect.move_ip(-(rect.width/2), -rect.height-my_img.get_rect().height + 10)
+        return rect    
+        
 
     def rem_balloon(self):
         self.balloon_count -= 1

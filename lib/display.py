@@ -16,9 +16,15 @@ player      = None
 level       = None
 
 def update(seconds_elapsed):
+    global sprite_list
+    new_sprite_list = []
     
     for s in sprite_list:
         s.move(seconds_elapsed)
+        if not s.dead:
+            new_sprite_list.append(s)
+            
+    new_sprite_list = sprite_list
     
     view[1] = -player.position[1] + 400        
                                       
