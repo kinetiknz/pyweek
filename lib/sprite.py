@@ -155,7 +155,16 @@ class Balloon(Sprite):
             else:
                 self.animate(elapsed_time * 20.0)
             
-   
+    def get_body_rect(self):
+        rect = Sprite.get_rect(self)
+        rect.height /= 2
+        return rect
+
+    def get_string_rect(self):
+        rect = Sprite.get_rect(self)
+        rect.top += rect.height / 2
+        return rect
+       
     def pop(self):
         if not self.dead and not self.popped:
             self.pop_timer = 0.05 * len(Balloon.pop_frames)
@@ -163,7 +172,7 @@ class Balloon(Sprite):
             self.popped = True
 
     def check_collision(self):
-       hit = self.level.check_area(self.get_rect())
+       hit = self.level.check_area(self.get_body_rect())
        if hit == self.level.spike:
            self.pop()
            return True

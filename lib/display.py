@@ -18,9 +18,10 @@ level       = None
 def update(seconds_elapsed):
     global sprite_list
     new_sprite_list = []
-    
+        
     for s in sprite_list:
         s.move(seconds_elapsed)
+        player.check_balloon(s)
         if not s.dead:
             new_sprite_list.append(s)
             

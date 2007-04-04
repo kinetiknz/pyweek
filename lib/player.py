@@ -34,11 +34,21 @@ class Player(Sprite):
                                          self.position[1] - (self.collision_rect.height) )
         bunch_rect = self.get_bunch_rect(self.get_bunch_img())
         if (bunch_rect):
-            if self.level.check_area(bunch_rect) == self.level.solid:
+            bunch_hit = self.level.check_area(bunch_rect)
+            if bunch_hit == self.level.solid:
+                return True
+            elif bunch_hit == self.level.spike:
+                self.rem_balloon()
                 return True
             
         return self.level.check_area(rect) == self.level.solid
     
+    def check_balloon(self, obj):
+        if isinstance(obj, sprite.Balloon):
+            if not obj.dead and obj.get_string_rect().colliderect(self.get_hand_rect()):
+                obj.dead = True
+                self.add_balloon()
+        
     def apply_balloon_force(self):
         if (self.balloon_count == 0):
             self.accel[1] = 400.0 # gravity for freefall
@@ -76,6 +86,11 @@ class Player(Sprite):
         rect.move_ip(-(rect.width/2), -rect.height-my_img.get_rect().height + 10)
         return rect    
         
+    def get_hand_rect(self):
+        rect = Sprite.get_rect(self)
+        rect.top += rect.height/3
+        rect.bottom -= rect.height/3
+        return rect
 
     def rem_balloon(self):
         self.balloon_count -= 1
