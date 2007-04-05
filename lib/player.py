@@ -6,9 +6,10 @@ from sprite import *
 
 class Player(Sprite):
     
-    def __init__(self, level):
+    def __init__(self, level, balloon_list):
         Sprite.__init__(self)
         self.level = level
+        self.balloon_list = balloon_list
         self.set_position(level.spawn)
         self.left = Sprite.load_images(self, data.filepath("player_l"))
         self.right = Sprite.load_images(self, data.filepath("player_r"))
@@ -21,6 +22,8 @@ class Player(Sprite):
         self.balloon_bunch.append(Sprite.load_images(self, data.filepath("balloon")))
         self.balloon_bunch.append(Sprite.load_images(self, data.filepath("two_balloons")))
         self.balloon_bunch.append(Sprite.load_images(self, data.filepath("three_balloons")))
+        self.balloon_bunch.append(Sprite.load_images(self, data.filepath("four_balloons")))
+        self.balloon_bunch.append(Sprite.load_images(self, data.filepath("five_balloons")))
         self.set_anim_list(self.right)
         self.top_speed      = euclid.Vector2(200.0, 700.0)
         self.drag_factor    = 400.0
@@ -38,9 +41,8 @@ class Player(Sprite):
             if bunch_hit == self.level.solid:
                 return True
             elif bunch_hit == self.level.spike:
-                if self.balloon_count > 1:
-                    self.balloon_count = 1
-                else:
+                self.balloon_count -= 1
+                if self.balloon_count < 0:
                     self.balloon_count = 0
                 return True
             
@@ -95,9 +97,15 @@ class Player(Sprite):
         return rect
 
     def rem_balloon(self):
-        self.balloon_count -= 1
-        if (self.balloon_count < 0):
-            self.balloon_count = 0
+        if self.balloon_count > 0:
+            self.balloon_count -= 1
+            new = Balloon(self.level)
+            new.position = self.position + euclid.Vector2(0.0, -(self.get_rect().height * 0.9))
+            if self.last_dir == 'r':
+                new.position[0] -= self.get_rect().width
+            else:
+                 new.position[0] += self.get_rect().width
+            self.balloon_list.append(new)
 
     def add_balloon(self):
         self.balloon_count += 1

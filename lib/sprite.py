@@ -171,7 +171,7 @@ class Balloon(Sprite):
        if hit == self.level.spike:
            self.pop()
            return True
-       elif hit == self.level.solid:
+       elif hit == self.level.solid or hit == self.level.spike:
            return True
        else:
            return False

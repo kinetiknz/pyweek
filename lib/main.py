@@ -24,9 +24,10 @@ def main():
     lvl = level.load_level("t001")
     print lvl
 
-    stick_guy      = player.Player(lvl)
+    stick_guy      = player.Player(lvl, display.sprite_list)
     display.player = stick_guy
     display.level  = lvl
+    
     
     display.sprite_list.append(stick_guy)
    
