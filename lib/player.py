@@ -38,14 +38,14 @@ class Player(Sprite):
             if bunch_hit == self.level.solid:
                 return True
             elif bunch_hit == self.level.spike:
-                self.rem_balloon()
+                self.balloon_count = 1
                 return True
             
         return self.level.check_area(rect) == self.level.solid
     
     def check_balloon(self, obj):
         if isinstance(obj, sprite.Balloon):
-            if not obj.dead and obj.get_string_rect().colliderect(self.get_hand_rect()):
+            if not obj.dead and not obj.popped and obj.get_rect().colliderect(self.get_hand_rect()):
                 obj.dead = True
                 self.add_balloon()
         
@@ -88,15 +88,14 @@ class Player(Sprite):
         
     def get_hand_rect(self):
         rect = Sprite.get_rect(self)
-        rect.top += rect.height/3
-        rect.bottom -= rect.height/3
+        rect.height /= 2
         return rect
 
     def rem_balloon(self):
         self.balloon_count -= 1
         if (self.balloon_count < 0):
             self.balloon_count = 0
-        
+
     def add_balloon(self):
         self.balloon_count += 1
         

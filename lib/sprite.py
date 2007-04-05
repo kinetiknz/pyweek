@@ -160,11 +160,6 @@ class Balloon(Sprite):
         rect.height /= 2
         return rect
 
-    def get_string_rect(self):
-        rect = Sprite.get_rect(self)
-        rect.top += rect.height / 2
-        return rect
-       
     def pop(self):
         if not self.dead and not self.popped:
             self.pop_timer = 0.05 * len(Balloon.pop_frames)
