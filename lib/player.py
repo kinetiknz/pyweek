@@ -38,7 +38,10 @@ class Player(Sprite):
             if bunch_hit == self.level.solid:
                 return True
             elif bunch_hit == self.level.spike:
-                self.balloon_count = 1
+                if self.balloon_count > 1:
+                    self.balloon_count = 1
+                else:
+                    self.balloon_count = 0
                 return True
             
         return self.level.check_area(rect) == self.level.solid
