@@ -1,4 +1,22 @@
-#! /usr/bin/env python
+# PyWeek #4: Gasbag Follies - Produced by Vandelay Industries
+#
+# Copyright (c) 2007 Matthew Gregan <kinetik@flim.org>
+#                    Joseph Miller <joff@googlehax.com>
+#                    Elizabeth Moffatt <cybin@ihug.co.nz>
+#                    Marcel Weber <xar@orcon.net.nz>
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF MIND, USE, DATA OR PROFITS, WHETHER
+# IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING
+# OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
 '''Level loading module.
 
 Loads level files (a bitmap image and associated description file).
@@ -64,7 +82,7 @@ class Level(object):
     def view_player(self):
         """Return a rect with the view centered on the player."""
         return [self.spawn[0], self.spawn[1], 600, 480]
-        
+
     def check_point(self, x,y, contents):
         if contents == self.spike:
             return contents
@@ -77,24 +95,24 @@ class Level(object):
             return self.spike
         else:
             return contents
-      
+
     def check_area(self, rect):
         contents = self.background
-        
-        if (   rect.left < 0 
+
+        if (   rect.left < 0
              or rect.right >= self.bg_rect.width
-             or rect.top < 0 
+             or rect.top < 0
              or rect.bottom >= self.bg_rect.height ):
             return self.solid
-    
+
         # Just check the four corners for speed
         contents = self.check_point(rect.left,  rect.top,    contents)
         contents = self.check_point(rect.right, rect.top,    contents)
         contents = self.check_point(rect.left,  rect.bottom, contents)
         contents = self.check_point(rect.right, rect.bottom, contents)
-        
+
         return contents
-    
+
 
 def bound_view(level, view):
     y = view[1]

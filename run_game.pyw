@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+#
 # PyWeek #4: Gasbag Follies - Produced by Vandelay Industries
 #
 # Copyright (c) 2007 Matthew Gregan <kinetik@flim.org>
@@ -17,44 +19,16 @@
 # IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING
 # OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import pygame
-import player
-import sprite
-import level
+import sys
+import os
+try:
+    basename = os.path.dirname(__file__)
+    libdir = os.path.abspath(os.path.join(basename, 'lib'))
+    thirddir = os.path.abspath(os.path.join(basename, 'thirdparty'))
+    sys.path.insert(0, libdir)
+    sys.path.insert(0, thirddir)
+except:
+    pass
 
-pygame.init()
-
-width  = 640
-height = 480
-
-screen = pygame.display.set_mode([width, height])
-view   = [20, 0, 600, 480]
-
-sprite_list = []
-player      = None
-level       = None
-
-def update(seconds_elapsed):
-    global sprite_list
-    new_sprite_list = []
-
-    for s in sprite_list:
-        s.move(seconds_elapsed)
-        if not s.dead:
-            new_sprite_list.append(s)
-            if isinstance(s, sprite.Dart):
-                s.check_for_balloons(sprite_list)
-
-    new_sprite_list = sprite_list
-    player.check_balloons(sprite_list)
-    player.check_darts(sprite_list)
-
-    view[1] = -player.position[1] + 400
-
-    screen.fill(0)
-    screen.blit(level.fg, view)
-
-    for s in sprite_list:
-        s.render(screen, view)
-
-    pygame.display.flip()
+import main
+main.main()

@@ -1,3 +1,22 @@
+# PyWeek #4: Gasbag Follies - Produced by Vandelay Industries
+#
+# Copyright (c) 2007 Matthew Gregan <kinetik@flim.org>
+#                    Joseph Miller <joff@googlehax.com>
+#                    Elizabeth Moffatt <cybin@ihug.co.nz>
+#                    Marcel Weber <xar@orcon.net.nz>
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF MIND, USE, DATA OR PROFITS, WHETHER
+# IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING
+# OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
 import pygame
 import euclid
 import data
@@ -25,7 +44,7 @@ class Sprite(pygame.sprite.Sprite):
 
     def construct_filename(self, image_basename, frame_number):
         return image_basename + ("_%02d" % frame_number) + ".png"
-    
+
     def check_collision(self):
         return False
 
@@ -33,92 +52,92 @@ class Sprite(pygame.sprite.Sprite):
         list_to_return = []
         frame_num = 0;
         filename = self.construct_filename(image_basename, frame_num)
-        
+
         while (os.path.exists(filename)):
             list_to_return.append(pygame.image.load(filename))
             list_to_return[-1].convert()
             frame_num += 1
             filename = self.construct_filename(image_basename, frame_num)
-            
+
         return list_to_return
-            
+
     def get_rect(self):
         rect = self.anim_list[int(self.anim_frame)].get_rect()
         rect.move_ip(self.position[0] - (rect.width/2), self.position[1]-(rect.height))
         return rect
-    
+
     def render(self, dest_surface, view):
         if self.dead:
             return
-        
+
         img  = self.anim_list[int(self.anim_frame)]
         rect = self.get_rect()
         rect.move_ip(view[0], view[1])
-        
+
         if rect.right < 0 or rect.left > display.width or rect.bottom < 0 or rect.top > 480:
             return
-        
+
         dest_surface.blit( img, rect )
 
     def animate(self, amount):
         self.anim_frame = (self.anim_frame + amount) % len(self.anim_list)
-        
+
     def stop(self):
         self.velocity = euclid.Vector2(0.0, 0.0)
         self.accel    = euclid.Vector2(0.0, 0.0)
-        
+
     def move(self, elapsed_time):
         if self.dead:
             return
-        
+
         old_velocity = self.velocity.copy()
         old_position = self.position.copy()
-        
+
         # move x first
         if self.velocity[0] > self.top_speed[0]:
             self.velocity[0] = self.top_speed[0]
         elif self.velocity[0] < -self.top_speed[0]:
             self.velocity[0] = -self.top_speed[0]
-        
+
         self.position[0] += (self.velocity[0] * elapsed_time)
-        
+
         if self.check_collision():
             self.velocity[0] = old_velocity[0] * self.collide_speed
             self.position[0] = old_position[0]
         else:
             self.velocity[0] += (self.accel[0] * elapsed_time)
-        
+
         # move y now
         if self.velocity[1] > self.top_speed[1]:
             self.velocity[1] = self.top_speed[1]
         elif self.velocity[1] < -self.top_speed[1]:
             self.velocity[1] = -self.top_speed[1]
-                
+
         self.position[1] += (self.velocity[1] * elapsed_time)
-        
+
         if self.check_collision():
             self.velocity[1] = old_velocity[1] * self.collide_speed
             self.position[1] = old_position[1]
         else:
             self.velocity[1] += (self.accel[1] * elapsed_time)
-                    
+
         self.apply_drag(self.velocity, elapsed_time)
         ychange = self.position[1] - old_position[1]
         if (ychange < 1.0 and ychange > -1.0):
             self.on_ground = True
         else:
             self.on_ground = False
-        
-    
+
+
     def apply_drag(self, reference, elapsed_time):
         drag = self.drag_factor * elapsed_time
-        
+
         if reference[0] < drag and reference[0] > -drag:
             reference[0] = 0.0
         elif reference[0] < 0.0:
             reference[0] += drag
         else:
-            reference[0] -= drag 
+            reference[0] -= drag
 
     def set_position(self, new_pos):
         self.position[0] = new_pos[0]
@@ -129,14 +148,14 @@ class Sprite(pygame.sprite.Sprite):
 class Balloon(Sprite):
     frames = None
     pop_frames = None
-    
+
     def __init__(self, level):
         Sprite.__init__(self)
 
         if not Balloon.frames:
             Balloon.frames = Sprite.load_images(self, data.filepath("balloon"))
             Balloon.pop_frames = Sprite.load_images(self, data.filepath("balloon_pop"))
-            
+
         self.set_anim_list(Balloon.frames)
         self.level       = level
         self.velocity[1] = random.randrange(-75.0, -65.0)
@@ -154,7 +173,7 @@ class Balloon(Sprite):
                 self.pop_timer = 0.0
             else:
                 self.animate(elapsed_time * 20.0)
-            
+
     def get_body_rect(self):
         rect = Sprite.get_rect(self)
         rect.height /= 2
@@ -163,7 +182,7 @@ class Balloon(Sprite):
     def pop(self):
         if not self.dead and not self.popped:
             self.pop_timer = 0.05 * len(Balloon.pop_frames)
-            self.set_anim_list(Balloon.pop_frames)        
+            self.set_anim_list(Balloon.pop_frames)
             self.popped = True
 
     def check_collision(self):
@@ -175,17 +194,17 @@ class Balloon(Sprite):
            return True
        else:
            return False
-          
+
 
 class Emitter(Sprite):
     frames = None
-    
+
     def __init__(self, level, balloon_list):
         Sprite.__init__(self)
 
         if not Emitter.frames:
             Emitter.frames = Sprite.load_images(self, data.filepath("emitter"))
-             
+
         self.set_anim_list(Emitter.frames)
         self.level         = level
         self.balloon_list  = balloon_list
@@ -214,7 +233,7 @@ class Emitter(Sprite):
 
 
 class DartLauncher(Sprite):
-   
+
     def __init__(self, level, sprite_list):
         Sprite.__init__(self)
 
@@ -235,7 +254,7 @@ class DartLauncher(Sprite):
         self.launch_timer -= elapsed_time
         if (self.launch_timer < 0.0):
                 self.launch()
-                
+
     def render(self, dest_surface, view):
         pass
 
@@ -243,23 +262,23 @@ class DartLauncher(Sprite):
 class Dart(Sprite):
     frames_l = None
     frames_r = None
-    
+
     def __init__(self, level):
         Sprite.__init__(self)
 
         if not Dart.frames_l:
             Dart.frames_l = Sprite.load_images(self, data.filepath("dart_l"))
             Dart.frames_r = Sprite.load_images(self, data.filepath("dart_r"))
-             
+
         self.set_anim_list(Dart.frames_l)
         self.level         = level
         self.top_speed     = euclid.Vector2(400.0, 400.0)
 
- 
+
     def check_collision(self):
         if self.level.check_area(self.get_rect()) != self.level.background:
             self.dead = True
-            
+
     def check_for_balloons(self, sprite_list):
         for obj in sprite_list:
             if isinstance(obj, Balloon):
@@ -272,6 +291,5 @@ class Dart(Sprite):
             self.set_anim_list(Dart.frames_l)
         else:
             self.set_anim_list(Dart.frames_r)
-            
-        Sprite.move(self, elapsed_time)
 
+        Sprite.move(self, elapsed_time)
