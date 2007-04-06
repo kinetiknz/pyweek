@@ -34,9 +34,9 @@ import level
 import euclid
 import sys
 
-def add_a_balloon(guy, lvl):
+def add_a_balloon(base_pos, lvl):
     new = sprite.Balloon(lvl)
-    new.position = guy.position + euclid.Vector2(random.randrange(250.0, 450.0), random.randrange(0.0, 150.0))
+    new.position = base_pos + euclid.Vector2(random.randrange(250.0, 450.0), random.randrange(0.0, 150.0))
     display.sprite_list.append(new)
 
 def main():
@@ -61,7 +61,7 @@ def main():
 
 
     for i in xrange(0,20):
-        add_a_balloon(stick_guy, lvl)
+        add_a_balloon(stick_guy.position, lvl)
 
 
     timer = pygame.time.Clock()

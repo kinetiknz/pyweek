@@ -40,7 +40,7 @@ def update(seconds_elapsed):
 
     for s in sprite_list:
         s.move(seconds_elapsed)
-        if not s.dead:
+        if s.alive():
             new_sprite_list.append(s)
             if isinstance(s, sprite.Dart):
                 s.check_for_balloons(sprite_list)
@@ -53,6 +53,10 @@ def update(seconds_elapsed):
 
     screen.fill(0)
     screen.blit(level.fg, view)
+
+    dead_sprites = filter(lambda s: not s.alive(), sprite_list)
+    for dead in dead_sprites:
+        sprite_list.remove(dead)
 
     for s in sprite_list:
         s.render(screen, view)

@@ -19,14 +19,14 @@
 
 import pygame
 import euclid
-import data
+import util
 import os
 import random
 import display
 
 class Sprite(pygame.sprite.Sprite):
-
     def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
         self.anim_list     = []
         self.anim_frame    = 0
         self.position      = euclid.Vector2(0.0, 0.0)
@@ -37,6 +37,12 @@ class Sprite(pygame.sprite.Sprite):
         self.collide_speed = 1.0
         self.on_ground     = False
         self.dead          = False
+
+    def alive(self):
+        return not self.dead
+
+    def kill(self):
+        self.dead = True
 
     def set_anim_list(self, anim_list):
         self.anim_list = anim_list
@@ -54,8 +60,7 @@ class Sprite(pygame.sprite.Sprite):
         filename = self.construct_filename(image_basename, frame_num)
 
         while (os.path.exists(filename)):
-            list_to_return.append(pygame.image.load(filename))
-            list_to_return[-1].convert()
+            list_to_return.append(util.load_image(filename))
             frame_num += 1
             filename = self.construct_filename(image_basename, frame_num)
 
@@ -68,9 +73,10 @@ class Sprite(pygame.sprite.Sprite):
 
     def render(self, dest_surface, view):
         if self.dead:
-            return
+            raise Exception("render called on dead sprite [%r]" % self)
 
         img  = self.anim_list[int(self.anim_frame)]
+        print img
         rect = self.get_rect()
         rect.move_ip(view[0], view[1])
 
@@ -88,7 +94,7 @@ class Sprite(pygame.sprite.Sprite):
 
     def move(self, elapsed_time):
         if self.dead:
-            return
+            raise Exception("move called on dead sprite [%r]" % self)
 
         old_velocity = self.velocity.copy()
         old_position = self.position.copy()
@@ -153,8 +159,8 @@ class Balloon(Sprite):
         Sprite.__init__(self)
 
         if not Balloon.frames:
-            Balloon.frames = Sprite.load_images(self, data.filepath("balloon"))
-            Balloon.pop_frames = Sprite.load_images(self, data.filepath("balloon_pop"))
+            Balloon.frames = Sprite.load_images(self, util.filepath("balloon"))
+            Balloon.pop_frames = Sprite.load_images(self, util.filepath("balloon_pop"))
 
         self.set_anim_list(Balloon.frames)
         self.level       = level
@@ -162,17 +168,24 @@ class Balloon(Sprite):
         self.top_speed   = euclid.Vector2(100.0, 100.0)
         self.pop_timer   = 0.0
         self.popped      = False
+        self.lifetime    = 5
+
+    def can_collect(self):
+        return not (self.dead or self.popped)
 
     def move(self, elapsed_time):
-        if not self.popped:
-            Sprite.move(self, elapsed_time)
-        else:
+        if self.popped:
             self.pop_timer -= elapsed_time
             if (self.pop_timer <= 0.0):
-                self.dead = True
+                self.kill()
                 self.pop_timer = 0.0
             else:
                 self.animate(elapsed_time * 20.0)
+        else:
+            self.lifetime -= elapsed_time
+            if self.lifetime <= 0 and not self.popped:
+                self.pop()
+            Sprite.move(self, elapsed_time)
 
     def get_body_rect(self):
         rect = Sprite.get_rect(self)
@@ -180,17 +193,17 @@ class Balloon(Sprite):
         return rect
 
     def pop(self):
-        if not self.dead and not self.popped:
-            self.pop_timer = 0.05 * len(Balloon.pop_frames)
-            self.set_anim_list(Balloon.pop_frames)
-            self.popped = True
+        assert not self.popped
+        self.popped = True
+        self.pop_timer = 0.05 * len(Balloon.pop_frames)
+        self.set_anim_list(Balloon.pop_frames)
 
     def check_collision(self):
        hit = self.level.check_area(self.get_body_rect())
        if hit == self.level.spike:
            self.pop()
            return True
-       elif hit == self.level.solid or hit == self.level.spike:
+       elif hit == self.level.solid:
            return True
        else:
            return False
@@ -203,7 +216,7 @@ class Emitter(Sprite):
         Sprite.__init__(self)
 
         if not Emitter.frames:
-            Emitter.frames = Sprite.load_images(self, data.filepath("emitter"))
+            Emitter.frames = Sprite.load_images(self, util.filepath("emitter"))
 
         self.set_anim_list(Emitter.frames)
         self.level         = level
@@ -233,7 +246,6 @@ class Emitter(Sprite):
 
 
 class DartLauncher(Sprite):
-
     def __init__(self, level, sprite_list):
         Sprite.__init__(self)
 
@@ -267,13 +279,12 @@ class Dart(Sprite):
         Sprite.__init__(self)
 
         if not Dart.frames_l:
-            Dart.frames_l = Sprite.load_images(self, data.filepath("dart_l"))
-            Dart.frames_r = Sprite.load_images(self, data.filepath("dart_r"))
+            Dart.frames_l = Sprite.load_images(self, util.filepath("dart_l"))
+            Dart.frames_r = Sprite.load_images(self, util.filepath("dart_r"))
 
         self.set_anim_list(Dart.frames_l)
         self.level         = level
         self.top_speed     = euclid.Vector2(400.0, 400.0)
-
 
     def check_collision(self):
         if self.level.check_area(self.get_rect()) != self.level.background:
@@ -284,7 +295,7 @@ class Dart(Sprite):
             if isinstance(obj, Balloon):
                 if not obj.dead and obj.get_body_rect().colliderect(self.get_rect()):
                     obj.pop()
-                    self.dead = True
+                    self.kill()
 
     def move(self, elapsed_time):
         if (self.velocity < 0.0):

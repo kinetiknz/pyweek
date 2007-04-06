@@ -19,30 +19,29 @@
 
 import pygame
 import euclid
-import data
+import util
 import sprite
 from sprite import *
 
 class Player(Sprite):
-
     def __init__(self, level, balloon_list):
         Sprite.__init__(self)
         self.level = level
         self.balloon_list = balloon_list
         self.set_position(level.spawn)
-        self.left = Sprite.load_images(self, data.filepath("player_l"))
-        self.right = Sprite.load_images(self, data.filepath("player_r"))
-        self.hang_left = Sprite.load_images(self, data.filepath("player_hang_l"))
-        self.hang_right = Sprite.load_images(self, data.filepath("player_hang_r"))
-        self.fall = Sprite.load_images(self, data.filepath("player_fall"))
-        self.fall_left = Sprite.load_images(self, data.filepath("player_fall_l"))
-        self.fall_right = Sprite.load_images(self, data.filepath("player_fall_r"))
+        self.left = Sprite.load_images(self, util.filepath("player_l"))
+        self.right = Sprite.load_images(self, util.filepath("player_r"))
+        self.hang_left = Sprite.load_images(self, util.filepath("player_hang_l"))
+        self.hang_right = Sprite.load_images(self, util.filepath("player_hang_r"))
+        self.fall = Sprite.load_images(self, util.filepath("player_fall"))
+        self.fall_left = Sprite.load_images(self, util.filepath("player_fall_l"))
+        self.fall_right = Sprite.load_images(self, util.filepath("player_fall_r"))
         self.balloon_bunch = []
-        self.balloon_bunch.append(Sprite.load_images(self, data.filepath("balloon")))
-        self.balloon_bunch.append(Sprite.load_images(self, data.filepath("two_balloons")))
-        self.balloon_bunch.append(Sprite.load_images(self, data.filepath("three_balloons")))
-        self.balloon_bunch.append(Sprite.load_images(self, data.filepath("four_balloons")))
-        self.balloon_bunch.append(Sprite.load_images(self, data.filepath("five_balloons")))
+        self.balloon_bunch.append(Sprite.load_images(self, util.filepath("balloon")))
+        self.balloon_bunch.append(Sprite.load_images(self, util.filepath("two_balloons")))
+        self.balloon_bunch.append(Sprite.load_images(self, util.filepath("three_balloons")))
+        self.balloon_bunch.append(Sprite.load_images(self, util.filepath("four_balloons")))
+        self.balloon_bunch.append(Sprite.load_images(self, util.filepath("five_balloons")))
         self.set_anim_list(self.right)
         self.top_speed      = euclid.Vector2(200.0, 700.0)
         self.drag_factor    = 400.0
@@ -60,7 +59,7 @@ class Player(Sprite):
             if bunch_hit == self.level.solid:
                 return True
             elif bunch_hit == self.level.spike:
-                self.pop_balloon()
+                self.pop_balloons()
 
         return self.level.check_area(rect) == self.level.solid
 
@@ -68,8 +67,10 @@ class Player(Sprite):
         rect = self.get_hand_rect()
         for obj in sprite_list:
             if isinstance(obj, sprite.Balloon):
-                if not obj.dead and not obj.popped and obj.get_rect().colliderect(rect):
-                    obj.dead = True
+                if obj.can_collect() \
+                        and obj.get_rect().colliderect(rect) \
+                        and self.balloon_count < len(self.balloon_bunch):
+                    obj.kill()
                     self.add_balloon()
 
     def check_darts(self, sprite_list):
@@ -79,9 +80,9 @@ class Player(Sprite):
 
         for obj in sprite_list:
             if isinstance(obj, sprite.Dart):
-                if not obj.dead and obj.get_rect().colliderect(rect):
-                    obj.dead = True
-                    self.pop_balloon()
+                if obj.alive() and obj.get_rect().colliderect(rect):
+                    obj.kill()
+                    self.pop_balloons()
 
     def apply_balloon_force(self):
         if (self.balloon_count == 0):
@@ -125,26 +126,34 @@ class Player(Sprite):
         rect.height /= 2
         return rect
 
-    def pop_balloon(self):
+    def pop_balloons(self):
         if self.balloon_count > 0:
-            new = Balloon(self.level)
-            new.position = self.position + euclid.Vector2(0.0, -(self.get_rect().height * 0.9))
-            new.pop()
-            self.balloon_list.append(new)
-            self.balloon_count -= 1
+            limit = 1
+            if self.balloon_count == 1:
+                limit = 0
+            while self.balloon_count > limit:
+                new = self._release_balloon()
+                new.pop()
+
+    def _release_balloon(self):
+        new = Balloon(self.level)
+        new.position = self.position + euclid.Vector2(0.0, -(self.get_rect().height * 0.9))
+        self.balloon_list.append(new)
+        self.balloon_count -= 1
+        return new
 
     def drop_balloon(self):
         if self.balloon_count > 0:
-            self.balloon_count -= 1
-            new = Balloon(self.level)
-            new.position = self.position + euclid.Vector2(0.0, -(self.get_rect().height * 0.9))
+            new = self._release_balloon()
             if self.last_dir == 'r':
                 new.position[0] -= self.get_rect().width
             else:
                  new.position[0] += self.get_rect().width
-            self.balloon_list.append(new)
 
     def add_balloon(self):
+        if self.balloon_count >= len(self.balloon_bunch):
+            print "Debug! Don't do this in release!"
+            return
         self.balloon_count += 1
 
     def move_left(self):

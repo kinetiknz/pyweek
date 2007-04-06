@@ -17,14 +17,13 @@
 # IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING
 # OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-'''Simple data loader module.
+'''Utility module.
 
-Loads data files from the "data" directory shipped with a game.
-
-Enhancing this to handle caching etc. is left as an exercise for the reader.
+Provides tools to build game-specific paths, load images efficiently, etc.
 '''
 
 import os
+import pygame.image
 
 data_py = os.path.abspath(os.path.dirname(__file__))
 data_dir = os.path.normpath(os.path.join(data_py, '..', 'data'))
@@ -34,9 +33,5 @@ def filepath(filename):
     '''
     return os.path.join(data_dir, filename)
 
-def load(filename, mode='rb'):
-    '''Open a file in the data directory.
-
-    "mode" is passed as the second arg to open().
-    '''
-    return open(os.path.join(data_dir, filename), mode)
+def load_image(filename):
+    return pygame.image.load(filename).convert_alpha()

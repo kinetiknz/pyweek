@@ -22,9 +22,9 @@
 Loads level files (a bitmap image and associated description file).
 '''
 
-import pygame.image as img
-import pygame.surface as srf
-import data
+import pygame.image
+import pygame.surface
+import util
 
 def load_level(level):
     return Level(level)
@@ -59,14 +59,12 @@ def coord_val(s):
 
 class Level(object):
     def __init__(self, name):
-        self.bg_path = data.filepath(name) + ".png"
-        self.bg = img.load(self.bg_path)
-        self.fg = img.load(data.filepath(name) + "_skin.png")
-        self.bg = srf.Surface.convert(self.bg)
-        self.fg = srf.Surface.convert(self.fg)
+        self.bg_path = util.filepath(name) + ".png"
+        self.bg = util.load_image(self.bg_path)
+        self.fg = util.load_image(util.filepath(name) + "_skin.png")
         self.bg_rect = self.bg.get_rect()
 
-        self.fg_path = data.filepath(name) + ".dsc"
+        self.fg_path = util.filepath(name) + ".dsc"
         kv = read_desc(open(self.fg_path, "r"))
         self.name = kv["name"]
         self.solid = hex_val(kv["solid"])
