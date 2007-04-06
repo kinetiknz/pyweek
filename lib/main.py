@@ -49,7 +49,9 @@ def main():
 
     while 1:
         for e in pygame.event.get():
-            if e.type == pygame.QUIT:
+            if e.type == pygame.QUIT or \
+                    e.type == pygame.KEYDOWN and \
+                    e.key == pygame.K_ESCAPE:
                 sys.exit(0)
                 
             if e.type == pygame.KEYUP:
