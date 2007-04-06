@@ -76,7 +76,6 @@ class Sprite(pygame.sprite.Sprite):
             raise Exception("render called on dead sprite [%r]" % self)
 
         img  = self.anim_list[int(self.anim_frame)]
-        print img
         rect = self.get_rect()
         rect.move_ip(view[0], view[1])
 
