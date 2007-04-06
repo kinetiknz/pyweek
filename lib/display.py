@@ -21,11 +21,14 @@ def update(seconds_elapsed):
         
     for s in sprite_list:
         s.move(seconds_elapsed)
-        player.check_balloon(s)
         if not s.dead:
             new_sprite_list.append(s)
+            if isinstance(s, sprite.Dart):
+                s.check_for_balloons(sprite_list)
             
     new_sprite_list = sprite_list
+    player.check_balloons(sprite_list)
+    player.check_darts(sprite_list)
     
     view[1] = -player.position[1] + 400        
                                       

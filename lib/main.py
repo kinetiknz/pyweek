@@ -35,6 +35,12 @@ def main():
     emit.position = stick_guy.position + euclid.Vector2(300.0, 200.0)
     display.sprite_list.append(emit)
    
+    launch = sprite.DartLauncher(lvl, display.sprite_list)
+    launch.position = stick_guy.position + euclid.Vector2(0.0, 0.0)
+    display.sprite_list.append(launch)
+      
+   
+   
     for i in xrange(0,20):
         add_a_balloon(stick_guy, lvl)
 
@@ -50,7 +56,7 @@ def main():
                 if e.key == pygame.K_UP:
                     stick_guy.add_balloon()
                 if e.key == pygame.K_DOWN:
-                    stick_guy.rem_balloon()
+                    stick_guy.drop_balloon()
                         
         elapsed = timer.tick() / 1000.0
                            

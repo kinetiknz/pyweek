@@ -41,18 +41,28 @@ class Player(Sprite):
             if bunch_hit == self.level.solid:
                 return True
             elif bunch_hit == self.level.spike:
-                self.balloon_count -= 1
-                if self.balloon_count < 0:
-                    self.balloon_count = 0
-                return True
+                self.pop_balloon()
             
         return self.level.check_area(rect) == self.level.solid
     
-    def check_balloon(self, obj):
-        if isinstance(obj, sprite.Balloon):
-            if not obj.dead and not obj.popped and obj.get_rect().colliderect(self.get_hand_rect()):
-                obj.dead = True
-                self.add_balloon()
+    def check_balloons(self, sprite_list):
+        rect = self.get_hand_rect()
+        for obj in sprite_list:
+            if isinstance(obj, sprite.Balloon):
+                if not obj.dead and not obj.popped and obj.get_rect().colliderect(rect):
+                    obj.dead = True
+                    self.add_balloon()
+                
+    def check_darts(self, sprite_list):
+        rect = self.get_bunch_rect(self.get_bunch_img())
+        if not rect:
+            return
+        
+        for obj in sprite_list:
+            if isinstance(obj, sprite.Dart):
+                if not obj.dead and obj.get_rect().colliderect(rect):
+                    obj.dead = True
+                    self.pop_balloon()
         
     def apply_balloon_force(self):
         if (self.balloon_count == 0):
@@ -96,7 +106,15 @@ class Player(Sprite):
         rect.height /= 2
         return rect
 
-    def rem_balloon(self):
+    def pop_balloon(self):
+        if self.balloon_count > 0:
+            new = Balloon(self.level)
+            new.position = self.position + euclid.Vector2(0.0, -(self.get_rect().height * 0.9))
+            new.pop()
+            self.balloon_list.append(new)
+            self.balloon_count -= 1
+            
+    def drop_balloon(self):
         if self.balloon_count > 0:
             self.balloon_count -= 1
             new = Balloon(self.level)

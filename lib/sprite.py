@@ -211,3 +211,67 @@ class Emitter(Sprite):
                 self.emitting   = True
                 self.anim_frame = 0
 
+
+
+class DartLauncher(Sprite):
+   
+    def __init__(self, level, sprite_list):
+        Sprite.__init__(self)
+
+        self.level           = level
+        self.sprite_list     = sprite_list
+        self.launch_interval = 5.0
+        self.launch_timer    = self.launch_interval
+        self.launch_vec      = euclid.Vector2(400.0, 0.0)
+
+    def launch(self):
+       new = Dart(self.level)
+       new.position = self.position + (self.launch_vec * 0.1)
+       new.velocity = self.launch_vec.copy()
+       self.sprite_list.append(new)
+       self.launch_timer = self.launch_interval
+
+    def move(self, elapsed_time):
+        self.launch_timer -= elapsed_time
+        if (self.launch_timer < 0.0):
+                self.launch()
+                
+    def render(self, dest_surface, view):
+        pass
+
+
+class Dart(Sprite):
+    frames_l = None
+    frames_r = None
+    
+    def __init__(self, level):
+        Sprite.__init__(self)
+
+        if not Dart.frames_l:
+            Dart.frames_l = Sprite.load_images(self, data.filepath("dart_l"))
+            Dart.frames_r = Sprite.load_images(self, data.filepath("dart_r"))
+             
+        self.set_anim_list(Dart.frames_l)
+        self.level         = level
+        self.top_speed     = euclid.Vector2(400.0, 400.0)
+
+ 
+    def check_collision(self):
+        if self.level.check_area(self.get_rect()) != self.level.background:
+            self.dead = True
+            
+    def check_for_balloons(self, sprite_list):
+        for obj in sprite_list:
+            if isinstance(obj, Balloon):
+                if not obj.dead and obj.get_body_rect().colliderect(self.get_rect()):
+                    obj.pop()
+                    self.dead = True
+
+    def move(self, elapsed_time):
+        if (self.velocity < 0.0):
+            self.set_anim_list(Dart.frames_l)
+        else:
+            self.set_anim_list(Dart.frames_r)
+            
+        Sprite.move(self, elapsed_time)
+
