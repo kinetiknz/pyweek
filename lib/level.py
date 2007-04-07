@@ -74,6 +74,7 @@ class Level(object):
 
         self.wind_left = hex_val(kv["wind_left"])
         self.wind_right = hex_val(kv["wind_right"])
+        self.wind = (self.wind_left, self.wind_right)
 
     def __str__(self):
         return "[Level \"%s\": 0x%06x/0x%06x (%d, %d)]" % (
@@ -96,6 +97,8 @@ class Level(object):
     def check_area(self, rect):
         contents = self.background
 
+        # TODO: this check should be dealt with by designing the levels to
+        # be surrounded by solid areas except where the player can escape.
         if (   rect.left < 0
              or rect.right >= self.bg_rect.width
              or rect.top < 0
@@ -110,13 +113,24 @@ class Level(object):
 
         return contents
 
+    def check_wind_point(self, x, y, contents):
+        if contents in self.wind:
+            return contents
 
-def bound_view(level, view):
-    y = view[1]
-    top = 0
-    bottom = -(level.bg_rect.h - 480)
-    if y < bottom:
-        y = bottom
-    if y > top:
-        y = top
-    view[1] = y
+        col = self.bg.get_at((x,y))
+        col_as_int = (col[0] * 256 * 256) + (col[1] * 256) + col[2]
+        if col_as_int in self.wind:
+            return col_as_int
+        else:
+            return contents
+
+    def check_wind(self, rect):
+        contents = self.background
+
+        # Just check the four corners for speed
+        contents = self.check_wind_point(rect.left,  rect.top,    contents)
+        contents = self.check_wind_point(rect.right, rect.top,    contents)
+        contents = self.check_wind_point(rect.left,  rect.bottom, contents)
+        contents = self.check_wind_point(rect.right, rect.bottom, contents)
+
+        return contents

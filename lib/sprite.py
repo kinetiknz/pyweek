@@ -37,6 +37,7 @@ class Sprite(pygame.sprite.Sprite):
         self.collide_speed = 1.0
         self.on_ground     = False
         self.dead          = False
+        self.in_wind       = None
 
     def alive(self):
         return not self.dead
@@ -95,6 +96,8 @@ class Sprite(pygame.sprite.Sprite):
         if self.dead:
             raise Exception("move called on dead sprite [%r]" % self)
 
+        self.apply_wind_force()
+
         old_velocity = self.velocity.copy()
         old_position = self.position.copy()
 
@@ -143,6 +146,14 @@ class Sprite(pygame.sprite.Sprite):
             reference[0] += drag
         else:
             reference[0] -= drag
+
+    def apply_wind_force(self):
+        if self.in_wind:
+            if self.in_wind == self.level.wind_left:
+                self.velocity[0] += -7.0
+            elif self.in_wind == self.level.wind_right:
+                self.velocity[0] += 7.0
+        self.in_wind = None
 
     def set_position(self, new_pos):
         self.position[0] = new_pos[0]
@@ -197,7 +208,7 @@ class Balloon(Sprite):
         return rect
 
     def pop(self):
-        assert not self.popped
+        if self.popped: return
         self.popped = True
         self.pop_timer = 0.05 * len(Balloon.pop_frames)
         self.set_anim_list(Balloon.pop_frames)
@@ -209,9 +220,12 @@ class Balloon(Sprite):
            return True
        elif hit == self.level.solid:
            return True
-       else:
-           return False
 
+       wind_hit = self.level.check_wind(self.get_body_rect())
+       if wind_hit in self.level.wind:
+           self.in_wind = wind_hit
+
+       return False
 
 class Emitter(Sprite):
     frames = None

@@ -61,6 +61,10 @@ class Player(Sprite):
             elif bunch_hit == self.level.spike:
                 self.pop_balloons()
 
+            wind_hit = self.level.check_wind(bunch_rect)
+            if wind_hit in self.level.wind:
+                self.in_wind = wind_hit
+
         return self.level.check_area(rect) == self.level.solid
 
     def check_balloons(self, sprite_list):
