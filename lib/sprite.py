@@ -163,17 +163,20 @@ class Sprite(pygame.sprite.Sprite):
         self.position[1] = new_pos[1]
 
 
-
 class Balloon(Sprite):
     frames = None
     pop_frames = None
+    pop_sound = None
 
     def __init__(self, level):
         Sprite.__init__(self)
 
         if not Balloon.frames:
-            Balloon.frames = Sprite.load_images(self, util.filepath("balloon-35"))
+            Balloon.frames = Sprite.load_images(self, util.filepath("balloon_single"))
             Balloon.pop_frames = Sprite.load_images(self, util.filepath("balloon_pop"))
+
+        if not Balloon.pop_sound:
+            Balloon.pop_sound = pygame.mixer.Sound(util.filepath("pop.wav"))
 
         self.set_anim_list(Balloon.frames)
         self.level       = level
@@ -212,6 +215,7 @@ class Balloon(Sprite):
 
     def pop(self):
         if self.popped: return
+        self.pop_sound.play()
         self.popped = True
         self.pop_timer = 0.05 * len(Balloon.pop_frames)
         self.set_anim_list(Balloon.pop_frames)
@@ -230,8 +234,11 @@ class Balloon(Sprite):
 
        return False
 
+
 class Emitter(Sprite):
     frames = None
+    balloon_frames = None
+    inflate_sound = None
 
     def __init__(self, level, balloon_list):
         Sprite.__init__(self)
@@ -239,12 +246,20 @@ class Emitter(Sprite):
         if not Emitter.frames:
             Emitter.frames = Sprite.load_images(self, util.filepath("emitter"))
 
+        if not Emitter.balloon_frames:
+            Emitter.balloon_frames = Sprite.load_images(self, util.filepath("balloon_inflate"))
+
+        if not Emitter.inflate_sound:
+            Emitter.inflate_sound = pygame.mixer.Sound(util.filepath("inflate.wav"))
+            Emitter.inflate_sound.set_volume(0.1)
+
         self.set_anim_list(Emitter.frames)
         self.level         = level
         self.balloon_list  = balloon_list
-        self.emit_interval = 5.0
+        self.emit_interval = 7.0
         self.emit_timer    = self.emit_interval
         self.emitting      = False
+        self.sound_playing = False
 
     def emit(self):
        new = Balloon(self.level)
@@ -252,6 +267,7 @@ class Emitter(Sprite):
        self.balloon_list.append(new)
        self.emit_timer = self.emit_interval
        self.emitting = False
+       self.sound_playing = False
 
     def move(self, elapsed_time):
         if (self.emitting):
@@ -260,10 +276,13 @@ class Emitter(Sprite):
                 self.emit()
         else:
             self.emit_timer -= elapsed_time
+            if self.emit_timer < 2.0:
+                if not self.sound_playing:
+                    self.channel = self.inflate_sound.play()
+                    self.sound_playing = True
             if (self.emit_timer < 0.0):
                 self.emitting   = True
                 self.anim_frame = 0
-
 
 
 class DartLauncher(Sprite):

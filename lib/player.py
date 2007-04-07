@@ -23,25 +23,27 @@ import util
 import sprite
 from sprite import *
 
+FALL_SOUND_DELAY = 0.3
+
 class Player(Sprite):
     def __init__(self, level, balloon_list):
         Sprite.__init__(self)
         self.level = level
         self.balloon_list = balloon_list
         self.set_position(level.spawn)
-        self.left = Sprite.load_images(self, util.filepath("man-55"))
-        self.right = Sprite.load_images(self, util.filepath("man-55"))
-        self.hang_left = Sprite.load_images(self, util.filepath("man-55"))
-        self.hang_right = Sprite.load_images(self, util.filepath("man-55"))
-        self.fall = Sprite.load_images(self, util.filepath("man-55"))
-        self.fall_left = Sprite.load_images(self, util.filepath("man-55"))
-        self.fall_right = Sprite.load_images(self, util.filepath("man-55"))
+        self.left = Sprite.load_images(self, util.filepath("runleft"))
+        self.right = Sprite.load_images(self, util.filepath("runright"))
+        self.hang_left = Sprite.load_images(self, util.filepath("float-left"))
+        self.hang_right = Sprite.load_images(self, util.filepath("float-right"))
+        self.fall = Sprite.load_images(self, util.filepath("fall-front"))
+        self.fall_left = Sprite.load_images(self, util.filepath("fall-left"))
+        self.fall_right = Sprite.load_images(self, util.filepath("fall-right"))
         self.balloon_bunch = []
-        self.balloon_bunch.append(Sprite.load_images(self, util.filepath("balloon-35")))
-        self.balloon_bunch.append(Sprite.load_images(self, util.filepath("balloon-35")))
-        self.balloon_bunch.append(Sprite.load_images(self, util.filepath("balloon-35")))
-        self.balloon_bunch.append(Sprite.load_images(self, util.filepath("balloon-35")))
-        self.balloon_bunch.append(Sprite.load_images(self, util.filepath("balloon-35")))
+        self.balloon_bunch.append(Sprite.load_images(self, util.filepath("balloon_single")))
+        self.balloon_bunch.append(Sprite.load_images(self, util.filepath("balloon_two")))
+        self.balloon_bunch.append(Sprite.load_images(self, util.filepath("balloon_three")))
+        self.balloon_bunch.append(Sprite.load_images(self, util.filepath("balloon_four")))
+        self.balloon_bunch.append(Sprite.load_images(self, util.filepath("balloon_five")))
         self.set_anim_list(self.right)
         self.top_speed      = euclid.Vector2(200.0, 700.0)
         self.drag_factor    = 400.0
@@ -49,6 +51,10 @@ class Player(Sprite):
         self.collide_speed  = 0.4
         self.last_dir       = 'l'
         self.collision_rect = self.fall[0].get_rect()
+        self.fall_sound = pygame.mixer.Sound(util.filepath("die.wav"))
+        self.fall_sound.set_volume(0.25)
+        self.fall_sound_delay = FALL_SOUND_DELAY
+        self.channel = None
 
     def reached_goal(self):
          rect = self.collision_rect.move( self.position[0] - (self.collision_rect.width/2),
@@ -158,7 +164,6 @@ class Player(Sprite):
 
     def add_balloon(self):
         if self.balloon_count >= len(self.balloon_bunch):
-            print "Debug! Don't do this in release!"
             return
         self.balloon_count += 1
 
@@ -167,6 +172,10 @@ class Player(Sprite):
 
     def move_right(self):
         self.accel[0] = 800.0
+
+    def play_sound(self, snd):
+        if not self.channel or (self.channel and not self.channel.get_busy()):
+            self.channel = snd.play()
 
     def move(self, elapsed_time):
         self.apply_balloon_force()
@@ -178,6 +187,12 @@ class Player(Sprite):
         self.accel[0] = 0.0
 
         Sprite.animate(self, elapsed_time * 10.0)
+
+        if self.anim_list == self.fall:
+            self.fall_sound_delay -= elapsed_time
+            if self.fall_sound_delay <= 0:
+                self.play_sound(self.fall_sound)
+                self.fall_sound_delay = FALL_SOUND_DELAY
 
     def pick_anim_list(self):
         if (self.balloon_count == 0 and self.on_ground and self.accel[0] == 0.0):

@@ -143,19 +143,19 @@ def bound_view(level, view):
     y = view[1]
     top = -level.area.top
     bottom = -(level.area.bottom - 480)
-    
+
     if y < bottom:
         y = bottom
     if y > top:
         y = top
     view[1] = y
-    
+
     x = view[0]
     left = -level.area.left
     right = -(level.area.right - 600)
-    
+
     if x < right:
         x = right
     if x > left:
         x = left
-    view[0] = x    
+    view[0] = x

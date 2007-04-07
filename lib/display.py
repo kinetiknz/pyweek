@@ -46,7 +46,7 @@ def update(seconds_elapsed):
 
     view[1] = -player.position[1] + 400
     level.bound_view(lvl, view)
-    
+
     screen.fill(0)
     screen.blit(lvl.fg, view)
 

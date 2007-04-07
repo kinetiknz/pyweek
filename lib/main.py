@@ -20,12 +20,8 @@
 '''Game main module.
 
 Contains the entry point used by the run_game.py script.
-
-Feel free to put all your game code here, or in other modules in this "lib"
-directory.
 '''
 
-import random
 import pygame
 import display
 import player
@@ -34,11 +30,6 @@ import level
 import euclid
 import sys
 import util
-
-def add_a_balloon(base_pos, lvl):
-    new = sprite.Balloon(lvl)
-    new.position = base_pos + euclid.Vector2(random.randrange(250.0, 450.0), random.randrange(0.0, 150.0))
-    display.sprite_list.append(new)
 
 class SplashRunner(object):
     def run(self):
@@ -78,7 +69,7 @@ class LevelRunner(object):
 
         # TODO: this should be set up by the level loader
         emit = sprite.Emitter(lvl, display.sprite_list)
-        emit.position = stick_guy.position + euclid.Vector2(300.0, 200.0)
+        emit.position = stick_guy.position + euclid.Vector2(300.0, 0.0)
         display.sprite_list.append(emit)
 
         # TODO: this should be set up by the level loader
@@ -86,13 +77,10 @@ class LevelRunner(object):
         launch.position = stick_guy.position + euclid.Vector2(0.0, 0.0)
         display.sprite_list.append(launch)
 
-        # TODO: this should be set up by the level loader
-        for i in xrange(0,20):
-            add_a_balloon(stick_guy.position, lvl)
-
         # Play some music, should probably be in the level loader
         pygame.mixer.music.load(util.filepath("PyWeek4-1.ogg"))
-        pygame.mixer.music.play(-1)
+        pygame.mixer.music.set_volume(0.50)
+        #pygame.mixer.music.play(-1)
 
         timer = pygame.time.Clock()
 
@@ -130,7 +118,7 @@ class LevelRunner(object):
                 stick_guy.move_right()
 
             display.update(elapsed)
-            
+
             if stick_guy.reached_goal():
                 return True
 
