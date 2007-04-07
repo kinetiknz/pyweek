@@ -284,11 +284,12 @@ class Emitter(Sprite):
             Sprite.animate(self, elapsed_time * 10.0)
         else:
             self.emit_timer -= elapsed_time
-               
-            if (self.emit_timer < 0.0):
+            if self.emit_timer < 1.0:
                 if not self.sound_playing:
                     self.channel = self.inflate_sound.play()
-                    self.sound_playing = True                
+                    self.sound_playing = True
+                    
+            if (self.emit_timer < 0.0):
                 self.emitting   = True
                 self.anim_frame = 0
                 self.anim_done = self.emit
