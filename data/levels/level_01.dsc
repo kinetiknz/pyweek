@@ -7,4 +7,4 @@ spike = #ff0000
 wind_left = #00ff00
 wind_right = #0000ff
 sprite_Player = 100, 950
-sprite_Emitter = 400, 950
+sprite_top_Emitter = 400, 990

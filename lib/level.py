@@ -25,6 +25,7 @@ Loads level files (a bitmap image and associated description file).
 import pygame.image
 import pygame.surface
 import euclid
+import player
 import sprite
 import util
 
@@ -81,17 +82,33 @@ class Level(object):
         self.wind_right = hex_val(kv["wind_right"])
         self.wind = (self.wind_left, self.wind_right)
 
-        self.spawn = coord_val(kv["sprite_Player"])
-
         match = "sprite_"
+        topmatch = "top_"
+        top = False
         sprites = filter(lambda x: x.startswith(match), kv)
+        above_player = []
+        below_player = []
         for s in sprites:
             sprite_name = s[len(match):]
+            if sprite_name.startswith(topmatch):
+                sprite_name = sprite_name[len(topmatch):]
+                top = True
             if sprite_name == "Player": continue
             sprite_class = getattr(sprite, sprite_name)
             instance = sprite_class(self, self.sprite_list)
             instance.position = euclid.Vector2(*coord_val(kv[s]))
-            self.sprite_list.append(instance)
+            if top:
+                above_player.append(instance)
+            else:
+                below_player.append(instance)
+
+        self.spawn = coord_val(kv["sprite_Player"])
+        self.player = player.Player(self, sprite_list)
+        self.player.position = euclid.Vector2(*self.spawn)
+
+        self.sprite_list.extend(below_player)
+        self.sprite_list.append(self.player)
+        self.sprite_list.extend(above_player)
 
     def __str__(self):
         return "[Level \"%s\": 0x%06x/0x%06x (%d, %d)]" % (

@@ -61,11 +61,9 @@ class LevelRunner(object):
         '''Return True to indicate the level was beaten, False to indicate the player died.'''
         lvl = level.Level(self.name, display.sprite_list)
 
-        stick_guy      = player.Player(lvl, display.sprite_list)
+        stick_guy = lvl.player
         display.player = stick_guy
         display.lvl    = lvl
-
-        display.sprite_list.append(stick_guy)
 
         # Play some music, should probably be in the level loader
         pygame.mixer.music.load(util.filepath("sounds/PyWeek4-1.ogg"))
