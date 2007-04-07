@@ -65,6 +65,8 @@ def main():
 
     timer = pygame.time.Clock()
 
+    fps_limit = 1.0/60.0
+
     while 1:
         for e in pygame.event.get():
             if e.type == pygame.QUIT or \
@@ -79,6 +81,9 @@ def main():
                     stick_guy.drop_balloon()
 
         elapsed = timer.tick() / 1000.0
+        if elapsed < fps_limit:
+            dt = int((fps_limit - elapsed) * 1000)
+            pygame.time.wait(dt)
 
         keys = pygame.key.get_pressed()
 
