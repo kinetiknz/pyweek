@@ -65,6 +65,9 @@ class Sprite(pygame.sprite.Sprite):
             frame_num += 1
             filename = self.construct_filename(image_basename, frame_num)
 
+        if not list_to_return:
+            raise Exception("empty image list")
+
         return list_to_return
 
     def get_rect(self):
@@ -169,7 +172,7 @@ class Balloon(Sprite):
         Sprite.__init__(self)
 
         if not Balloon.frames:
-            Balloon.frames = Sprite.load_images(self, util.filepath("balloon"))
+            Balloon.frames = Sprite.load_images(self, util.filepath("balloon-35"))
             Balloon.pop_frames = Sprite.load_images(self, util.filepath("balloon_pop"))
 
         self.set_anim_list(Balloon.frames)
