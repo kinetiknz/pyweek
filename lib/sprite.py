@@ -263,31 +263,32 @@ class Emitter(Sprite):
         self.set_anim_list(Emitter.frames)
         self.level         = level
         self.balloon_list  = sprite_list
-        self.emit_interval = 7.0
+        self.emit_interval = 3.0
         self.emit_timer    = self.emit_interval
         self.emitting      = False
         self.sound_playing = False
 
     def emit(self):
        new = Balloon(self.level, self.balloon_list)
-       new.position = self.position
+       new.position = self.position.copy()
        self.balloon_list.append(new)
        self.emit_timer = self.emit_interval
        self.emitting = False
        self.sound_playing = False
        self.anim_list = self.frames
        self.anim_frame = 0.0
+       self.anim_done = None
 
     def move(self, elapsed_time):
         if (self.emitting):
             Sprite.animate(self, elapsed_time * 10.0)
         else:
             self.emit_timer -= elapsed_time
-            if self.emit_timer < 2.0:
+               
+            if (self.emit_timer < 0.0):
                 if not self.sound_playing:
                     self.channel = self.inflate_sound.play()
-                    self.sound_playing = True
-            if (self.emit_timer < 0.0):
+                    self.sound_playing = True                
                 self.emitting   = True
                 self.anim_frame = 0
                 self.anim_done = self.emit
