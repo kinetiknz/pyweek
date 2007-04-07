@@ -35,17 +35,12 @@ player      = None
 level       = None
 
 def update(seconds_elapsed):
-    global sprite_list
-    new_sprite_list = []
-
     for s in sprite_list:
         s.move(seconds_elapsed)
         if s.alive():
-            new_sprite_list.append(s)
             if isinstance(s, sprite.Dart):
                 s.check_for_balloons(sprite_list)
 
-    new_sprite_list = sprite_list
     player.check_balloons(sprite_list)
     player.check_darts(sprite_list)
 
