@@ -1,0 +1,17 @@
+version = 1
+name = Level 3
+area = 0,200,640,1000
+solid = #000000
+background = #ffffff
+spike = #ff0000
+wind_left = #00ff00
+wind_right = #0000ff
+sprite_Player = 573, 250
+sprite_Emitter = 503, 249
+sprite_Emitter = 406, 770
+sprite_Emitter = 126, 716
+sprite_Emitter = 448, 1582
+sprite_Emitter = 130, 1051
+sprite_Emitter = 12, 1565
+sprite_DartLauncher = 1, 839
+sprite_DartLauncher = 1, 72
