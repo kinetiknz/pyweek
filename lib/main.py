@@ -33,6 +33,7 @@ import sprite
 import level
 import euclid
 import sys
+import util
 
 def add_a_balloon(base_pos, lvl):
     new = sprite.Balloon(lvl)
@@ -88,6 +89,10 @@ class LevelRunner(object):
         # TODO: this should be set up by the level loader
         for i in xrange(0,20):
             add_a_balloon(stick_guy.position, lvl)
+
+        # Play some music, should probably be in the level loader
+        pygame.mixer.music.load(util.filepath("PyWeek4-1.ogg"))
+        pygame.mixer.music.play(-1)
 
         timer = pygame.time.Clock()
 
