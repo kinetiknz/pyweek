@@ -113,7 +113,7 @@ class LevelRunner(object):
                 return False
 
 def main():
-    levels = [LevelRunner("levels/level_01"), LevelRunner("levels/level_02"), LevelRunner("levels/t001")]
+    levels = [LevelRunner("levels/level_02"), LevelRunner("levels/t001")]
 
     splash = SplashRunner()
     menu = MenuRunner(levels)
