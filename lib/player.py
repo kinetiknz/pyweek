@@ -24,7 +24,7 @@ import sprite
 from sprite import *
 
 FALL_SOUND_DELAY = 0.3
-MAX_SAFE_FALL    = 0.8
+MAX_SAFE_FALL    = 0.6
 
 class Player(Sprite):
     def __init__(self, level, balloon_list):

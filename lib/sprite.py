@@ -269,17 +269,17 @@ class Emitter(Sprite):
 
     def emit(self):
        new = Balloon(self.level)
-       new.position = self.position + euclid.Vector2(30.0, -20.0)
+       new.position = self.position
        self.balloon_list.append(new)
        self.emit_timer = self.emit_interval
        self.emitting = False
        self.sound_playing = False
+       self.anim_list = self.frames
+       self.anim_frame = 0.0
 
     def move(self, elapsed_time):
         if (self.emitting):
             Sprite.animate(self, elapsed_time * 10.0)
-            if (int(self.anim_frame) == 0.0):
-                self.emit()
         else:
             self.emit_timer -= elapsed_time
             if self.emit_timer < 2.0:
@@ -289,6 +289,8 @@ class Emitter(Sprite):
             if (self.emit_timer < 0.0):
                 self.emitting   = True
                 self.anim_frame = 0
+                self.anim_done = self.emit
+                self.anim_list = self.balloon_frames
 
 
 class DartLauncher(Sprite):
