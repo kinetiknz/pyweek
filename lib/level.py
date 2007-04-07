@@ -57,6 +57,10 @@ def coord_val(s):
     x, y = s.split(',', 1)
     return int(x), int(y)
 
+def rect_val(s):
+    x,y,w,h  = s.split(',')
+    return pygame.Rect(int(x), int(y), int(w), int(h))
+
 class Level(object):
     def __init__(self, name):
         self.bg_path = util.filepath(name) + ".png"
@@ -67,6 +71,7 @@ class Level(object):
         self.fg_path = util.filepath(name) + ".dsc"
         kv = read_desc(open(self.fg_path, "r"))
         self.name = kv["name"]
+        self.area = rect_val(kv["area"])
         self.solid = hex_val(kv["solid"])
         self.background = hex_val(kv["background"])
         self.spike = hex_val(kv["spike"])
@@ -137,10 +142,21 @@ class Level(object):
 
 def bound_view(level, view):
     y = view[1]
-    top = 0
-    bottom = -(level.bg_rect.h - 480)
+    top = -level.area.top
+    bottom = -(level.area.bottom - 480)
+    
     if y < bottom:
         y = bottom
     if y > top:
         y = top
     view[1] = y
+    
+    x = view[0]
+    left = -level.area.left
+    right = -(level.area.right - 600)
+    
+    if x < right:
+        x = right
+    if x > left:
+        x = left
+    view[0] = x    

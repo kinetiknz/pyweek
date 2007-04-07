@@ -1,5 +1,6 @@
 version = 1
 name = Test Level
+area = -20,0,600,2400
 solid = #000000
 background = #ffffff
 spike = #ff0000
