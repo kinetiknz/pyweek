@@ -72,6 +72,9 @@ class Level(object):
         self.spike = hex_val(kv["spike"])
         self.spawn = coord_val(kv["player"])
 
+        self.wind_left = hex_val(kv["wind_left"])
+        self.wind_right = hex_val(kv["wind_right"])
+
     def __str__(self):
         return "[Level \"%s\": 0x%06x/0x%06x (%d, %d)]" % (
             self.name, self.solid, self.background,

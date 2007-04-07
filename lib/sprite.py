@@ -167,10 +167,14 @@ class Balloon(Sprite):
         self.top_speed   = euclid.Vector2(100.0, 100.0)
         self.pop_timer   = 0.0
         self.popped      = False
-        self.lifetime    = 5
+        self.lifetime    = 60
+        self.collect_delay = -1
 
     def can_collect(self):
-        return not (self.dead or self.popped)
+        return not (self.collect_delay > 0 or self.dead or self.popped)
+
+    def set_collect_delay(self, delay):
+        self.collect_delay = delay
 
     def move(self, elapsed_time):
         if self.popped:
@@ -182,6 +186,7 @@ class Balloon(Sprite):
                 self.animate(elapsed_time * 20.0)
         else:
             self.lifetime -= elapsed_time
+            self.collect_delay -= elapsed_time
             if self.lifetime <= 0 and not self.popped:
                 self.pop()
             Sprite.move(self, elapsed_time)

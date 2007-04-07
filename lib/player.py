@@ -145,10 +145,7 @@ class Player(Sprite):
     def drop_balloon(self):
         if self.balloon_count > 0:
             new = self._release_balloon()
-            if self.last_dir == 'r':
-                new.position[0] -= self.get_rect().width
-            else:
-                 new.position[0] += self.get_rect().width
+            new.set_collect_delay(5)
 
     def add_balloon(self):
         if self.balloon_count >= len(self.balloon_bunch):
