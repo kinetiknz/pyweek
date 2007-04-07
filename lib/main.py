@@ -68,7 +68,7 @@ class LevelRunner(object):
         # Play some music, should probably be in the level loader
         pygame.mixer.music.load(util.filepath("sounds/PyWeek4-1.ogg"))
         pygame.mixer.music.set_volume(0.50)
-        #pygame.mixer.music.play(-1)
+        pygame.mixer.music.play(-1)
 
         timer = pygame.time.Clock()
 
@@ -84,7 +84,7 @@ class LevelRunner(object):
                 if e.type == pygame.KEYUP:
                     if e.key == pygame.K_UP:
                         stick_guy.add_balloon()
-                    elif e.key == pygame.K_DOWN:
+                    if e.key == pygame.K_SPACE:
                         stick_guy.drop_balloon()
 
             elapsed = timer.tick() / 1000.0
@@ -113,7 +113,7 @@ class LevelRunner(object):
                 return False
 
 def main():
-    levels = [LevelRunner("levels/level_01"), LevelRunner("levels/level_02"), LevelRunner("levels/t001")]
+    levels = [LevelRunner("levels/level_03"), LevelRunner("levels/level_02"), LevelRunner("levels/level_03")]
 
     splash = SplashRunner()
     menu = MenuRunner(levels)
