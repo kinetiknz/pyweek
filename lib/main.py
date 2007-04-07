@@ -81,6 +81,11 @@ def main():
                     stick_guy.drop_balloon()
 
         elapsed = timer.tick() / 1000.0
+
+        # why not just use timer.tick(fps)?  good question.  it seems to eat
+        # a lot more CPU than seems reasonable, almost as if it uses
+        # pygame.time.delay rather than pygame.time.wait... but! the docs
+        # say that only timer.tick_busy_loop() does this.  *shrug*
         if elapsed < fps_limit:
             dt = int((fps_limit - elapsed) * 1000)
             pygame.time.wait(dt)
