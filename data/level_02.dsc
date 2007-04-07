@@ -1,6 +1,6 @@
 version = 1
 name = Level 1
-area = 0,300,640,700
+area = 0,200,640,1000
 solid = #000000
 background = #ffffff
 spike = #ff0000

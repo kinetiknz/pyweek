@@ -111,11 +111,10 @@ class Level(object):
             return self.solid
 
         # Just check the four corners for speed
-        contents = self.check_point(rect.left,  rect.top,    contents)
-        contents = self.check_point(rect.right, rect.top,    contents)
-        contents = self.check_point(rect.left,  rect.bottom, contents)
-        contents = self.check_point(rect.right, rect.bottom, contents)
-
+        for x in xrange(rect.left, rect.right, rect.width / 3):
+            for y in xrange(rect.top, rect.bottom, rect.height / 3):
+                contents = self.check_point(x, y, contents)
+        
         return contents
 
     def check_wind_point(self, x, y, contents):
