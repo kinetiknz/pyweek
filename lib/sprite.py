@@ -172,11 +172,11 @@ class Balloon(Sprite):
         Sprite.__init__(self)
 
         if not Balloon.frames:
-            Balloon.frames = Sprite.load_images(self, util.filepath("balloon_single"))
-            Balloon.pop_frames = Sprite.load_images(self, util.filepath("balloon_pop"))
+            Balloon.frames = Sprite.load_images(self, util.filepath("graphics/balloon_single"))
+            Balloon.pop_frames = Sprite.load_images(self, util.filepath("graphics/balloon_pop"))
 
         if not Balloon.pop_sound:
-            Balloon.pop_sound = pygame.mixer.Sound(util.filepath("pop.wav"))
+            Balloon.pop_sound = pygame.mixer.Sound(util.filepath("sounds/pop.wav"))
 
         self.set_anim_list(Balloon.frames)
         self.level       = level
@@ -244,13 +244,13 @@ class Emitter(Sprite):
         Sprite.__init__(self)
 
         if not Emitter.frames:
-            Emitter.frames = Sprite.load_images(self, util.filepath("emitter"))
+            Emitter.frames = Sprite.load_images(self, util.filepath("graphics/emitter"))
 
         if not Emitter.balloon_frames:
-            Emitter.balloon_frames = Sprite.load_images(self, util.filepath("balloon_inflate"))
+            Emitter.balloon_frames = Sprite.load_images(self, util.filepath("graphics/balloon_inflate"))
 
         if not Emitter.inflate_sound:
-            Emitter.inflate_sound = pygame.mixer.Sound(util.filepath("inflate.wav"))
+            Emitter.inflate_sound = pygame.mixer.Sound(util.filepath("sounds/inflate.wav"))
             Emitter.inflate_sound.set_volume(0.1)
 
         self.set_anim_list(Emitter.frames)
@@ -319,8 +319,8 @@ class Dart(Sprite):
         Sprite.__init__(self)
 
         if not Dart.frames_l:
-            Dart.frames_l = Sprite.load_images(self, util.filepath("dart_l"))
-            Dart.frames_r = Sprite.load_images(self, util.filepath("dart_r"))
+            Dart.frames_l = Sprite.load_images(self, util.filepath("graphics/dart_l"))
+            Dart.frames_r = Sprite.load_images(self, util.filepath("graphics/dart_r"))
 
         self.set_anim_list(Dart.frames_l)
         self.level         = level

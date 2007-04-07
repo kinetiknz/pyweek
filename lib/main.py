@@ -78,7 +78,7 @@ class LevelRunner(object):
         display.sprite_list.append(launch)
 
         # Play some music, should probably be in the level loader
-        pygame.mixer.music.load(util.filepath("PyWeek4-1.ogg"))
+        pygame.mixer.music.load(util.filepath("sounds/PyWeek4-1.ogg"))
         pygame.mixer.music.set_volume(0.50)
         #pygame.mixer.music.play(-1)
 
@@ -123,7 +123,7 @@ class LevelRunner(object):
                 return True
 
 def main():
-    levels = [LevelRunner("level_01"), LevelRunner("level_02"), LevelRunner("t001")]
+    levels = [LevelRunner("levels/level_01"), LevelRunner("levels/level_02"), LevelRunner("levels/t001")]
 
     splash = SplashRunner()
     menu = MenuRunner(levels)

@@ -114,7 +114,7 @@ class Level(object):
         for x in xrange(rect.left, rect.right, rect.width / 3):
             for y in xrange(rect.top, rect.bottom, rect.height / 3):
                 contents = self.check_point(x, y, contents)
-        
+
         return contents
 
     def check_wind_point(self, x, y, contents):
