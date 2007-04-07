@@ -174,7 +174,7 @@ class Balloon(Sprite):
     pop_frames = None
     pop_sound = None
 
-    def __init__(self, level):
+    def __init__(self, level, sprite_list):
         Sprite.__init__(self)
 
         if not Balloon.frames:
@@ -183,6 +183,7 @@ class Balloon(Sprite):
 
         if not Balloon.pop_sound:
             Balloon.pop_sound = pygame.mixer.Sound(util.filepath("sounds/pop.wav"))
+            Balloon.pop_sound.set_volume(0.7)
 
         self.set_anim_list(Balloon.frames)
         self.level       = level
@@ -246,7 +247,7 @@ class Emitter(Sprite):
     balloon_frames = None
     inflate_sound = None
 
-    def __init__(self, level, balloon_list):
+    def __init__(self, level, sprite_list):
         Sprite.__init__(self)
 
         if not Emitter.frames:
@@ -261,14 +262,14 @@ class Emitter(Sprite):
 
         self.set_anim_list(Emitter.frames)
         self.level         = level
-        self.balloon_list  = balloon_list
+        self.balloon_list  = sprite_list
         self.emit_interval = 7.0
         self.emit_timer    = self.emit_interval
         self.emitting      = False
         self.sound_playing = False
 
     def emit(self):
-       new = Balloon(self.level)
+       new = Balloon(self.level, self.balloon_list)
        new.position = self.position
        self.balloon_list.append(new)
        self.emit_timer = self.emit_interval
@@ -304,7 +305,7 @@ class DartLauncher(Sprite):
         self.launch_vec      = euclid.Vector2(400.0, 0.0)
 
     def launch(self):
-       new = Dart(self.level)
+       new = Dart(self.level, self.sprite_list)
        new.position = self.position + (self.launch_vec * 0.1)
        new.velocity = self.launch_vec.copy()
        self.sprite_list.append(new)
@@ -323,7 +324,7 @@ class Dart(Sprite):
     frames_l = None
     frames_r = None
 
-    def __init__(self, level):
+    def __init__(self, level, sprite_list):
         Sprite.__init__(self)
 
         if not Dart.frames_l:
