@@ -125,6 +125,9 @@ class LevelRunner(object):
                 stick_guy.move_right()
 
             display.update(elapsed)
+            
+            if stick_guy.reached_goal():
+                return True
 
 def main():
     levels = [LevelRunner("level_01"), LevelRunner("t001")]

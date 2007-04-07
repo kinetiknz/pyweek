@@ -50,6 +50,11 @@ class Player(Sprite):
         self.last_dir       = 'l'
         self.collision_rect = self.fall[0].get_rect()
 
+    def reached_goal(self):
+         rect = self.collision_rect.move( self.position[0] - (self.collision_rect.width/2),
+                                          self.position[1] - (self.collision_rect.height) )
+         return rect.bottom < self.level.area.top
+
     def check_collision(self):
         rect = self.collision_rect.move( self.position[0] - (self.collision_rect.width/2),
                                          self.position[1] - (self.collision_rect.height) )
