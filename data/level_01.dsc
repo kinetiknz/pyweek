@@ -1,0 +1,9 @@
+version = 1
+name = Test Level
+solid = #000000
+background = #ffffff
+spike = #ff0000
+wind_left = #00ff00
+wind_right = #0000ff
+player = 100, 550
+balloon_emitter = 0, 0

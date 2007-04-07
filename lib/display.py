@@ -28,11 +28,11 @@ width  = 640
 height = 480
 
 screen = pygame.display.set_mode([width, height])
-view   = [20, 0, 600, 480]
+view   = [0, 0, 640, 480]
 
 sprite_list = []
 player      = None
-level       = None
+lvl         = None
 
 def update(seconds_elapsed):
     for s in sprite_list:
@@ -45,9 +45,10 @@ def update(seconds_elapsed):
     player.check_darts(sprite_list)
 
     view[1] = -player.position[1] + 400
-
+    level.bound_view(lvl, view)
+    
     screen.fill(0)
-    screen.blit(level.fg, view)
+    screen.blit(lvl.fg, view)
 
     dead_sprites = filter(lambda s: not s.alive(), sprite_list)
     for dead in dead_sprites:

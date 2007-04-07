@@ -134,3 +134,13 @@ class Level(object):
         contents = self.check_wind_point(rect.right, rect.bottom, contents)
 
         return contents
+
+def bound_view(level, view):
+    y = view[1]
+    top = 0
+    bottom = -(level.bg_rect.h - 480)
+    if y < bottom:
+        y = bottom
+    if y > top:
+        y = top
+    view[1] = y

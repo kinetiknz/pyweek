@@ -40,11 +40,11 @@ def add_a_balloon(base_pos, lvl):
     display.sprite_list.append(new)
 
 def main():
-    lvl = level.load_level("t001")
+    lvl = level.load_level("level_01")
 
     stick_guy      = player.Player(lvl, display.sprite_list)
     display.player = stick_guy
-    display.level  = lvl
+    display.lvl    = lvl
 
 
     display.sprite_list.append(stick_guy)
