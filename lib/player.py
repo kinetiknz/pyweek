@@ -151,7 +151,7 @@ class Player(Sprite):
                 new.pop()
 
     def _release_balloon(self):
-        new = Balloon(self.level)
+        new = Balloon(self.level, self.balloon_list)
         new.position = self.position + euclid.Vector2(0.0, -(self.get_rect().height * 0.9))
         self.balloon_list.append(new)
         self.balloon_count -= 1

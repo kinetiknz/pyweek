@@ -59,23 +59,13 @@ class LevelRunner(object):
 
     def run(self):
         '''Return True to indicate the level was beaten, False to indicate the player died.'''
-        lvl = level.load_level(self.name)
+        lvl = level.Level(self.name, display.sprite_list)
 
         stick_guy      = player.Player(lvl, display.sprite_list)
         display.player = stick_guy
         display.lvl    = lvl
 
         display.sprite_list.append(stick_guy)
-
-        # TODO: this should be set up by the level loader
-        emit = sprite.Emitter(lvl, display.sprite_list)
-        emit.position = stick_guy.position + euclid.Vector2(300.0, 0.0)
-        display.sprite_list.append(emit)
-
-        # TODO: this should be set up by the level loader
-        launch = sprite.DartLauncher(lvl, display.sprite_list)
-        launch.position = stick_guy.position + euclid.Vector2(0.0, 0.0)
-        display.sprite_list.append(launch)
 
         # Play some music, should probably be in the level loader
         pygame.mixer.music.load(util.filepath("sounds/PyWeek4-1.ogg"))

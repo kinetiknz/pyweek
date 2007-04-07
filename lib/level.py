@@ -24,10 +24,9 @@ Loads level files (a bitmap image and associated description file).
 
 import pygame.image
 import pygame.surface
+import euclid
+import sprite
 import util
-
-def load_level(level):
-    return Level(level)
 
 MIN_SUPPORTED = 1
 MAX_SUPPORTED = 1
@@ -62,7 +61,9 @@ def rect_val(s):
     return pygame.Rect(int(x), int(y), int(w), int(h))
 
 class Level(object):
-    def __init__(self, name):
+    def __init__(self, name, sprite_list):
+        self.sprite_list = sprite_list
+
         self.bg_path = util.filepath(name) + ".png"
         self.bg = util.load_image(self.bg_path)
         self.fg = util.load_image(util.filepath(name) + "_skin.png")
@@ -75,11 +76,22 @@ class Level(object):
         self.solid = hex_val(kv["solid"])
         self.background = hex_val(kv["background"])
         self.spike = hex_val(kv["spike"])
-        self.spawn = coord_val(kv["player"])
 
         self.wind_left = hex_val(kv["wind_left"])
         self.wind_right = hex_val(kv["wind_right"])
         self.wind = (self.wind_left, self.wind_right)
+
+        self.spawn = coord_val(kv["sprite_Player"])
+
+        match = "sprite_"
+        sprites = filter(lambda x: x.startswith(match), kv)
+        for s in sprites:
+            sprite_name = s[len(match):]
+            if sprite_name == "Player": continue
+            sprite_class = getattr(sprite, sprite_name)
+            instance = sprite_class(self, self.sprite_list)
+            instance.position = euclid.Vector2(*coord_val(kv[s]))
+            self.sprite_list.append(instance)
 
     def __str__(self):
         return "[Level \"%s\": 0x%06x/0x%06x (%d, %d)]" % (
