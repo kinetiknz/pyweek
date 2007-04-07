@@ -121,6 +121,8 @@ class LevelRunner(object):
 
             if stick_guy.reached_goal():
                 return True
+            elif stick_guy.dead:
+                return False
 
 def main():
     levels = [LevelRunner("levels/level_01"), LevelRunner("levels/level_02"), LevelRunner("levels/t001")]

@@ -38,6 +38,7 @@ class Sprite(pygame.sprite.Sprite):
         self.on_ground     = False
         self.dead          = False
         self.in_wind       = None
+        self.anim_done     = None
 
     def alive(self):
         return not self.dead
@@ -89,7 +90,12 @@ class Sprite(pygame.sprite.Sprite):
         dest_surface.blit( img, rect )
 
     def animate(self, amount):
-        self.anim_frame = (self.anim_frame + amount) % len(self.anim_list)
+        anim_len = len(self.anim_list)
+        self.anim_frame = (self.anim_frame + amount)
+        if self.anim_frame >= anim_len:
+            if self.anim_done: 
+                self.anim_done()
+            self.anim_frame = self.anim_frame % anim_len 
 
     def stop(self):
         self.velocity = euclid.Vector2(0.0, 0.0)

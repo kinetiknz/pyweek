@@ -24,6 +24,7 @@ import sprite
 from sprite import *
 
 FALL_SOUND_DELAY = 0.3
+MAX_SAFE_FALL    = 0.8
 
 class Player(Sprite):
     def __init__(self, level, balloon_list):
@@ -38,6 +39,8 @@ class Player(Sprite):
         self.fall = Sprite.load_images(self, util.filepath("graphics/fall-front"))
         self.fall_left = Sprite.load_images(self, util.filepath("graphics/fall-left"))
         self.fall_right = Sprite.load_images(self, util.filepath("graphics/fall-right"))
+        self.splat = Sprite.load_images(self, util.filepath("graphics/death"))
+        self.dead_anim = Sprite.load_images(self, util.filepath("graphics/dead"))
         self.balloon_bunch = []
         self.balloon_bunch.append(Sprite.load_images(self, util.filepath("graphics/balloon_single")))
         self.balloon_bunch.append(Sprite.load_images(self, util.filepath("graphics/balloon_two")))
@@ -49,6 +52,11 @@ class Player(Sprite):
         self.drag_factor    = 400.0
         self.balloon_count  = 0
         self.collide_speed  = 0.4
+        self.falling        = False
+        self.dying          = False
+        self.splatted       = False
+        self.hit_by_dart    = False
+        self.fall_time      = 0.0
         self.last_dir       = 'l'
         self.collision_rect = self.fall[0].get_rect()
         self.fall_sound = pygame.mixer.Sound(util.filepath("sounds/die.wav"))
@@ -90,14 +98,17 @@ class Player(Sprite):
 
     def check_darts(self, sprite_list):
         rect = self.get_bunch_rect(self.get_bunch_img())
-        if not rect:
-            return
+        body_rect = self.collision_rect
 
         for obj in sprite_list:
             if isinstance(obj, sprite.Dart):
-                if obj.alive() and obj.get_rect().colliderect(rect):
-                    obj.kill()
-                    self.pop_balloons()
+                if obj.alive():
+                    if rect:
+                        if obj.get_rect().colliderect(rect):
+                            obj.kill()
+                            self.pop_balloons()
+                    if obj.get_rect().colliderect(body_rect):
+                        self.dying_now()
 
     def apply_balloon_force(self):
         if (self.balloon_count == 0):
@@ -163,38 +174,83 @@ class Player(Sprite):
             new.set_collect_delay(3)
 
     def add_balloon(self):
-        if self.balloon_count >= len(self.balloon_bunch):
+        if self.balloon_count >= len(self.balloon_bunch) or not self.still_moving():
             return
         self.balloon_count += 1
 
+    def still_moving(self):
+        return not self.dying and not self.hit_by_dart and not self.splatted
+
     def move_left(self):
-        self.accel[0] = -800.0
+        if self.still_moving():
+            self.accel[0] = -800.0
 
     def move_right(self):
-        self.accel[0] = 800.0
+        if self.still_moving():
+            self.accel[0] = 800.0
 
     def play_sound(self, snd):
         if not self.channel or (self.channel and not self.channel.get_busy()):
             self.channel = snd.play()
 
+    def kill_sprite(self):
+        self.dead = True
+
+    def death(self):
+        self.anim_frame = 0
+        self.anim_list = self.dead_anim
+        self.anim_done = self.kill
+        self.splatted = True
+        self.dying = False
+ 
+    def dying_now(self):
+        self.play_sound(self.fall_sound)
+        self.dying = True
+        self.anim_frame = 0
+        self.fall_time = 0.0
+        self.anim_done = self.death
+        while self.balloon_count > 0:
+            self.drop_balloon()
+
+
     def move(self, elapsed_time):
-        self.apply_balloon_force()
-        Sprite.move(self, elapsed_time)
+        if self.still_moving():
+            self.apply_balloon_force()
+        else:
+            elapsed_time /= 1.5
+            
+        Sprite.move(self, elapsed_time)    
         self.pick_anim_list()
 
         # null out any horizontal acceleration from keypress
         # now that we've moved the player.
         self.accel[0] = 0.0
 
+        
         Sprite.animate(self, elapsed_time * 10.0)
-
-        if self.anim_list == self.fall:
+        
+        if self.falling and self.still_moving():
             self.fall_sound_delay -= elapsed_time
+            self.fall_time += elapsed_time
             if self.fall_sound_delay <= 0:
                 self.play_sound(self.fall_sound)
                 self.fall_sound_delay = FALL_SOUND_DELAY
+        else:
+            if self.fall_time > MAX_SAFE_FALL:
+                self.dying_now()
+            self.fall_time = 0.0
 
     def pick_anim_list(self):
+        self.falling = False
+        
+        if self.splatted:
+            self.anim_list = self.dead_anim
+            return
+        
+        if self.dying:
+            self.anim_list = self.splat
+            return
+                
         if (self.balloon_count == 0 and self.on_ground and self.accel[0] == 0.0):
             self.anim_frame = 0
 
@@ -207,6 +263,7 @@ class Player(Sprite):
                 l = self.fall_left
                 r = self.fall_right
                 d = self.fall
+                self.falling = True
         else:
             l = self.hang_left
             r = self.hang_right
